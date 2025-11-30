@@ -11,7 +11,7 @@ function login() {
 
     if (users[user] && users[user] === pass) {
         localStorage.setItem("homecrewUser", user);
-        window.location.href = "agenda.html";
+        window.location.href = "dashboard.html";
     } else {
         document.getElementById("error").textContent = "Ongeldige login";
     }
