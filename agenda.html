@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <title>Homecrew - Agenda</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="login-box">
+    <h1>Homecrew</h1>
+    <p id="welcome"></p>
+
+    <h3>📅 Nieuwe afspraak</h3>
+
+    <input type="date" id="date">
+    <input type="text" id="title" placeholder="Titel">
+    <textarea id="description" placeholder="Beschrijving"></textarea>
+
+    <button onclick="addEvent()">Toevoegen</button>
+
+    <h3>🗓️ Afspraken</h3>
+    <ul id="events"></ul>
+
+    <button onclick="logout()">Uitloggen</button>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
