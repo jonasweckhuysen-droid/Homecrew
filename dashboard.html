@@ -9,25 +9,41 @@
     <meta name="theme-color" content="#3a6ea5">
     <link rel="apple-touch-icon" href="/Homecrew/icons/icon-192.png">
 
+    <!-- Font Awesome voor iconen -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
     <link rel="stylesheet" href="/Homecrew/style.css">
 </head>
 <body>
-<div class="dashboard-box">
-    <h1 id="welcome"></h1>
+<div class="dashboard-container">
 
-    <div class="dashboard-buttons">
-        <div class="dash-btn agenda" onclick="window.location.href='/Homecrew/agenda.html'">Agenda</div>
-        <div class="dash-btn taken" onclick="window.location.href='/Homecrew/taken.html'">Taken</div>
+    <div class="welcome-banner">
+        <h1 id="welcome">Welkom!</h1>
+        <p>Wat gaan we vandaag doen? 🌈</p>
     </div>
 
-    <button class="logout-btn" onclick="logout()">Uitloggen</button>
+    <div class="dashboard-buttons">
+        <div class="dash-btn agenda" onclick="window.location.href='/Homecrew/agenda.html'">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Agenda</span>
+        </div>
+        <div class="dash-btn taken" onclick="window.location.href='/Homecrew/taken.html'">
+            <i class="fas fa-tasks"></i>
+            <span>Taken</span>
+        </div>
+        <!-- Voeg hier later extra knoppen toe -->
+    </div>
+
+    <button class="logout-btn" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> Uitloggen
+    </button>
+
 </div>
 
 <script src="/Homecrew/script.js"></script>
 <script>
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/Homecrew/sw.js');
-}
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/Homecrew/sw.js');
+
 const activeUser = localStorage.getItem("homecrewUser");
 if (!activeUser) window.location.href = "/Homecrew/index.html";
 document.getElementById("welcome").innerText = "Welkom, " + activeUser + " 👋";
