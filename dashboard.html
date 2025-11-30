@@ -14,12 +14,17 @@
 
     <h3>📌 Begin hier</h3>
 
-    <button onclick="window.location.href='agenda.html'">📅 Agenda</button>
-    <button onclick="window.location.href='taken.html'">📝 Takenlijst</button>
-    <!-- Later kunnen we hier extra pagina's toevoegen -->
+    <div class="dashboard-buttons">
+        <div class="dash-btn agenda" onclick="window.location.href='agenda.html'">
+            📅 Agenda
+        </div>
+        <div class="dash-btn taken" onclick="window.location.href='taken.html'">
+            📝 Takenlijst
+        </div>
+        <!-- Later meer knoppen toevoegen -->
+    </div>
 
-    <br><br>
-    <button onclick="logout()">Uitloggen</button>
+    <button class="logout-btn" onclick="logout()">Uitloggen</button>
 </div>
 
 <script src="script.js"></script>
