@@ -5,11 +5,13 @@ const users = {
 };
 
 // ================= LOGIN =================
-function login() {
-    const user = document.getElementById("username").value;
-    const pass = document.getElementById("password").value;
+function login(event) {
+    if (event) event.preventDefault();
 
-    if (users[user] && users[user] === pass) {
+    const user = document.getElementById("username").value.trim().toLowerCase();
+    const pass = document.getElementById("password").value.trim();
+
+    if (users[user] === pass) {
         localStorage.setItem("homecrewUser", user);
         window.location.href = "agenda.html";
     } else {
