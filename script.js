@@ -185,3 +185,25 @@ window.toggleTask = async function(id, status) {
 window.deleteTask = async function(id) {
     await deleteDoc(doc(db, "tasks", id));
 };
+
+import { getAuth, setPersistence, browserLocalPersistence, onAuthStateChanged, signInWithEmailAndPassword } 
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const auth = getAuth();
+
+// ZORG DAT DE USER BLIJFT INGELOGD
+setPersistence(auth, browserLocalPersistence)
+.then(() => {
+  console.log("Gebruiker wordt onthouden op dit toestel");
+})
+.catch((error) => {
+  console.error("Fout bij instellen persistentie:", error);
+});
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    console.log("Automatisch ingelogd:", user.email);
+    window.location.href = "dashboard.html"; // of je startpagina naar keuze
+  } else {
+    console.log("Niet ingelogd");
+  }
+});
