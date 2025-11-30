@@ -4,18 +4,17 @@
     <meta charset="UTF-8">
     <title>Homecrew - Login</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <!-- Manifest voor PWA -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#3a6ea5">
 
-<!-- Zorg dat de app op iOS kan werken -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="manifest" href="/Homecrew/manifest.json">
+    <meta name="theme-color" content="#3a6ea5">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="/Homecrew/icons/icon-192.png">
+
+    <link rel="stylesheet" href="/Homecrew/style.css">
 </head>
 <body>
-
 <div class="login-box">
     <h1>Homecrew</h1>
     <p>Familieplatform</p>
@@ -24,17 +23,16 @@
     <input type="password" id="password" placeholder="Wachtwoord">
 
     <button onclick="login()">Inloggen</button>
-
     <p id="error"></p>
 </div>
 
-<script src="script.js"></script>
-    <script>
+<script src="/Homecrew/script.js"></script>
+<script>
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
+    navigator.serviceWorker.register('/Homecrew/sw.js')
     .then(() => console.log('Service Worker geregistreerd'))
     .catch(err => console.log('Service Worker fout', err));
 }
-    </script>
+</script>
 </body>
 </html>
