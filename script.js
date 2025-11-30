@@ -23,25 +23,25 @@ function logout() {
     window.location.href = "index.html";
 }
 
-// ================= LOAD USER =================
-if (window.location.pathname.includes("agenda.html")) {
+// ================= DASHBOARD =================
+if (window.location.pathname.includes("dashboard.html")) {
     const activeUser = localStorage.getItem("homecrewUser");
-
-    if (!activeUser) {
-        window.location.href = "index.html";
-    }
-
-    document.getElementById("welcome").innerText =
-        "Welkom, " + activeUser + " 👋";
-
-    loadEvents();
+    if (!activeUser) window.location.href = "index.html";
+    document.getElementById("welcome").innerText = "Welkom, " + activeUser + " 👋";
 }
 
 // ================= AGENDA =================
+if (window.location.pathname.includes("agenda.html")) {
+    const activeUser = localStorage.getItem("homecrewUser");
+    if (!activeUser) window.location.href = "index.html";
+    document.getElementById("welcome").innerText = "Welkom, " + activeUser + " 👋";
+    loadEvents();
+}
+
 function addEvent() {
     const date = document.getElementById("date").value;
-    const title = document.getElementById("title").value;
-    const description = document.getElementById("description").value;
+    const title = document.getElementById("title").value.trim();
+    const description = document.getElementById("description").value.trim();
     const user = localStorage.getItem("homecrewUser");
 
     if (!date || !title) {
@@ -49,18 +49,13 @@ function addEvent() {
         return;
     }
 
-    const event = {
-        date,
-        title,
-        description,
-        user
-    };
+    const event = { date, title, description, user };
 
     let events = JSON.parse(localStorage.getItem("homecrewEvents")) || [];
     events.push(event);
-
     localStorage.setItem("homecrewEvents", JSON.stringify(events));
 
+    document.getElementById("date").value = "";
     document.getElementById("title").value = "";
     document.getElementById("description").value = "";
 
@@ -68,27 +63,32 @@ function addEvent() {
 }
 
 function loadEvents() {
-events.forEach((event, index) => {
-    const li = document.createElement("li");
+    const list = document.getElementById("events");
+    list.innerHTML = "";
 
-    // Voeg class toe op basis van gebruiker
-    let userClass = "";
-    if(event.user === "jonas") userClass = "user-jonas";
-    else if(event.user === "liese") userClass = "user-liese";
-    else if(event.user === "loreana") userClass = "user-loreana";
+    let events = JSON.parse(localStorage.getItem("homecrewEvents")) || [];
+    events.sort((a, b) => new Date(a.date) - new Date(b.date));
 
-    li.className = userClass;
+    events.forEach((event, index) => {
+        const li = document.createElement("li");
 
-    li.innerHTML = `
-        <strong>${event.date}</strong><br>
-        ${event.title}<br>
-        <small>Door: ${event.user}</small><br>
-        ${event.description || ""}
-        <br><button onclick="deleteEvent(${index})">❌</button>
-    `;
+        let userClass = "";
+        if(event.user === "jonas") userClass = "user-jonas";
+        else if(event.user === "liese") userClass = "user-liese";
+        else if(event.user === "loreana") userClass = "user-loreana";
 
-    list.appendChild(li);
-});
+        li.className = userClass;
+
+        li.innerHTML = `
+            <strong>${event.date}</strong><br>
+            ${event.title}<br>
+            <small>Door: ${event.user}</small><br>
+            ${event.description || ""}
+            <br><button onclick="deleteEvent(${index})">❌</button>
+        `;
+
+        list.appendChild(li);
+    });
 }
 
 function deleteEvent(index) {
@@ -101,14 +101,8 @@ function deleteEvent(index) {
 // ================= TAKEN =================
 if (window.location.pathname.includes("taken.html")) {
     const activeUser = localStorage.getItem("homecrewUser");
-
-    if (!activeUser) {
-        window.location.href = "index.html";
-    }
-
-    document.getElementById("welcome").innerText =
-        "Welkom, " + activeUser + " 👋";
-
+    if (!activeUser) window.location.href = "index.html";
+    document.getElementById("welcome").innerText = "Welkom, " + activeUser + " 👋";
     loadTasks();
 }
 
@@ -126,7 +120,6 @@ function addTask() {
 
     let tasks = JSON.parse(localStorage.getItem("homecrewTasks")) || [];
     tasks.push(task);
-
     localStorage.setItem("homecrewTasks", JSON.stringify(tasks));
 
     document.getElementById("taskTitle").value = "";
@@ -135,26 +128,31 @@ function addTask() {
     loadTasks();
 }
 
-tasks.forEach((task, index) => {
-    const li = document.createElement("li");
+function loadTasks() {
+    const list = document.getElementById("tasks");
+    list.innerHTML = "";
 
-    // Voeg class toe op basis van gebruiker
-    let userClass = "";
-    if(task.user === "jonas") userClass = "user-jonas";
-    else if(task.user === "liese") userClass = "user-liese";
-    else if(task.user === "loreana") userClass = "user-loreana";
+    let tasks = JSON.parse(localStorage.getItem("homecrewTasks")) || [];
 
-    li.className = userClass;
+    tasks.forEach((task, index) => {
+        const li = document.createElement("li");
 
-    li.innerHTML = `
-        <input type="checkbox" ${task.done ? "checked" : ""} onclick="toggleTask(${index})">
-        <strong>${task.title}</strong> (${task.user})<br>
-        ${task.desc || ""}
-        <br><button onclick="deleteTask(${index})">❌</button>
-    `;
+        let userClass = "";
+        if(task.user === "jonas") userClass = "user-jonas";
+        else if(task.user === "liese") userClass = "user-liese";
+        else if(task.user === "loreana") userClass = "user-loreana";
 
-    list.appendChild(li);
-});
+        li.className = userClass;
+
+        li.innerHTML = `
+            <input type="checkbox" ${task.done ? "checked" : ""} onclick="toggleTask(${index})">
+            <strong>${task.title}</strong> (${task.user})<br>
+            ${task.desc || ""}
+            <br><button onclick="deleteTask(${index})">❌</button>
+        `;
+
+        list.appendChild(li);
+    });
 }
 
 function toggleTask(index) {
@@ -169,15 +167,4 @@ function deleteTask(index) {
     tasks.splice(index, 1);
     localStorage.setItem("homecrewTasks", JSON.stringify(tasks));
     loadTasks();
-}
-
-if (window.location.pathname.includes("dashboard.html")) {
-    const activeUser = localStorage.getItem("homecrewUser");
-
-    if (!activeUser) {
-        window.location.href = "index.html";
-    }
-
-    document.getElementById("welcome").innerText =
-        "Welkom, " + activeUser + " 👋";
 }
