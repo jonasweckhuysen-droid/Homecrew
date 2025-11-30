@@ -135,24 +135,26 @@ function addTask() {
     loadTasks();
 }
 
-function loadTasks() {
-    const list = document.getElementById("tasks");
-    list.innerHTML = "";
+tasks.forEach((task, index) => {
+    const li = document.createElement("li");
 
-    let tasks = JSON.parse(localStorage.getItem("homecrewTasks")) || [];
+    // Voeg class toe op basis van gebruiker
+    let userClass = "";
+    if(task.user === "jonas") userClass = "user-jonas";
+    else if(task.user === "liese") userClass = "user-liese";
+    else if(task.user === "loreana") userClass = "user-loreana";
 
-    tasks.forEach((task, index) => {
-        const li = document.createElement("li");
+    li.className = userClass;
 
-        li.innerHTML = `
-            <input type="checkbox" ${task.done ? "checked" : ""} onclick="toggleTask(${index})">
-            <strong>${task.title}</strong> (${task.user})<br>
-            ${task.desc || ""}
-            <br><button onclick="deleteTask(${index})">❌</button>
-        `;
+    li.innerHTML = `
+        <input type="checkbox" ${task.done ? "checked" : ""} onclick="toggleTask(${index})">
+        <strong>${task.title}</strong> (${task.user})<br>
+        ${task.desc || ""}
+        <br><button onclick="deleteTask(${index})">❌</button>
+    `;
 
-        list.appendChild(li);
-    });
+    list.appendChild(li);
+});
 }
 
 function toggleTask(index) {
