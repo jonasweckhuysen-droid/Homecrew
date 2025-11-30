@@ -168,3 +168,105 @@ function deleteTask(index) {
     localStorage.setItem("homecrewTasks", JSON.stringify(tasks));
     loadTasks();
 }
+/* Algemene body */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #f3f1ec, #e0f7fa);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* Dashboard container */
+.dashboard-container {
+    text-align: center;
+    max-width: 500px;
+    padding: 20px;
+}
+
+/* Welcome banner */
+.welcome-banner {
+    background: linear-gradient(90deg, #ff9a9e, #fad0c4, #a1c4fd);
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    margin-bottom: 30px;
+    animation: fadeInDown 1s ease-out;
+    color: white;
+}
+
+.welcome-banner h1 {
+    margin: 0;
+    font-size: 28px;
+}
+
+.welcome-banner p {
+    margin-top: 8px;
+    font-size: 16px;
+}
+
+/* Dashboard knoppen */
+.dashboard-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.dash-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 18px;
+    border-radius: 15px;
+    font-size: 20px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+}
+
+.dash-btn span {
+    font-weight: bold;
+}
+
+/* Kleuren en iconen per knop */
+.dash-btn.agenda { background: #3a6ea5; }
+.dash-btn.taken { background: #ff6f61; }
+
+.dash-btn:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+}
+
+/* Logout knop */
+.logout-btn {
+    margin-top: 30px;
+    width: 100%;
+    padding: 15px;
+    border-radius: 15px;
+    border: none;
+    font-size: 16px;
+    background: #dc3545;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.logout-btn:hover {
+    background: #c82333;
+    transform: translateY(-3px);
+}
+
+/* Animaties */
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
