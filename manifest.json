@@ -2,18 +2,18 @@
   "name": "Homecrew",
   "short_name": "Homecrew",
   "description": "Familie-app voor agenda en taken",
-  "start_url": "https://jonasweckhuysen-droid.github.io/Homecrew/index.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f3f1ec",
   "theme_color": "#3a6ea5",
   "icons": [
     {
-      "src": "/Homecrew/icons/icon-192.png",
+      "src": "icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/Homecrew/icons/icon-512.png",
+      "src": "icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
