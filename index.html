@@ -5,6 +5,14 @@
     <title>Homecrew - Login</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
+    <!-- Manifest voor PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#3a6ea5">
+
+<!-- Zorg dat de app op iOS kan werken -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 </head>
 <body>
 
@@ -21,5 +29,12 @@
 </div>
 
 <script src="script.js"></script>
+    <script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+    .then(() => console.log('Service Worker geregistreerd'))
+    .catch(err => console.log('Service Worker fout', err));
+}
+    </script>
 </body>
 </html>
