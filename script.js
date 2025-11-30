@@ -68,26 +68,27 @@ function addEvent() {
 }
 
 function loadEvents() {
-    const list = document.getElementById("events");
-    list.innerHTML = "";
+events.forEach((event, index) => {
+    const li = document.createElement("li");
 
-    let events = JSON.parse(localStorage.getItem("homecrewEvents")) || [];
+    // Voeg class toe op basis van gebruiker
+    let userClass = "";
+    if(event.user === "jonas") userClass = "user-jonas";
+    else if(event.user === "liese") userClass = "user-liese";
+    else if(event.user === "loreana") userClass = "user-loreana";
 
-    events.sort((a, b) => new Date(a.date) - new Date(b.date));
+    li.className = userClass;
 
-    events.forEach((event, index) => {
-        const li = document.createElement("li");
+    li.innerHTML = `
+        <strong>${event.date}</strong><br>
+        ${event.title}<br>
+        <small>Door: ${event.user}</small><br>
+        ${event.description || ""}
+        <br><button onclick="deleteEvent(${index})">❌</button>
+    `;
 
-        li.innerHTML = `
-            <strong>${event.date}</strong><br>
-            ${event.title}<br>
-            <small>Door: ${event.user}</small><br>
-            ${event.description || ""}
-            <br><button onclick="deleteEvent(${index})">❌</button>
-        `;
-
-        list.appendChild(li);
-    });
+    list.appendChild(li);
+});
 }
 
 function deleteEvent(index) {
