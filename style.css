@@ -185,3 +185,18 @@ li button:hover {
         padding: 12px;
     }
 }
+.back-btn {
+  background: #3a6ea5;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 25px;
+  margin: 15px;
+  font-size: 16px;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.back-btn:active {
+  transform: scale(0.95);
+}
