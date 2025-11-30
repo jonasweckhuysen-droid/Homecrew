@@ -96,3 +96,74 @@ function deleteEvent(index) {
     localStorage.setItem("homecrewEvents", JSON.stringify(events));
     loadEvents();
 }
+
+// ================= TAKEN =================
+if (window.location.pathname.includes("taken.html")) {
+    const activeUser = localStorage.getItem("homecrewUser");
+
+    if (!activeUser) {
+        window.location.href = "index.html";
+    }
+
+    document.getElementById("welcome").innerText =
+        "Welkom, " + activeUser + " 👋";
+
+    loadTasks();
+}
+
+function addTask() {
+    const title = document.getElementById("taskTitle").value.trim();
+    const desc = document.getElementById("taskDesc").value.trim();
+    const user = localStorage.getItem("homecrewUser");
+
+    if (!title) {
+        alert("Titel is verplicht");
+        return;
+    }
+
+    const task = { title, desc, user, done: false };
+
+    let tasks = JSON.parse(localStorage.getItem("homecrewTasks")) || [];
+    tasks.push(task);
+
+    localStorage.setItem("homecrewTasks", JSON.stringify(tasks));
+
+    document.getElementById("taskTitle").value = "";
+    document.getElementById("taskDesc").value = "";
+
+    loadTasks();
+}
+
+function loadTasks() {
+    const list = document.getElementById("tasks");
+    list.innerHTML = "";
+
+    let tasks = JSON.parse(localStorage.getItem("homecrewTasks")) || [];
+
+    tasks.forEach((task, index) => {
+        const li = document.createElement("li");
+
+        li.innerHTML = `
+            <input type="checkbox" ${task.done ? "checked" : ""} onclick="toggleTask(${index})">
+            <strong>${task.title}</strong> (${task.user})<br>
+            ${task.desc || ""}
+            <br><button onclick="deleteTask(${index})">❌</button>
+        `;
+
+        list.appendChild(li);
+    });
+}
+
+function toggleTask(index) {
+    let tasks = JSON.parse(localStorage.getItem("homecrewTasks")) || [];
+    tasks[index].done = !tasks[index].done;
+    localStorage.setItem("homecrewTasks", JSON.stringify(tasks));
+    loadTasks();
+}
+
+function deleteTask(index) {
+    let tasks = JSON.parse(localStorage.getItem("homecrewTasks")) || [];
+    tasks.splice(index, 1);
+    localStorage.setItem("homecrewTasks", JSON.stringify(tasks));
+    loadTasks();
+}
