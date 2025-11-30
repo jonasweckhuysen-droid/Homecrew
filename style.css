@@ -206,3 +206,16 @@ li button {
 li button:hover {
     background: #c82333;
 }
+
+/* Kleur per gebruiker in agenda en taken */
+.user-jonas {
+    border-left: 6px solid #3a6ea5; /* blauw */
+}
+
+.user-liese {
+    border-left: 6px solid #dc3545; /* rood */
+}
+
+.user-loreana {
+    border-left: 6px solid #ff69b4; /* roze */
+}
