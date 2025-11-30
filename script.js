@@ -167,3 +167,14 @@ function deleteTask(index) {
     localStorage.setItem("homecrewTasks", JSON.stringify(tasks));
     loadTasks();
 }
+
+if (window.location.pathname.includes("dashboard.html")) {
+    const activeUser = localStorage.getItem("homecrewUser");
+
+    if (!activeUser) {
+        window.location.href = "index.html";
+    }
+
+    document.getElementById("welcome").innerText =
+        "Welkom, " + activeUser + " 👋";
+}
