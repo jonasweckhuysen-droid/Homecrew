@@ -1,3 +1,16 @@
+// ================= FIREBASE INIT =================
+const firebaseConfig = {
+  apiKey: "AIzaSyXXXX",
+  authDomain: "homecrew-app.firebaseapp.com",
+  projectId: "homecrew-app",
+  storageBucket: "homecrew-app.appspot.com",
+  messagingSenderId: "1234567890",
+  appId: "1:1234567890:web:abcdef123456",
+  measurementId: "G-XXXX"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 const users = {
     "jonas": "1234",
     "liese": "1234",
