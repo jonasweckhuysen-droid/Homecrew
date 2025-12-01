@@ -17,7 +17,7 @@
 <div class="dashboard-container">
 
     <!-- Welkomst banner -->
-    <div class="welcome-banner" style="background: linear-gradient(135deg, #ffecd2, #fcb69f); padding: 20px; border-radius: 25px; margin: 20px;">
+    <div class="welcome-banner" style="background: linear-gradient(135deg, #ffecd2, #fcb69f); padding: 25px; border-radius: 25px; margin: 20px; box-shadow: 0 6px 18px rgba(0,0,0,0.2);">
         <h1 id="welcome">Welkom!</h1>
         <p>Wat gaan we vandaag doen? 🌈</p>
     </div>
@@ -55,43 +55,98 @@
         </div>
     </div>
 
-    <!-- Terug naar home / logout -->
-    <div class="home-btn" id="logoutBtn">
+    <!-- Logout knop -->
+    <button class="logout-btn" id="logoutBtn">
         <i class="fas fa-sign-out-alt"></i>
         <span>Uitloggen</span>
-    </div>
+    </button>
 
 </div>
 
 <script type="module">
-import { auth, logout } from './script.js';
+    import { logout } from './script.js';
 
-// Check actief ingelogde gebruiker
-const activeUser = localStorage.getItem("homecrewUser");
-if (!activeUser) window.location.href = "/Homecrew/index.html";
-document.getElementById("welcome").innerText = "Welkom, " + activeUser + " 👋";
+    // Check actief ingelogde gebruiker
+    const activeUser = localStorage.getItem("homecrewUser");
+    if (!activeUser) window.location.href = "/Homecrew/index.html";
+    document.getElementById("welcome").innerText = "Welkom, " + activeUser + " 👋";
 
-// Koppel de logout knop
-document.getElementById("logoutBtn").addEventListener("click", () => {
-    logout();
-});
+    // Koppel de logout knop
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+        logout();
+    });
 
-// Service Worker
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/Homecrew/sw.js');
-}
+    // Service Worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/Homecrew/sw.js');
+    }
 </script>
 
 <style>
 /* -------------------- Extra dashboard badges -------------------- */
+.dash-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    border-radius: 16px;
+    font-size: 20px;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    transition: all 0.2s ease;
+    gap: 12px;
+    margin: 10px 0;
+}
+
+.dash-btn i {
+    font-size: 26px;
+}
+
 .dash-btn .badge {
-    font-size: 22px;
-    margin-left: auto;
+    font-size: 24px;
     transition: transform 0.3s;
 }
 
 .dash-btn:hover .badge {
     transform: scale(1.3) rotate(10deg);
+}
+
+/* Dashboard knop kleuren */
+.dash-btn.agenda { background: linear-gradient(135deg, #3a6ea5, #5ea0d0); }
+.dash-btn.boodschappenlijst { background: linear-gradient(135deg, #ff9800, #ffc04d); }
+.dash-btn.berichten { background: linear-gradient(135deg, #9c27b0, #b45fc1); }
+.dash-btn.taken { background: linear-gradient(135deg, #f44336, #f77b6d); }
+.dash-btn.locatie { background: linear-gradient(135deg, #4caf50, #81c784); }
+
+.dash-btn:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 18px rgba(0,0,0,0.25);
+}
+
+/* -------------------- Logout knop verbeterd -------------------- */
+.logout-btn {
+    background: linear-gradient(135deg, #dc3545, #ff6b6b);
+    border: none;
+    color: white;
+    font-size: 18px;
+    padding: 14px 20px;
+    border-radius: 16px;
+    cursor: pointer;
+    width: 90%;
+    max-width: 400px;
+    margin: 30px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.2);
+}
+
+.logout-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
 }
 
 /* -------------------- Animatie fade-in voor dashboardknoppen -------------------- */
