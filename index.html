@@ -4,14 +4,9 @@
     <meta charset="UTF-8">
     <title>Homecrew - Login</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#3a6ea5">
-
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#3a6ea5">
     <link rel="apple-touch-icon" href="/Homecrew/icons/icon-192.png">
-
     <link rel="stylesheet" href="/Homecrew/style.css">
 </head>
 <body>
@@ -21,15 +16,18 @@
 
     <input type="text" id="username" placeholder="Gebruikersnaam">
     <input type="password" id="password" placeholder="Wachtwoord">
-
     <button onclick="login()">Inloggen</button>
+    <button onclick="register()">Nieuw account aanmaken</button>
+
     <p id="error"></p>
+
     <h3>Wachtwoord wijzigen</h3>
-<input type="password" id="newPassword" placeholder="Nieuw wachtwoord/pincode">
-<button class="add-btn" onclick="changePassword(document.getElementById('newPassword').value)">
-    Wijzig wachtwoord
-</button>
+    <input type="password" id="newPassword" placeholder="Nieuw wachtwoord/pincode">
+    <button class="add-btn" onclick="changePassword(document.getElementById('newPassword').value)">
+        Wijzig wachtwoord
+    </button>
 </div>
+
 <script type="module" src="script.js"></script>
 <script>
 if ('serviceWorker' in navigator) {
