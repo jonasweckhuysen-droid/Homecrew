@@ -18,24 +18,17 @@ function getUserColor(user) {
 document.addEventListener("DOMContentLoaded", () => {
 
     const page = window.location.pathname.split("/").pop();
+    const logged = localStorage.getItem("homecrew_loggedin") === "true";
 
-    // Als je op login pagina bent
-    if (page === "" || page === "index.html") {
-
-        const remembered = localStorage.getItem("homecrew_loggedin");
-
-        if (remembered === "true") {
-            window.location.href = "dashboard.html";
-        }
+    // Alleen redirect als het nodig is
+    if ((page === "" || page === "index.html") && logged) {
+        // al ingelogd → dashboard openen
+        window.location.replace("dashboard.html");
     }
-    // Als je op andere pagina bent → login vereist
-    else {
 
-        const logged = localStorage.getItem("homecrew_loggedin");
-
-        if (logged !== "true") {
-            window.location.href = "index.html";
-        }
+    if ((page !== "" && page !== "index.html") && !logged) {
+        // niet ingelogd → index openen
+        window.location.replace("index.html");
     }
 
     // Taken automatisch laden
