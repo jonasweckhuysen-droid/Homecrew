@@ -25,7 +25,9 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, setPersistence, browserLocalPersistence, inMemoryPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { 
+    getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, setPersistence, browserLocalPersistence, inMemoryPersistence 
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 // Firebase config
 const firebaseConfig = {
@@ -41,7 +43,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Als al ingelogd → dashboard
+// Redirect als al ingelogd
 if(localStorage.getItem("homecrewUser")) window.location.href = "dashboard.html";
 
 // Start knop
@@ -60,19 +62,20 @@ document.getElementById("startBtn").addEventListener("click", async () => {
         // Kies persistentie
         await setPersistence(auth, stayLoggedIn ? browserLocalPersistence : inMemoryPersistence);
 
-        // Probeer login
-        await signInWithEmailAndPassword(auth, username+"@homecrew.local", password);
+        // Probeer in te loggen
+        await signInWithEmailAndPassword(auth, username + "@homecrew.local", password);
         localStorage.setItem("homecrewUser", username);
         window.location.href = "dashboard.html";
-    } catch(e){
-        // Als login faalt → registratie
+
+    } catch(loginErr){
+        // Als login faalt → maak account aan
         try {
-            await createUserWithEmailAndPassword(auth, username+"@homecrew.local", password);
+            await createUserWithEmailAndPassword(auth, username + "@homecrew.local", password);
             localStorage.setItem("homecrewUser", username);
             window.location.href = "dashboard.html";
-        } catch(err){
-            console.error(err);
-            errorEl.textContent = "Kan niet registreren: " + err.message;
+        } catch(registerErr){
+            console.error("Registratie mislukt:", registerErr);
+            errorEl.textContent = "Kan niet registreren: " + registerErr.message;
         }
     }
 });
