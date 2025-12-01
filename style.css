@@ -457,3 +457,31 @@ textarea {
   border-radius: 12px;
   margin-top: 5px;
 }
+
+/* Dashboard knoppen kleuren */
+.dash-btn {
+    padding: 20px;
+    border-radius: 16px;
+    font-size: 20px;
+    color: white;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.dash-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+}
+
+/* Kleuren per knop */
+.dash-btn.agenda { background: #3a6ea5; }        /* blauw */
+.dash-btn.boodschappenlijst { background: #ff9800; } /* oranje */
+.dash-btn.berichten { background: #9c27b0; }    /* paars */
+.dash-btn.locatie { background: #4caf50; }       /* groen */
+.dash-btn.taken { background: #f44336; }         /* rood */
