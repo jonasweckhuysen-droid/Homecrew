@@ -1,72 +1,197 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <meta charset="UTF-8">
-    <title>Homecrew - Agenda</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Homecrew – Agenda</title>
 
-    <link rel="manifest" href="/Homecrew/manifest.json">
-    <meta name="theme-color" content="#3a6ea5">
-    <link rel="apple-touch-icon" href="/Homecrew/icons/icon-192.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e2a38">
 
-    <link rel="stylesheet" href="/Homecrew/style.css">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/ical.js@1.4.0/build/ical.min.js"></script>
 </head>
-<body class="agenda-body">
 
-<!-- TOPBAR -->
-<div class="topbar">
-  <button class="back-btn" onclick="window.location.href='/Homecrew/dashboard.html'">
-    🏠
-  </button>
-  <span class="top-title">Mijn agenda</span>
+<body class="app-body">
+
+<header class="topbar">
+  <button onclick="window.location.href='dashboard.html'" class="icon-btn">🏠</button>
+  <h2>📅 Homecrew agenda</h2>
+  <button onclick="logout()" class="icon-btn">🚪</button>
+</header>
+
+
+<main class="content">
+
+<h3 id="welcomeUser"></h3>
+
+<div class="card">
+  <h3>Nieuwe afspraak toevoegen</h3>
+
+  <input type="text" id="eventTitle" placeholder="Titel">
+  <input type="datetime-local" id="eventDate">
+  <textarea id="eventDescription" placeholder="Beschrijving (optioneel)"></textarea>
+
+  <button class="main-btn" onclick="addEvent()">Toevoegen</button>
 </div>
 
-<div class="login-box">
 
-    <h1 id="welcome"></h1>
-
-    <div class="card">
-      <h3>➕ Nieuwe gebeurtenis</h3>
-
-      <div class="input-group">
-        <label>📅 Datum</label>
-        <input type="date" id="date">
-      </div>
-
-      <div class="input-group">
-        <label>📝 Titel</label>
-        <input type="text" id="title" placeholder="Titel">
-      </div>
-
-      <div class="input-group">
-        <label>📖 Beschrijving</label>
-        <textarea id="description" placeholder="Beschrijving"></textarea>
-      </div>
-
-      <button class="add-btn" onclick="addEvent()">✅ Toevoegen</button>
-    </div>
-
-    <div class="card">
-      <h3>📌 Gebeurtenissen</h3>
-      <ul id="events" class="events-list"></ul>
-    </div>
-
-    <button class="logout-btn" onclick="logout()">🚪 Uitloggen</button>
+<div class="card">
+  <h3>📌 Afspraak overzicht</h3>
+  <ul id="eventList" class="event-list"></ul>
 </div>
 
-<script type="module" src="script.js"></script>
+</main>
 
 <script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/Homecrew/sw.js');
+
+// ===========================
+// USER CHECK
+// ===========================
+const user = localStorage.getItem("homecrewUser");
+
+if(!user){
+  window.location.href = "index.html";
 }
 
-const activeUser = localStorage.getItem("homecrewUser");
-if (!activeUser) window.location.href = "/Homecrew/index.html";
+document.getElementById("welcomeUser").innerText = "Welkom " + user + " 👋";
 
-document.getElementById("welcome").innerText = "Welkom, " + activeUser + " 👋";
+function getUserColor(user) {
+  if (user === "Jonas") return "blue";
+  if (user === "Liese") return "red";
+  if (user === "Loreana") return "pink";
+  return "gray";
+}
 
-loadEvents();
+
+// ===========================
+// LOGOUT
+// ===========================
+function logout(){
+  localStorage.removeItem("homecrewUser");
+  location.href = "index.html";
+}
+
+
+// ===========================
+// LOCAL EVENTS
+// ===========================
+function addEvent(){
+  const title = document.getElementById("eventTitle").value.trim();
+  const date = document.getElementById("eventDate").value;
+  const desc = document.getElementById("eventDescription").value.trim();
+
+  if(title === "" || date === ""){
+    alert("Titel en datum zijn verplicht");
+    return;
+  }
+
+  let events = JSON.parse(localStorage.getItem("homecrewEvents")) || [];
+
+  events.push({
+    user: user,
+    title: title,
+    date: date,
+    description: desc
+  });
+
+  localStorage.setItem("homecrewEvents", JSON.stringify(events));
+
+  document.getElementById("eventTitle").value = "";
+  document.getElementById("eventDate").value = "";
+  document.getElementById("eventDescription").value = "";
+
+  loadLocalEvents();
+}
+
+
+// ===========================
+// LOAD LOCAL EVENTS
+// ===========================
+function loadLocalEvents(){
+  const list = document.getElementById("eventList");
+  list.innerHTML = "";
+
+  let events = JSON.parse(localStorage.getItem("homecrewEvents")) || [];
+
+  events.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  events.forEach((ev, index) => {
+    const li = document.createElement("li");
+
+    li.className = "event-item";
+    li.style.borderLeft = "6px solid " + getUserColor(ev.user);
+
+    li.innerHTML = `
+      <strong>${ev.title}</strong>
+      <div class="event-meta">
+        ${new Date(ev.date).toLocaleString("nl-BE")}
+      </div>
+      <div class="event-user" style="color:${getUserColor(ev.user)}">
+        👤 ${ev.user}
+      </div>
+      <div>${ev.description || ""}</div>
+      <button onclick="deleteEvent(${index})">🗑️</button>
+    `;
+
+    list.appendChild(li);
+  });
+}
+
+function deleteEvent(index){
+  let events = JSON.parse(localStorage.getItem("homecrewEvents")) || [];
+  events.splice(index,1);
+  localStorage.setItem("homecrewEvents", JSON.stringify(events));
+  loadLocalEvents();
+}
+
+
+// ===========================
+// GOOGLE CALENDAR ICS
+// ===========================
+const icsUrl = "https://calendar.google.com/calendar/ical/b3756ae16d0f11ea12a33407c6077e5925740ab0ce0d19514aa77a7fc6a6e0c0%40group.calendar.google.com/public/basic.ics";
+
+async function loadGoogleCalendar(){
+  try{
+    const response = await fetch(icsUrl);
+    const data = await response.text();
+
+    const jcalData = ICAL.parse(data);
+    const comp = new ICAL.Component(jcalData);
+    const vevents = comp.getAllSubcomponents("vevent");
+
+    const list = document.getElementById("eventList");
+
+    vevents.forEach(v => {
+      const ev = new ICAL.Event(v);
+
+      const li = document.createElement("li");
+      li.className = "event-item";
+      li.style.borderLeft = "6px solid black";
+
+      li.innerHTML = `
+        <strong>${ev.summary}</strong>
+        <div class="event-meta">${ev.startDate.toJSDate().toLocaleString("nl-BE")}</div>
+        <div style="color:black;">📅 Google agenda</div>
+        <div>${ev.description || ""}</div>
+      `;
+
+      list.appendChild(li);
+
+    });
+
+  }catch(err){
+    console.error("Google kalender fout:", err);
+  }
+}
+
+
+// ===========================
+// INIT
+// ===========================
+loadLocalEvents();
+loadGoogleCalendar();
+
 </script>
 
 </body>
