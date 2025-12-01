@@ -22,6 +22,7 @@
     </div>
 
     <div class="dashboard-buttons">
+
         <!-- ALFABETISCHE VOLGORDE -->
 
         <div class="dash-btn agenda" onclick="window.location.href='/Homecrew/agenda.html'">
@@ -39,13 +40,19 @@
             <span>Berichten</span>
         </div>
 
+        <div class="dash-btn locatie" onclick="window.location.href='/Homecrew/locatie.html'">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>Locatie</span>
+        </div>
+
         <div class="dash-btn taken" onclick="window.location.href='/Homecrew/taken.html'">
             <i class="fas fa-tasks"></i>
             <span>Taken</span>
         </div>
+
     </div>
 
-    <button class="logout-btn" onclick="logout()">
+    <button class="logout-btn" id="logoutBtn">
         <i class="fas fa-sign-out-alt"></i> Uitloggen
     </button>
 
@@ -53,17 +60,18 @@
 
 <script type="module" src="script.js"></script>
 <script>
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/Homecrew/sw.js');
-    }
-
+    // Controleer ingelogde gebruiker
     const activeUser = localStorage.getItem("homecrewUser");
-
     if (!activeUser) {
         window.location.href = "/Homecrew/index.html";
+    } else {
+        document.getElementById("welcome").innerText = "Welkom, " + activeUser + " 👋";
     }
 
-    document.getElementById("welcome").innerText = "Welkom, " + activeUser + " 👋";
+    // Logout knop correct koppelen
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+        if(typeof logout === "function") logout();
+    });
 </script>
 </body>
 </html>
