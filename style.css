@@ -264,3 +264,59 @@ li.taken::before { content: "📝"; position: absolute; left: 12px; top: 15px; f
   border-radius:6px;
   color:white;
 }
+/* -------------------- Dashboard knoppen -------------------- */
+.dashboard-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+/* Algemene dash-btn styling */
+.dash-btn {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 15px;
+    padding: 20px;
+    border-radius: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+    transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+}
+
+/* Iconen iets groter */
+.dash-btn i {
+    font-size: 28px;
+}
+
+/* Hover effect */
+.dash-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 22px rgba(0,0,0,0.35);
+    filter: brightness(1.1);
+}
+
+/* Kleuren per knop met gradient */
+.dash-btn.agenda {
+    background: linear-gradient(135deg, #3a6ea5, #70a1ff);
+}
+
+.dash-btn.boodschappenlijst {
+    background: linear-gradient(135deg, #ff9800, #ffc947);
+}
+
+.dash-btn.berichten {
+    background: linear-gradient(135deg, #9c27b0, #d46ee5);
+}
+
+.dash-btn.taken {
+    background: linear-gradient(135deg, #f44336, #ff7961);
+}
+
+.dash-btn.locatie {
+    background: linear-gradient(135deg, #4caf50, #81c784);
+}
