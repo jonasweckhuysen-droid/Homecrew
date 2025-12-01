@@ -1,54 +1,58 @@
-<!DOCTYPE html><html lang="nl">
+<!DOCTYPE html>
+<html lang="nl">
 <head>
     <meta charset="UTF-8">
     <title>Homecrew - Dashboard</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="manifest" href="/Homecrew/manifest.json">
-<meta name="theme-color" content="#3a6ea5">
-<link rel="apple-touch-icon" href="/Homecrew/icons/icon-192.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="/Homecrew/manifest.json">
+    <meta name="theme-color" content="#3a6ea5">
+    <link rel="apple-touch-icon" href="/Homecrew/icons/icon-192.png">
 
-<!-- Font Awesome voor iconen -->
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <!-- Font Awesome voor iconen -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 
-<link rel="stylesheet" href="/Homecrew/style.css">
-
+    <link rel="stylesheet" href="/Homecrew/style.css">
 </head>
-<body><div class="dashboard-container"><div class="welcome-banner">
-    <h1 id="welcome">Welkom!</h1>
-    <p>Wat gaan we vandaag doen? 🌈</p>
+<body>
+<div class="dashboard-container">
+
+    <div class="welcome-banner">
+        <h1 id="welcome">Welkom!</h1>
+        <p>Wat gaan we vandaag doen? 🌈</p>
+    </div>
+
+    <div class="dashboard-buttons">
+        <!-- ALFABETISCHE VOLGORDE -->
+
+        <div class="dash-btn agenda" onclick="window.location.href='/Homecrew/agenda.html'">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Agenda</span>
+        </div>
+
+        <div class="dash-btn boodschappenlijst" onclick="window.location.href='/Homecrew/boodschappen.html'">
+            <i class="fas fa-shopping-basket"></i>
+            <span>Boodschappenlijst</span>
+        </div>
+
+        <div class="dash-btn berichten" onclick="window.location.href='/Homecrew/berichten.html'">
+            <i class="fas fa-comments"></i>
+            <span>Berichten</span>
+        </div>
+
+        <div class="dash-btn taken" onclick="window.location.href='/Homecrew/taken.html'">
+            <i class="fas fa-tasks"></i>
+            <span>Taken</span>
+        </div>
+    </div>
+
+    <button class="logout-btn" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> Uitloggen
+    </button>
+
 </div>
 
-<div class="dashboard-buttons">
-
-    <div class="dash-btn agenda" onclick="window.location.href='/Homecrew/agenda.html'">
-        <i class="fas fa-calendar-alt"></i>
-        <span>Agenda</span>
-    </div>
-
-    <div class="dash-btn boodschappenlijst" onclick="window.location.href='/Homecrew/boodschappen.html'">
-        <i class="fas fa-shopping-basket"></i>
-        <span>Boodschappenlijst</span>
-    </div>
-
-    <div class="dash-btn taken" onclick="window.location.href='/Homecrew/taken.html'">
-        <i class="fas fa-tasks"></i>
-        <span>Taken</span>
-    </div>
-
-    <!-- NIEUW: INTERNE BERICHTEN -->
-    <div class="dash-btn berichten" onclick="window.location.href='/Homecrew/berichten.html'">
-        <i class="fas fa-comments"></i>
-        <span>Berichten</span>
-    </div>
-
-    <!-- Voeg hier later extra knoppen toe -->
-
-</div>
-
-<button class="logout-btn" onclick="logout()">
-    <i class="fas fa-sign-out-alt"></i> Uitloggen
-</button>
-
-</div><script type="module" src="script.js"></script><script>
+<script type="module" src="script.js"></script>
+<script>
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/Homecrew/sw.js');
     }
@@ -60,5 +64,6 @@
     }
 
     document.getElementById("welcome").innerText = "Welkom, " + activeUser + " 👋";
-</script></body>
+</script>
+</body>
 </html>
