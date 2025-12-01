@@ -9,13 +9,13 @@ body {
 
 h1, h2, h3 {
     text-align: center;
-    font-family: 'Comic Sans MS', Arial, sans-serif;
     color: #444;
+    margin: 0 0 10px 0;
 }
 
 /* -------------------- Login / Dashboard box -------------------- */
 .login-box, .dashboard-box {
-    max-width: 400px;
+    max-width: 420px;
     margin: 50px auto;
     padding: 25px;
     background: #ffffff;
@@ -42,7 +42,7 @@ input:focus, textarea:focus {
     box-shadow: 0 0 8px rgba(0,123,255,0.3);
 }
 
-/* -------------------- Knoppen -------------------- */
+/* -------------------- Knoppen algemeen -------------------- */
 button {
     padding: 14px;
     border: none;
@@ -90,18 +90,21 @@ button.add-btn:hover { background: #0069d9; }
     gap: 12px;
 }
 
+.dash-btn i {
+    font-size: 24px;
+}
+
 .dash-btn:hover {
     transform: translateY(-3px);
     box-shadow: 0 8px 16px rgba(0,0,0,0.3);
 }
 
-/* Dashboard knop kleuren + iconen */
-.dash-btn.agenda::before { content: "📅"; font-size: 24px; }
-.dash-btn.taken::before { content: "✅"; font-size: 24px; }
-
-/* Kleuren per knop */
-.dash-btn.agenda { background: #3a6ea5; }
-.dash-btn.taken { background: #28a745; }
+/* Dashboard knop kleuren */
+.dash-btn.agenda { background: #3a6ea5; }          /* blauw */
+.dash-btn.boodschappenlijst { background: #ff9800; } /* oranje */
+.dash-btn.berichten { background: #9c27b0; }       /* paars */
+.dash-btn.locatie { background: #4caf50; }         /* groen */
+.dash-btn.taken { background: #f44336; }           /* rood */
 
 /* -------------------- Lijsten (Agenda / Taken) -------------------- */
 ul {
@@ -127,7 +130,7 @@ li:hover {
     box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
 
-/* -------------------- Iconen per item type -------------------- */
+/* Iconen per item type */
 li.agenda::before { content: "📅"; position: absolute; left: 12px; top: 15px; font-size: 20px; }
 li.taken::before { content: "📝"; position: absolute; left: 12px; top: 15px; font-size: 20px; }
 
@@ -185,303 +188,71 @@ li button:hover {
         padding: 12px;
     }
 }
-/* --------- Topbar + Home knop --------- */
-.topbar {
-    width: 100%;
-    padding: 15px;
-    background: #3a6ea5;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 
-    position: sticky;
-    top: 0;
-    z-index: 999;
-}
-
-.back-btn {
-    background: white;
-    color: #3a6ea5;
-    border: none;
-    padding: 10px 18px;
-    border-radius: 25px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
-    transition: 0.2s;
-    width: auto;
-}
-
-.back-btn:hover {
-    transform: scale(1.05);
-}
-.agenda-body {
-  background: linear-gradient(135deg, #243c5a, #3a6ea5);
-  font-family: Arial, sans-serif;
-  min-height: 100vh;
-}
-
-.topbar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 15px;
-  background: #1e3350;
-  color: white;
-  font-size: 20px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.4);
-}
-
-.top-title {
-  font-weight: bold;
-  margin-left: 10px;
-  font-size: 18px;
-}
-
-.back-btn {
-  background: #ff9800;
-  border: none;
-  border-radius: 50%;
-  padding: 10px 14px;
-  font-size: 18px;
-  cursor: pointer;
-}
-
-.login-box {
-  max-width: 420px;
-  margin: 20px auto;
-  padding: 10px;
-}
-
-h1 {
-  color: white;
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.card {
-  background: white;
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-}
-
-.card h3 {
-  margin-bottom: 12px;
-  color: #3a6ea5;
-}
-
-.input-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 12px;
-}
-
-.input-group label {
-  font-size: 14px;
-  margin-bottom: 5px;
-  color: #555;
-}
-
-input, textarea {
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-}
-
-textarea {
-  resize: none;
-  height: 70px;
-}
-
-.add-btn {
-  width: 100%;
-  background: #4caf50;
-  border: none;
-  color: white;
-  padding: 12px;
-  font-size: 16px;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.add-btn:hover {
-  background: #43a047;
-}
-
-.logout-btn {
-  width: 100%;
-  background: #c62828;
-  border: none;
-  color: white;
-  padding: 12px;
-  font-size: 16px;
-  border-radius: 12px;
-  cursor: pointer;
-}
-
-.events-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.events-list li {
-  background: #f3f6fa;
-  border-left: 6px solid #3a6ea5;
-  padding: 12px 15px;
-  border-radius: 12px;
-  margin-bottom: 12px;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-}
-
-.events-list li strong {
-  display: block;
-  color: #1e3350;
-  font-size: 15px;
-}
-
-.events-list li span {
-  font-size: 13px;
-  color: #555;
-}
-.nav-btn {
-  background: linear-gradient(135deg,#ff9800,#f57c00);
-  border: none;
-  color: white;
-  padding: 14px;
-  width: 100%;
-  border-radius: 15px;
-  font-size: 16px;
-  margin: 8px 0;
-}
-.list-box {
-  display: none;
-  width: 100%;
-  margin-top: 15px;
-  background: white;
-  padding: 15px;
-  border-radius: 20px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-  animation: fadeIn 0.4s ease;
-}
-
-.list-box.show {
-  display: block;
-}
-
-@keyframes fadeIn {
-  from {opacity:0; transform: translateY(10px);}
-  to {opacity:1; transform: translateY(0);}
-}
-
-.input-group {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-}
+/* -------------------- Chat & extra componenten -------------------- */
 .chat-box {
-  height: 50vh;
-  overflow-y: auto;
-  background: white;
-  padding: 15px;
-  border-radius: 20px;
-  box-shadow: 0 8px 15px rgba(0,0,0,0.08);
-  margin-bottom: 15px;
+    height: 50vh;
+    overflow-y: auto;
+    background: white;
+    padding: 15px;
+    border-radius: 20px;
+    box-shadow: 0 8px 15px rgba(0,0,0,0.08);
+    margin-bottom: 15px;
 }
 
 .my-message {
-  background: #3a6ea5;
-  color: white;
-  padding: 10px 14px;
-  border-radius: 20px 20px 5px 20px;
-  margin: 8px 0;
-  max-width: 80%;
-  align-self: flex-end;
+    background: #3a6ea5;
+    color: white;
+    padding: 10px 14px;
+    border-radius: 20px 20px 5px 20px;
+    margin: 8px 0;
+    max-width: 80%;
+    align-self: flex-end;
 }
 
 .other-message {
-  background: #f1f1f1;
-  padding: 10px 14px;
-  border-radius: 20px 20px 20px 5px;
-  margin: 8px 0;
-  max-width: 80%;
+    background: #f1f1f1;
+    padding: 10px 14px;
+    border-radius: 20px 20px 20px 5px;
+    margin: 8px 0;
+    max-width: 80%;
 }
 
 .chat-input {
-  display: flex;
-  gap: 10px;
+    display: flex;
+    gap: 10px;
 }
 
 .chat-input input {
-  flex: 1;
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
+    flex: 1;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
 }
 
 .chat-input button {
-  background: #3a6ea5;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  padding: 10px 14px;
-      }
-
-.chat-box {
-  max-height: 400px;
-  overflow-y: auto;
-  border: 1px solid #ccc;
-  border-radius: 16px;
-  padding: 15px;
-  background: #fdfdfd;
-  margin-bottom: 15px;
-}
-
-.chat-message {
-  padding: 8px 12px;
-  border-radius: 12px;
-  margin-bottom: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  background: linear-gradient(135deg, #e0f7fa, #ffffff);
-  transition: all 0.2s ease;
-}
-
-.chat-message img.chat-image {
-  max-width: 150px;
-  border-radius: 12px;
-  margin-top: 5px;
-}
-
-/* Dashboard knoppen kleuren */
-.dash-btn {
-    padding: 20px;
-    border-radius: 16px;
-    font-size: 20px;
+    background: #3a6ea5;
     color: white;
-    text-align: center;
-    cursor: pointer;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 14px;
 }
 
-.dash-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+/* -------------------- Animaties -------------------- */
+.list-box {
+    display: none;
+    width: 100%;
+    margin-top: 15px;
+    background: white;
+    padding: 15px;
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    animation: fadeIn 0.4s ease;
 }
 
-/* Kleuren per knop */
-.dash-btn.agenda { background: #3a6ea5; }        /* blauw */
-.dash-btn.boodschappenlijst { background: #ff9800; } /* oranje */
-.dash-btn.berichten { background: #9c27b0; }    /* paars */
-.dash-btn.locatie { background: #4caf50; }       /* groen */
-.dash-btn.taken { background: #f44336; }         /* rood */
+.list-box.show { display: block; }
+
+@keyframes fadeIn {
+    from {opacity:0; transform: translateY(10px);}
+    to {opacity:1; transform: translateY(0);}
+}
