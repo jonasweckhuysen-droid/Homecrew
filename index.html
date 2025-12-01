@@ -16,30 +16,13 @@
     <input type="text" id="username" placeholder="Naam">
     <input type="password" id="password" placeholder="Wachtwoord/pincode">
 
-    <label style="display:flex; align-items:center; gap:10px; margin-top:10px;">
+    <label class="remember-label">
         <input type="checkbox" id="stayLoggedIn"> Blijf ingelogd
     </label>
 
-    <button id="startBtn">Start</button>
-    <p id="error" style="color:red; margin-top:10px;"></p>
+    <button id="startBtn" class="main-btn">Start</button>
+    <p id="error" class="error-msg"></p>
 </div>
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    // Auto-login
-    if (isLoggedIn()) {
-        window.location.href = "dashboard.html";
-        return;
-    }
-
-    document.getElementById("startBtn").addEventListener("click", () => {
-        const username = document.getElementById("username").value;
-        const password = document.getElementById("password").value;
-        const stay = document.getElementById("stayLoggedIn").checked;
-        login(username, password, stay);
-    });
-});
-</script>
 
 </body>
 </html>
