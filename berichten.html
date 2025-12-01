@@ -1,27 +1,32 @@
-<!DOCTYPE html><html lang="nl">
+<!DOCTYPE html>
+<html lang="nl">
 <head>
 <meta charset="UTF-8">
 <title>Homecrew - Berichten</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="manifest" href="/Homecrew/manifest.json">
-<meta name="theme-color" content="#3a6ea5">
-<link rel="apple-touch-icon" href="/Homecrew/icons/icon-192.png"><script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script><link rel="stylesheet" href="/Homecrew/style.css">
-</head><body><div class="dashboard-container"><div class="welcome-banner">
-    <h1>💬 Interne berichten</h1>
-    <p>Stuur een bericht naar je huisgenoten</p>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/Homecrew/manifest.json">
+<link rel="apple-touch-icon" href="/Homecrew/icons/icon-192.png">
+<link rel="stylesheet" href="/Homecrew/style.css">
+</head>
+<body>
+
+<!-- TOPBAR MET HUIS-ICOON -->
+<div class="topbar">
+  <button class="back-btn" onclick="window.location.href='/Homecrew/dashboard.html'">🏠 Home</button>
 </div>
 
-<div id="chatBox" class="chat-box"></div>
+<div class="login-box">
+  <h1 id="welcome"></h1>
 
-<div class="message-input-container">
-    <input type="text" id="messageInput" placeholder="Typ je bericht...">
-    <button onclick="sendMessage()">
-        <i class="fas fa-paper-plane"></i>
-    </button>
+  <div id="chatBox" class="chat-box"></div>
+
+  <input type="text" id="messageInput" placeholder="Typ je bericht..." />
+  <input type="file" id="imageInput" accept="image/*" />
+  <button class="add-btn" onclick="sendMessage()">Verstuur</button>
+
+  <button class="logout-btn" onclick="logout()">Uitloggen</button>
 </div>
 
-<button class="logout-btn" onclick="window.location.href='/Homecrew/dashboard.html'">
-    <i class="fas fa-arrow-left"></i> Terug naar dashboard
-</button>
-
-</div><script type="module" src="berichten.js"></script></body>
+<script type="module" src="berichten.js"></script>
+</body>
 </html>
