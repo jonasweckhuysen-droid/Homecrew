@@ -182,3 +182,85 @@ li.taken::before { content: "📝"; position: absolute; left: 12px; top: 15px; f
         padding: 12px;
     }
 }
+.app-body{
+  background:#1e2a38;
+  font-family:arial;
+  margin:0;
+  color:white;
+}
+
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px;
+  background:#111;
+}
+
+.icon-btn{
+  background:none;
+  border:none;
+  color:white;
+  font-size:22px;
+}
+
+.content{
+  padding:15px;
+}
+
+.card{
+  background:#2b3c4f;
+  padding:15px;
+  border-radius:12px;
+  margin-bottom:20px;
+}
+
+.card input,
+.card textarea{
+  width:100%;
+  margin:6px 0;
+  padding:10px;
+  border-radius:8px;
+  border:none;
+}
+
+.main-btn{
+  width:100%;
+  padding:12px;
+  border:none;
+  background:#4caf50;
+  border-radius:10px;
+  font-size:16px;
+  color:white;
+}
+
+.event-list{
+  list-style:none;
+  padding:0;
+}
+
+.event-item{
+  background:#1c2733;
+  padding:12px;
+  margin:10px 0;
+  border-radius:8px;
+}
+
+.event-meta{
+  font-size:13px;
+  opacity:0.7;
+}
+
+.event-user{
+  margin-top:4px;
+  font-weight:bold;
+}
+
+.event-item button{
+  margin-top:5px;
+  background:#ff4d4d;
+  border:none;
+  padding:6px 10px;
+  border-radius:6px;
+  color:white;
+}
