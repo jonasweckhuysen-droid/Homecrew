@@ -5,26 +5,35 @@
     <title>Homecrew - Taken</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/Homecrew/style.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
-<body>
+<body class="app-body">
 
-<div class="topbar">
-  <button class="back-btn" onclick="window.location.href='/Homecrew/dashboard.html'">🏠 Home</button>
-</div>
+<header class="topbar">
+    <button class="home-btn" onclick="window.location.href='/Homecrew/dashboard.html'">
+        <i class="fas fa-home"></i> Dashboard
+    </button>
+    <h2>📝 Taken</h2>
+    <button class="home-btn" id="logoutBtn">
+        <i class="fas fa-sign-out-alt"></i> Uitloggen
+    </button>
+</header>
 
-<div class="login-box">
-    <h1 id="welcome"></h1>
+<main class="content">
+    <h3 id="welcomeUser"></h3>
 
-    <h3>Nieuwe taak</h3>
-    <input type="text" id="taskTitle" placeholder="Titel">
-    <textarea id="taskDesc" placeholder="Beschrijving"></textarea>
-    <button class="add-btn" id="addTaskBtn">Toevoegen</button>
+    <div class="card">
+        <h3>Nieuwe taak toevoegen</h3>
+        <input type="text" id="taskTitle" placeholder="Titel">
+        <textarea id="taskDesc" placeholder="Beschrijving"></textarea>
+        <button class="main-btn" id="addTaskBtn"><i class="fas fa-plus"></i> Toevoegen</button>
+    </div>
 
-    <h3>Lijst taken</h3>
-    <ul id="tasks"></ul>
-
-    <button class="logout-btn" id="logoutBtn">Uitloggen</button>
-</div>
+    <div class="card">
+        <h3>Lijst taken</h3>
+        <ul id="tasks"></ul>
+    </div>
+</main>
 
 <script src="/Homecrew/script.js" defer></script>
 <script>
@@ -36,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-    document.getElementById("welcome").innerText = "Welkom, " + user + " 👋";
+    document.getElementById("welcomeUser").innerText = "Welkom, " + user + " 👋";
 
     // Event listeners
     document.getElementById("addTaskBtn").addEventListener("click", () => {
@@ -53,6 +62,30 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 
 <style>
+/* Taken lijst styling */
+#tasks li {
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    padding:12px 15px;
+    margin-bottom:10px;
+    border-radius:12px;
+    background: linear-gradient(145deg, #ffffff, #f1f1f1);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s;
+}
+#tasks li:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.2);
+}
+.delete-btn {
+    background:#DA4453;
+    color:white;
+    border:none;
+    border-radius:8px;
+    padding:5px 10px;
+    cursor:pointer;
+}
 .user-dot {
     display:inline-block;
     width:12px;
@@ -60,15 +93,6 @@ document.addEventListener("DOMContentLoaded", () => {
     border-radius:50%;
     margin-right:8px;
     vertical-align:middle;
-}
-.delete-btn {
-    float:right;
-    background:#DA4453;
-    color:white;
-    border:none;
-    border-radius:8px;
-    padding:3px 7px;
-    cursor:pointer;
 }
 </style>
 
