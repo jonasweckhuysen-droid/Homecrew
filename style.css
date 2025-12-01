@@ -1,18 +1,18 @@
 /* -------------------- Algemeen -------------------- */
-body {
+body, .app-body {
     margin: 0;
     padding: 0;
-    background: linear-gradient(135deg, #ffe6f0, #b2ebf2); /* kleurrijker */
-    font-family: 'Comic Sans MS', Arial, sans-serif;
-    color: #333;
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #f3f7fa, #e1f0f8); /* lichtere achtergrond */
+    color: #222; /* donkerder tekst voor betere leesbaarheid */
 }
 
 /* -------------------- Headers -------------------- */
 h1, h2, h3 {
     text-align: center;
-    color: #222;
+    color: #111; /* donkerder en duidelijker */
     margin: 0 0 10px 0;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.2); /* subtiele text shadow */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.15); /* subtiele text shadow */
 }
 
 /* -------------------- Login / Dashboard box -------------------- */
@@ -20,9 +20,9 @@ h1, h2, h3 {
     max-width: 420px;
     margin: 50px auto;
     padding: 25px;
-    background: linear-gradient(145deg, #ffffff, #f7f9fa); /* licht gekleurd */
+    background: linear-gradient(145deg, #ffffff, #f0f4f8); /* lichtere box */
     border-radius: 25px;
-    box-shadow: 0 12px 25px rgba(0,0,0,0.25);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.2);
     text-align: center;
 }
 
@@ -36,13 +36,13 @@ input[type="text"], input[type="password"], input[type="date"], textarea {
     font-size: 16px;
     box-sizing: border-box;
     transition: all 0.3s;
-    background: #f0f8ff;
-    box-shadow: inset 0 4px 8px rgba(0,0,0,0.1);
+    background: #fefefe;
+    box-shadow: inset 0 3px 6px rgba(0,0,0,0.1);
 }
 
 input:focus, textarea:focus {
     outline: none;
-    box-shadow: 0 0 10px rgba(0,123,255,0.5);
+    box-shadow: 0 0 10px rgba(0,123,255,0.4);
 }
 
 /* -------------------- Knoppen algemeen -------------------- */
@@ -56,12 +56,12 @@ button {
     width: 100%;
     color: white;
     transition: all 0.3s ease;
-    box-shadow: 0 6px 14px rgba(0,0,0,0.2);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.15);
 }
 
 button:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
 }
 
 /* Logout knop opvallender */
@@ -76,44 +76,41 @@ button.logout-btn {
 
 /* -------------------- Dashboard knoppen -------------------- */
 .dashboard-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
     margin-top: 20px;
 }
 
 .dash-btn {
-    padding: 22px;
-    border-radius: 20px;
-    font-size: 20px;
-    color: white;
-    text-align: center;
-    cursor: pointer;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.25);
-    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: flex-start;
     gap: 15px;
+    padding: 20px;
+    border-radius: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
 }
 
-.dash-btn i {
-    font-size: 28px;
-}
+.dash-btn i { font-size: 28px; }
 
-/* Hover effecten met lichte gradient */
 .dash-btn:hover {
     transform: translateY(-3px);
-    box-shadow: 0 12px 22px rgba(0,0,0,0.35);
+    box-shadow: 0 10px 18px rgba(0,0,0,0.25);
     filter: brightness(1.1);
 }
 
-/* Dashboard knop kleuren met gradient */
+/* Kleuren per knop met gradient */
 .dash-btn.agenda { background: linear-gradient(135deg, #3a6ea5, #70a1ff); }
 .dash-btn.boodschappenlijst { background: linear-gradient(135deg, #ff9800, #ffc947); }
 .dash-btn.berichten { background: linear-gradient(135deg, #9c27b0, #d46ee5); }
-.dash-btn.locatie { background: linear-gradient(135deg, #4caf50, #81c784); }
 .dash-btn.taken { background: linear-gradient(135deg, #f44336, #ff7961); }
+.dash-btn.locatie { background: linear-gradient(135deg, #4caf50, #81c784); }
 
 /* -------------------- Terug naar home / iconen -------------------- */
 .home-btn {
@@ -127,7 +124,7 @@ button.logout-btn {
     gap: 10px;
     margin: 15px auto;
     width: fit-content;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.2);
     cursor: pointer;
     transition: all 0.3s;
 }
@@ -137,7 +134,7 @@ button.logout-btn {
     filter: brightness(1.2);
 }
 
-/* -------------------- Lijsten (Agenda / Taken) -------------------- */
+/* -------------------- Lijsten (Agenda / Taken / Boodschappen) -------------------- */
 ul {
     list-style: none;
     padding: 0;
@@ -145,178 +142,56 @@ ul {
 }
 
 li {
-    background: linear-gradient(145deg, #ffffff, #f1f1f1);
+    background: linear-gradient(145deg, #ffffff, #f5f8fa); /* lichtere lijst items */
     margin-bottom: 15px;
-    padding: 18px;
-    border-radius: 20px;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    padding: 16px;
+    border-radius: 16px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     display: flex;
     flex-direction: column;
     transition: all 0.3s;
-    position: relative;
 }
 
 li:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.15);
 }
 
-/* Iconen per item type */
-li.agenda::before { content: "📅"; position: absolute; left: 12px; top: 15px; font-size: 22px; }
-li.taken::before { content: "📝"; position: absolute; left: 12px; top: 15px; font-size: 22px; }
+li.agenda::before { content: "📅"; position: absolute; left: 12px; top: 12px; font-size: 20px; }
+li.taken::before { content: "📝"; position: absolute; left: 12px; top: 12px; font-size: 20px; }
+
+/* -------------------- Kaarten / content -------------------- */
+.card {
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+}
+
+.card input, .card textarea {
+    width: 100%;
+    margin: 8px 0;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    background: #f5f8fa;
+}
+
+/* -------------------- Buttons in cards -------------------- */
+.main-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    background: #4caf50;
+    color: white;
+}
 
 /* -------------------- Mobiel responsiveness -------------------- */
 @media (max-width: 480px) {
-    .login-box, .dashboard-box {
-        margin: 30px 15px;
-        padding: 20px;
-    }
-
-    .dash-btn {
-        font-size: 18px;
-        padding: 18px;
-        justify-content: center;
-    }
-
-    li {
-        padding: 12px;
-    }
-}
-.app-body{
-  background:#1e2a38;
-  font-family:arial;
-  margin:0;
-  color:white;
-}
-
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:10px;
-  background:#111;
-}
-
-.icon-btn{
-  background:none;
-  border:none;
-  color:white;
-  font-size:22px;
-}
-
-.content{
-  padding:15px;
-}
-
-.card{
-  background:#2b3c4f;
-  padding:15px;
-  border-radius:12px;
-  margin-bottom:20px;
-}
-
-.card input,
-.card textarea{
-  width:100%;
-  margin:6px 0;
-  padding:10px;
-  border-radius:8px;
-  border:none;
-}
-
-.main-btn{
-  width:100%;
-  padding:12px;
-  border:none;
-  background:#4caf50;
-  border-radius:10px;
-  font-size:16px;
-  color:white;
-}
-
-.event-list{
-  list-style:none;
-  padding:0;
-}
-
-.event-item{
-  background:#1c2733;
-  padding:12px;
-  margin:10px 0;
-  border-radius:8px;
-}
-
-.event-meta{
-  font-size:13px;
-  opacity:0.7;
-}
-
-.event-user{
-  margin-top:4px;
-  font-weight:bold;
-}
-
-.event-item button{
-  margin-top:5px;
-  background:#ff4d4d;
-  border:none;
-  padding:6px 10px;
-  border-radius:6px;
-  color:white;
-}
-/* -------------------- Dashboard knoppen -------------------- */
-.dashboard-buttons {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin-top: 20px;
-}
-
-/* Algemene dash-btn styling */
-.dash-btn {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 15px;
-    padding: 20px;
-    border-radius: 20px;
-    font-size: 20px;
-    font-weight: bold;
-    color: white;
-    cursor: pointer;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.25);
-    transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
-}
-
-/* Iconen iets groter */
-.dash-btn i {
-    font-size: 28px;
-}
-
-/* Hover effect */
-.dash-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 22px rgba(0,0,0,0.35);
-    filter: brightness(1.1);
-}
-
-/* Kleuren per knop met gradient */
-.dash-btn.agenda {
-    background: linear-gradient(135deg, #3a6ea5, #70a1ff);
-}
-
-.dash-btn.boodschappenlijst {
-    background: linear-gradient(135deg, #ff9800, #ffc947);
-}
-
-.dash-btn.berichten {
-    background: linear-gradient(135deg, #9c27b0, #d46ee5);
-}
-
-.dash-btn.taken {
-    background: linear-gradient(135deg, #f44336, #ff7961);
-}
-
-.dash-btn.locatie {
-    background: linear-gradient(135deg, #4caf50, #81c784);
+    .login-box, .dashboard-box { margin: 30px 15px; padding: 20px; }
+    .dash-btn { font-size: 18px; padding: 18px; justify-content: center; }
+    li { padding: 12px; }
 }
