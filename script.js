@@ -1,6 +1,7 @@
 // ================= FIREBASE IMPORT =================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, updatePassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 // ================= FIREBASE CONFIG =================
 const firebaseConfig = {
@@ -16,39 +17,62 @@ const firebaseConfig = {
 // ================= INIT =================
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth();
 
-// ================= LOGIN (blijft lokaal) =================
-const users = {
-    "jonas": "1234",
-    "liese": "1234",
-    "loreana": "1234"
-};
-
+// ================= LOGIN MET FIREBASE AUTH =================
 window.login = function() {
     const user = document.getElementById("username").value.trim().toLowerCase();
     const pass = document.getElementById("password").value.trim();
 
-    if (users[user] && users[user] === pass) {
+    signInWithEmailAndPassword(auth, user + "@homecrew.local", pass)
+    .then((cred) => {
+        console.log("Ingelogd als:", cred.user.email);
         localStorage.setItem("homecrewUser", user);
         window.location.href = "dashboard.html";
-    } else {
+    })
+    .catch((err) => {
+        console.error(err);
         document.getElementById("error").textContent = "Ongeldige login";
-    }
+    });
 };
 
+// ================= LOGOUT =================
 window.logout = function() {
+    auth.signOut();
     localStorage.removeItem("homecrewUser");
     window.location.href = "index.html";
 };
 
-// ================= GEBRUIKER CONTROLE =================
-const activeUser = localStorage.getItem("homecrewUser");
+// ================= AUTOMATISCH INLOGGEN =================
+setPersistence(auth, browserLocalPersistence)
+.then(() => {
+    console.log("Gebruiker wordt onthouden op dit toestel");
+})
+.catch(err => console.error("Fout persistentie:", err));
 
-if (document.getElementById("welcome") && activeUser) {
-    document.getElementById("welcome").textContent = "Welkom, " + activeUser + " 👋";
-}
+onAuthStateChanged(auth, (user) => {
+    if(user) {
+        const activeUser = localStorage.getItem("homecrewUser") || user.email.split("@")[0];
+        if(document.getElementById("welcome")){
+            document.getElementById("welcome").textContent = "Welkom, " + activeUser + " 👋";
+        }
+        console.log("Automatisch ingelogd:", activeUser);
+    }
+});
+
+// ================= WACHTWOORD WIJZIGEN =================
+window.changePassword = function(newPass) {
+    if(!newPass || newPass.length < 4) return alert("Voer een geldig wachtwoord in");
+    const user = auth.currentUser;
+    if(user){
+        updatePassword(user, newPass)
+        .then(() => alert("Wachtwoord succesvol gewijzigd!"))
+        .catch(err => console.error(err));
+    }
+};
 
 // ================= AGENDA =================
+const activeUser = localStorage.getItem("homecrewUser");
 
 if (window.location.pathname.includes("agenda.html")) {
     if (!activeUser) window.location.href = "index.html";
@@ -60,17 +84,10 @@ window.addEvent = async function() {
     const title = document.getElementById("title").value.trim();
     const description = document.getElementById("description").value.trim();
 
-    if (!date || !title) {
-        alert("Datum en titel zijn verplicht");
-        return;
-    }
+    if(!date || !title) return alert("Datum en titel zijn verplicht");
 
     await addDoc(collection(db, "events"), {
-        date: date,
-        title: title,
-        description: description,
-        user: activeUser,
-        created: new Date()
+        date, title, description, user: activeUser, created: new Date()
     });
 
     document.getElementById("date").value = "";
@@ -80,22 +97,15 @@ window.addEvent = async function() {
 
 function loadEvents() {
     const list = document.getElementById("events");
-
     const q = query(collection(db, "events"), orderBy("date"));
-
     onSnapshot(q, (snapshot) => {
         list.innerHTML = "";
-
-        snapshot.forEach((docSnapshot) => {
+        snapshot.forEach(docSnapshot => {
             const event = docSnapshot.data();
             const id = docSnapshot.id;
 
             const li = document.createElement("li");
-
-            let userClass = "";
-            if(event.user === "jonas") userClass = "user-jonas";
-            else if(event.user === "liese") userClass = "user-liese";
-            else if(event.user === "loreana") userClass = "user-loreana";
+            let userClass = event.user === "jonas" ? "user-jonas" : event.user === "liese" ? "user-liese" : "user-loreana";
 
             li.className = userClass;
             li.innerHTML = `
@@ -111,12 +121,11 @@ function loadEvents() {
     });
 }
 
-window.deleteEvent = async function(id) {
+window.deleteEvent = async function(id){
     await deleteDoc(doc(db, "events", id));
-};
+}
 
 // ================= TAKEN =================
-
 if (window.location.pathname.includes("taken.html")) {
     if (!activeUser) window.location.href = "index.html";
     loadTasks();
@@ -126,17 +135,10 @@ window.addTask = async function() {
     const title = document.getElementById("taskTitle").value.trim();
     const desc = document.getElementById("taskDesc").value.trim();
 
-    if (!title) {
-        alert("Titel is verplicht");
-        return;
-    }
+    if(!title) return alert("Titel is verplicht");
 
     await addDoc(collection(db, "tasks"), {
-        title: title,
-        desc: desc,
-        user: activeUser,
-        done: false,
-        created: new Date()
+        title, desc, user: activeUser, done: false, created: new Date()
     });
 
     document.getElementById("taskTitle").value = "";
@@ -146,23 +148,16 @@ window.addTask = async function() {
 function loadTasks() {
     const list = document.getElementById("tasks");
     const q = query(collection(db, "tasks"), orderBy("created"));
-
     onSnapshot(q, (snapshot) => {
         list.innerHTML = "";
-
-        snapshot.forEach((docSnapshot) => {
+        snapshot.forEach(docSnapshot => {
             const task = docSnapshot.data();
             const id = docSnapshot.id;
 
             const li = document.createElement("li");
-
-            let userClass = "";
-            if(task.user === "jonas") userClass = "user-jonas";
-            else if(task.user === "liese") userClass = "user-liese";
-            else if(task.user === "loreana") userClass = "user-loreana";
+            let userClass = task.user === "jonas" ? "user-jonas" : task.user === "liese" ? "user-liese" : "user-loreana";
 
             li.className = userClass;
-
             li.innerHTML = `
                 <input type="checkbox" ${task.done ? "checked" : ""} onclick="toggleTask('${id}', ${task.done})">
                 <strong>${task.title}</strong> (${task.user})<br>
@@ -170,40 +165,15 @@ function loadTasks() {
                 <br>
                 <button onclick="deleteTask('${id}')">❌</button>
             `;
-
             list.appendChild(li);
         });
     });
 }
 
-window.toggleTask = async function(id, status) {
-    await updateDoc(doc(db, "tasks", id), {
-        done: !status
-    });
+window.toggleTask = async function(id, status){
+    await updateDoc(doc(db, "tasks", id), { done: !status });
 };
 
-window.deleteTask = async function(id) {
+window.deleteTask = async function(id){
     await deleteDoc(doc(db, "tasks", id));
 };
-
-import { getAuth, setPersistence, browserLocalPersistence, onAuthStateChanged, signInWithEmailAndPassword } 
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-const auth = getAuth();
-
-// ZORG DAT DE USER BLIJFT INGELOGD
-setPersistence(auth, browserLocalPersistence)
-.then(() => {
-  console.log("Gebruiker wordt onthouden op dit toestel");
-})
-.catch((error) => {
-  console.error("Fout bij instellen persistentie:", error);
-});
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    console.log("Automatisch ingelogd:", user.email);
-    window.location.href = "dashboard.html"; // of je startpagina naar keuze
-  } else {
-    console.log("Niet ingelogd");
-  }
-});
