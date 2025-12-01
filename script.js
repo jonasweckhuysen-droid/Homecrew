@@ -132,3 +132,58 @@ window.logout = async function() {
     }
 };
 export { auth, logout };
+
+// ===================== TAKEN FUNCTIES =====================
+
+// Taken laden
+export function loadTasks() {
+    const activeUser = localStorage.getItem("homecrewUser");
+    const tasks = JSON.parse(localStorage.getItem(`tasks_${activeUser}`)) || [];
+    const ul = document.getElementById("tasks");
+    if (!ul) return; // check of ul bestaat
+    ul.innerHTML = "";
+
+    tasks.forEach((task, index) => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+            <strong>${task.title}</strong>
+            <p>${task.desc}</p>
+            <button class="delete-btn">❌</button>
+        `;
+        li.querySelector(".delete-btn").addEventListener("click", () => {
+            removeTask(index);
+        });
+        ul.appendChild(li);
+    });
+}
+
+// Taak toevoegen
+export function addTask() {
+    const title = document.getElementById("taskTitle").value.trim();
+    const desc = document.getElementById("taskDesc").value.trim();
+
+    if (!title) {
+        alert("Vul een titel in voor de taak");
+        return;
+    }
+
+    const activeUser = localStorage.getItem("homecrewUser");
+    const tasks = JSON.parse(localStorage.getItem(`tasks_${activeUser}`)) || [];
+
+    tasks.push({ title, desc });
+    localStorage.setItem(`tasks_${activeUser}`, JSON.stringify(tasks));
+
+    document.getElementById("taskTitle").value = "";
+    document.getElementById("taskDesc").value = "";
+
+    loadTasks();
+}
+
+// Taak verwijderen
+export function removeTask(index) {
+    const activeUser = localStorage.getItem("homecrewUser");
+    const tasks = JSON.parse(localStorage.getItem(`tasks_${activeUser}`)) || [];
+    tasks.splice(index, 1);
+    localStorage.setItem(`tasks_${activeUser}`, JSON.stringify(tasks));
+    loadTasks();
+}
