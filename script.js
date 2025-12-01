@@ -1,12 +1,7 @@
 // ================= FIREBASE IMPORT =================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { 
-    getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, orderBy 
-} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-import { 
-    getAuth, setPersistence, browserLocalPersistence, 
-    signInWithEmailAndPassword, createUserWithEmailAndPassword, updatePassword, onAuthStateChanged 
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, setPersistence, browserLocalPersistence, updatePassword } 
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 // ================= FIREBASE CONFIG =================
 const firebaseConfig = {
@@ -21,7 +16,6 @@ const firebaseConfig = {
 
 // ================= INIT =================
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 const auth = getAuth();
 
 // ================= PERSISTENTIE =================
@@ -29,57 +23,45 @@ setPersistence(auth, browserLocalPersistence)
     .then(() => console.log("Gebruiker wordt onthouden op dit toestel"))
     .catch(err => console.error("Fout persistentie:", err));
 
-// ================= AUTOMATISCH INLOGGEN =================
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        const activeUser = localStorage.getItem("homecrewUser") || user.email.split("@")[0];
-        const welcomeEl = document.getElementById("welcome");
-        if (welcomeEl) welcomeEl.textContent = "Welkom, " + activeUser + " 👋";
-        console.log("Automatisch ingelogd:", activeUser);
-        if (!window.location.href.includes("dashboard.html")) {
-            window.location.href = "dashboard.html";
-        }
-    }
-});
+// ================= CHECK AUTOMATISCH INLOGGEN =================
+const storedUser = localStorage.getItem("homecrewUser");
+if (storedUser) {
+    showDashboard(storedUser); // automatisch naar dashboard
+} else {
+    showRegisterForm(); // eerste keer → pincode kiezen
+}
 
-// ================= LOGIN =================
-window.login = async function() {
-    const user = document.getElementById("username").value.trim().toLowerCase();
-    const pass = document.getElementById("password").value.trim();
-    const errorEl = document.getElementById("error");
+// ================= FUNCTIES =================
+function showDashboard(user) {
+    localStorage.setItem("homecrewUser", user);
+    const welcomeEl = document.getElementById("welcome");
+    if (welcomeEl) welcomeEl.textContent = "Welkom, " + user + " 👋";
+    window.location.href = "dashboard.html";
+}
 
-    if (!user || !pass) {
-        if (errorEl) errorEl.textContent = "Vul gebruikersnaam en wachtwoord in";
-        return;
-    }
+function showRegisterForm() {
+    document.getElementById("register-section").style.display = "block";
+}
 
-    try {
-        const cred = await signInWithEmailAndPassword(auth, user + "@homecrew.local", pass);
-        console.log("Ingelogd als:", cred.user.email);
-        localStorage.setItem("homecrewUser", user);
-        window.location.href = "dashboard.html";
-    } catch (err) {
-        console.error(err);
-        if (errorEl) errorEl.textContent = "Ongeldige login of gebruiker bestaat niet";
-    }
-};
-
-// ================= REGISTREREN =================
-window.register = async function() {
-    const user = document.getElementById("username").value.trim().toLowerCase();
+// ================= GEBRUIKER KIEZEN / REGISTREREN =================
+window.registerUser = function() {
+    const user = document.getElementById("username").value.trim();
     const pass = document.getElementById("password").value.trim();
 
-    if (!user || !pass) return alert("Vul gebruikersnaam en wachtwoord in");
+    if (!user || !pass) return alert("Vul een gebruikersnaam en wachtwoord/pincode in");
 
-    try {
-        const cred = await createUserWithEmailAndPassword(auth, user + "@homecrew.local", pass);
-        console.log("Account aangemaakt:", cred.user.email);
-        localStorage.setItem("homecrewUser", user);
-        window.location.href = "dashboard.html";
-    } catch (err) {
-        console.error(err);
-        alert("Account kon niet aangemaakt worden: " + err.message);
-    }
+    // Firebase account aanmaken voor veilige opslag van wachtwoord
+    // Hier gebruiken we een “dummy” email omdat we enkel pincode willen gebruiken
+    const email = user.toLowerCase() + "@homecrew.local";
+
+    createUserInFirebase(email, pass)
+        .then(() => {
+            showDashboard(user);
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Kon gebruiker niet registreren: " + err.message);
+        });
 };
 
 // ================= WACHTWOORD WIJZIGEN =================
@@ -98,12 +80,20 @@ window.changePassword = async function(newPass) {
 };
 
 // ================= LOGOUT =================
-window.logout = async function() {
-    try {
-        await auth.signOut();
-        localStorage.removeItem("homecrewUser");
-        window.location.href = "index.html";
-    } catch (err) {
-        console.error("Logout mislukt:", err);
-    }
+window.logout = function() {
+    localStorage.removeItem("homecrewUser");
+    window.location.href = "index.html";
 };
+
+// ================= HELPER: Firebase registratie =================
+async function createUserInFirebase(email, password) {
+    try {
+        // Firebase heeft email + wachtwoord nodig, maar we gebruiken dummy email
+        const { user } = await auth.createUserWithEmailAndPassword(auth, email, password);
+        return user;
+    } catch (err) {
+        // Als gebruiker al bestaat → gewoon accepteren
+        if (err.code === "auth/email-already-in-use") return auth.signInWithEmailAndPassword(email, password);
+        throw err;
+    }
+}
