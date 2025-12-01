@@ -131,3 +131,4 @@ window.logout = async function() {
         console.error("Logout mislukt:", err);
     }
 };
+export { auth, logout };
