@@ -6,10 +6,12 @@
 // GEBRUIKER KLEUR
 // =====================
 function getUserColor(user) {
-    if (user.toLowerCase() === "jonas") return "#3498db";   // blauw
-    if (user.toLowerCase() === "liese") return "#e74c3c";   // rood
-    if (user.toLowerCase() === "loreana") return "#ff69b4"; // roze
-    return "#555"; // standaardkleur
+    const colors = {
+        jonas: "#3498db",
+        liese: "#e74c3c",
+        loreana: "#ff69b4"
+    };
+    return colors[user.toLowerCase()] || "#555";
 }
 
 // =====================
@@ -22,49 +24,57 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.getItem("homecrew_loggedin") === "true" ||
         sessionStorage.getItem("homecrew_loggedin") === "true";
 
-    // Als je al ingelogd bent en op index zit → naar dashboard
+    // Indexpagina → al ingelogd? dan dashboard
     if ((page === "" || page === "index.html") && logged) {
         window.location.replace("dashboard.html");
     }
 
-    // Als je NIET bent ingelogd en niet op index zit → terug naar index
+    // Niet-indexpagina → niet ingelogd? dan index
     if ((page !== "" && page !== "index.html") && !logged) {
         window.location.replace("index.html");
     }
 
-    // Taken automatisch laden als die lijst bestaat
+    // Taken automatisch laden als lijst aanwezig
     if (document.getElementById("tasks")) {
         loadTasks();
     }
 });
 
 // =====================
-// LOGIN
+// LOGIN / REGISTRATIE
 // =====================
 function login() {
-    const name = document.getElementById("username").value.trim().toLowerCase();
+    const name = document.getElementById("username").value.trim();
     const pass = document.getElementById("password").value.trim();
     const remember = document.getElementById("stayLoggedIn")?.checked;
 
     if (!name || !pass) {
-        alert("Vul naam en pincode in");
+        alert("Vul naam en wachtwoord/pincode in");
         return;
     }
 
-    // Toegestane gebruikers
-    if (name !== "jonas" && name !== "liese" && name !== "loreana") {
-        alert("Onbekende gebruiker");
-        return;
+    // Nieuwe of bestaande gebruiker
+    const users = JSON.parse(localStorage.getItem("homecrewUsers") || "{}");
+
+    if (users[name]) {
+        // Bestaande gebruiker → check wachtwoord
+        if (users[name] !== pass) {
+            alert("Onjuist wachtwoord!");
+            return;
+        }
+    } else {
+        // Nieuwe gebruiker → account aanmaken
+        users[name] = pass;
+        localStorage.setItem("homecrewUsers", JSON.stringify(users));
     }
 
+    // Opslaan ingelogde status
     if (remember) {
         localStorage.setItem("homecrew_loggedin", "true");
         localStorage.setItem("homecrewUser", name);
-        localStorage.setItem("homecrewPass", pass);
     } else {
         sessionStorage.setItem("homecrew_loggedin", "true");
         sessionStorage.setItem("homecrewUser", name);
-        sessionStorage.setItem("homecrewPass", pass);
     }
 
     window.location.href = "dashboard.html";
@@ -74,8 +84,10 @@ function login() {
 // LOGOUT
 // =====================
 function logout() {
-    localStorage.clear();
-    sessionStorage.clear();
+    localStorage.removeItem("homecrew_loggedin");
+    localStorage.removeItem("homecrewUser");
+    sessionStorage.removeItem("homecrew_loggedin");
+    sessionStorage.removeItem("homecrewUser");
     window.location.href = "index.html";
 }
 
@@ -131,10 +143,8 @@ function addTask() {
 
     const tasks = JSON.parse(localStorage.getItem("homecrew_tasks")) || [];
     tasks.push({ title, desc, user: activeUser, created: Date.now() });
-
     localStorage.setItem("homecrew_tasks", JSON.stringify(tasks));
 
-    // Velden leegmaken en lijst herladen
     if (document.getElementById("taskTitle")) document.getElementById("taskTitle").value = "";
     if (document.getElementById("taskDesc")) document.getElementById("taskDesc").value = "";
     loadTasks();
