@@ -2,53 +2,83 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <title>Homecrew - Login</title>
+    <title>Homecrew - Eerste keer</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#3a6ea5">
-    <link rel="apple-touch-icon" href="/Homecrew/icons/icon-192.png">
-    <link rel="stylesheet" href="/Homecrew/style.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
 <div class="login-box">
+    <h1>Welkom bij Homecrew</h1>
+    <p>Vul je naam in en kies een wachtwoord/pincode</p>
 
-    <h1>Homecrew</h1>
-    <p>Familieplatform</p>
+    <input type="text" id="username" placeholder="Naam">
+    <input type="password" id="password" placeholder="Wachtwoord/pincode">
+    
+    <label style="display:flex; align-items:center; gap:10px; margin-top:10px;">
+        <input type="checkbox" id="stayLoggedIn">
+        Blijf ingelogd
+    </label>
 
-    <!-- ================= REGISTER SECTION ================= -->
-    <div id="register-section" style="display:none;">
-        <h3>Eerste keer openen? Kies je pincode</h3>
-        <input type="text" id="username" placeholder="Gebruikersnaam (Jonas, Liese, Loreana)">
-        <input type="password" id="password" placeholder="Kies een wachtwoord/pincode">
-        <button class="add-btn" onclick="registerUser()">Registreren & Inloggen</button>
-    </div>
+    <button id="startBtn">Start</button>
 
-    <!-- ================= LOGIN SECTION ================= -->
-    <div id="login-section">
-        <input type="text" id="loginUsername" placeholder="Gebruikersnaam">
-        <input type="password" id="loginPassword" placeholder="Wachtwoord/pincode">
-        <button class="add-btn" onclick="login()">Inloggen</button>
-    </div>
-
-    <p id="error"></p>
-
-    <!-- ================= CHANGE PASSWORD ================= -->
-    <h3>Wachtwoord wijzigen</h3>
-    <input type="password" id="newPassword" placeholder="Nieuw wachtwoord/pincode">
-    <button class="add-btn" onclick="changePassword(document.getElementById('newPassword').value)">
-        Wijzig wachtwoord
-    </button>
+    <p id="error" style="color:red; margin-top:10px;"></p>
 </div>
 
-<script type="module" src="script.js"></script>
-<script>
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/Homecrew/sw.js')
-    .then(() => console.log('Service Worker geregistreerd'))
-    .catch(err => console.log('Service Worker fout', err));
-}
-</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } 
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
+// Firebase config
+const firebaseConfig = {
+    apiKey: "AIzaSyCwlr069pxNXEEhIEGNug5Ly_kKSuvxSzs",
+    authDomain: "homecrew-d8e21.firebaseapp.com",
+    projectId: "homecrew-d8e21",
+    storageBucket: "homecrew-d8e21.firebasestorage.app",
+    messagingSenderId: "47664248188",
+    appId: "1:47664248188:web:0994c6b2ba07f6fee060f9",
+    measurementId: "G-5R58JL5D5K"
+};
+
+// Init
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+// Check automatisch ingelogd
+const localUser = localStorage.getItem("homecrewUser");
+if (localUser) window.location.href = "dashboard.html";
+
+// Start knop
+document.getElementById("startBtn").addEventListener("click", async () => {
+    const user = document.getElementById("username").value.trim().toLowerCase();
+    const pass = document.getElementById("password").value.trim();
+    const stay = document.getElementById("stayLoggedIn").checked;
+    const errorEl = document.getElementById("error");
+
+    if (!user || !pass) {
+        errorEl.textContent = "Vul naam en wachtwoord/pincode in";
+        return;
+    }
+
+    try {
+        // Persistentie instellen
+        await setPersistence(auth, stay ? browserLocalPersistence : null);
+
+        // Probeer in te loggen
+        await signInWithEmailAndPassword(auth, user + "@homecrew.local", pass);
+        localStorage.setItem("homecrewUser", user);
+        window.location.href = "dashboard.html";
+    } catch {
+        try {
+            // Als login faalt → maak account aan
+            await createUserWithEmailAndPassword(auth, user + "@homecrew.local", pass);
+            localStorage.setItem("homecrewUser", user);
+            window.location.href = "dashboard.html";
+        } catch (err) {
+            errorEl.textContent = "Fout bij aanmaken: " + err.message;
+        }
+    }
+});
+</script>
 </body>
 </html>
