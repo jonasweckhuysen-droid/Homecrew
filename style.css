@@ -195,3 +195,86 @@ li.taken::before { content: "📝"; position: absolute; left: 12px; top: 12px; f
     .dash-btn { font-size: 18px; padding: 18px; justify-content: center; }
     li { padding: 12px; }
 }
+/* -------------------- Lijst box styling -------------------- */
+.list-box {
+    display: none;
+    margin-top: 15px;
+    padding: 15px;
+    border-radius: 16px;
+    background: #f7f9fc; /* lichte achtergrond voor contrast */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.list-box.show {
+    display: block;
+}
+
+#vingardium-box {
+    margin-bottom: 20px; /* ruimte onder Vingardium zodat Drijvelden niet direct aanleunt */
+}
+
+.list-box h3 {
+    margin-bottom: 10px;
+    text-align: center;
+    font-size: 18px;
+    color: #222;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.input-group input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 12px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.input-group button {
+    padding: 10px 14px;
+    border: none;
+    border-radius: 10px;
+    background: #3a6ea5;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+/* -------------------- Lijst items -------------------- */
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+    transition: all 0.2s ease;
+}
+
+li:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+}
+
+li button {
+    background: #da4453;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
