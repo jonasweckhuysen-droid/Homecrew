@@ -26,69 +26,30 @@
     <button class="logout-btn" id="logoutBtn">Uitloggen</button>
 </div>
 
-<script type="module">
-import { logout } from './script.js';
+<script src="/Homecrew/script.js" defer></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
 
-const activeUser = localStorage.getItem("homecrewUser");
-if (!activeUser) window.location.href = "/Homecrew/index.html";
-document.getElementById("welcome").innerText = "Welkom, " + activeUser + " 👋";
+    const user = getActiveUser();
+    if (!user) {
+        window.location.href = "/Homecrew/index.html";
+        return;
+    }
 
-// Kleurmapping per gebruiker
-const userColors = {
-    Jonas: "#3a6ea5",
-    Liese: "#DA4453",
-    Loreana: "#fcb69f"
-};
+    document.getElementById("welcome").innerText = "Welkom, " + user + " 👋";
 
-// -------------------- Taken functies --------------------
-function loadTasks() {
-    const tasks = JSON.parse(localStorage.getItem("tasks_all")) || [];
-    const ul = document.getElementById("tasks");
-    ul.innerHTML = "";
-
-    tasks.forEach((task, index) => {
-        const li = document.createElement("li");
-        const color = userColors[task.user] || "#999";
-
-        li.innerHTML = `
-            <span class="user-dot" style="background:${color}"></span>
-            <strong>${task.title}</strong>
-            <p>${task.desc}</p>
-            <small>${task.user}</small>
-            <button class="delete-btn">❌</button>
-        `;
-        li.querySelector(".delete-btn").addEventListener("click", () => removeTask(index));
-        ul.appendChild(li);
+    // Event listeners
+    document.getElementById("addTaskBtn").addEventListener("click", () => {
+        const title = document.getElementById("taskTitle").value.trim();
+        const desc = document.getElementById("taskDesc").value.trim();
+        addTask(title, desc);
     });
-}
 
-function addTask() {
-    const title = document.getElementById("taskTitle").value.trim();
-    const desc = document.getElementById("taskDesc").value.trim();
-    if (!title) return alert("Vul een titel in");
+    document.getElementById("logoutBtn").addEventListener("click", logout);
 
-    const tasks = JSON.parse(localStorage.getItem("tasks_all")) || [];
-    tasks.push({ title, desc, user: activeUser });
-    localStorage.setItem("tasks_all", JSON.stringify(tasks));
-
-    document.getElementById("taskTitle").value = "";
-    document.getElementById("taskDesc").value = "";
+    // Taken laden bij openen
     loadTasks();
-}
-
-function removeTask(index) {
-    const tasks = JSON.parse(localStorage.getItem("tasks_all")) || [];
-    tasks.splice(index, 1);
-    localStorage.setItem("tasks_all", JSON.stringify(tasks));
-    loadTasks();
-}
-
-// -------------------- Event listeners --------------------
-document.getElementById("addTaskBtn").addEventListener("click", addTask);
-document.getElementById("logoutBtn").addEventListener("click", logout);
-
-// Taken laden bij openen
-loadTasks();
+});
 </script>
 
 <style>
