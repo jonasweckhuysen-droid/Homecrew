@@ -24,6 +24,11 @@
 
     <button onclick="login()">Inloggen</button>
     <p id="error"></p>
+    <h3>Wachtwoord wijzigen</h3>
+<input type="password" id="newPassword" placeholder="Nieuw wachtwoord/pincode">
+<button class="add-btn" onclick="changePassword(document.getElementById('newPassword').value)">
+    Wijzig wachtwoord
+</button>
 </div>
 <script type="module" src="script.js"></script>
 <script>
