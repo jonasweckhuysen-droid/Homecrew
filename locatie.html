@@ -2,30 +2,31 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Homecrew - Live Locatie</title>
-<link rel="stylesheet" href="/Homecrew/style.css">
-
-<!-- Google Maps API: vervang JOUW_GOOGLE_MAPS_API_KEY door je eigen key -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDo7KIQjAWmr6mNE413sky28HRM74yUaXQ"></script>
 </head>
-<body>
-<div class="topbar">
-  <button class="back-btn" onclick="window.location.href='dashboard.html'">⬅ Terug</button>
-  <span class="top-title">Live Locatie</span>
-</div>
+<body class="app-body">
 
-<div class="login-box">
-  <h1 id="welcome"></h1>
-  <div id="map" style="width:100%; height:500px; border-radius:16px; margin-top:15px;"></div>
-</div>
+<header class="topbar">
+  <button class="home-btn" onclick="window.location.href='dashboard.html'"><i class="fas fa-home"></i> Dashboard</button>
+  <h2>📍 Live Locatie</h2>
+  <button class="home-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Uitloggen</button>
+</header>
+
+<main class="content">
+  <h3 id="welcomeUser"></h3>
+  <div class="card">
+    <div id="map" style="width:100%; height:500px; border-radius:16px;"></div>
+  </div>
+</main>
 
 <script type="module">
-// ================= FIREBASE IMPORT =================
+// ================= FIREBASE =================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getFirestore, collection, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-// ================= FIREBASE CONFIG =================
 const firebaseConfig = {
   apiKey: "AIzaSyCwlr069pxNXEEhIEGNug5Ly_kKSuvxSzs",
   authDomain: "homecrew-d8e21.firebaseapp.com",
@@ -36,23 +37,22 @@ const firebaseConfig = {
   measurementId: "G-5R58JL5D5K"
 };
 
-// ================= INIT FIREBASE =================
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // ================= GEBRUIKER =================
 const activeUser = localStorage.getItem("homecrewUser");
 if (!activeUser) window.location.href = "index.html";
-document.getElementById("welcome").textContent = "Welkom, " + activeUser + " 👋";
+document.getElementById("welcomeUser").textContent = "Welkom, " + activeUser + " 👋";
 
 // ================= GOOGLE MAPS =================
 let map;
-let markers = {}; // houd markers per gebruiker bij
-let infoWindows = {}; // info window per gebruiker
+let markers = {};
+let infoWindows = {};
 
 function initMap() {
     map = new google.maps.Map(document.getElementById("map"), {
-        center: { lat: 51.2194, lng: 4.4025 }, // default: Antwerpen
+        center: { lat: 51.2194, lng: 4.4025 },
         zoom: 10
     });
 }
@@ -62,10 +62,9 @@ const userColors = {
     "jonas": "blue",
     "liese": "red",
     "loreana": "pink"
-    // Voeg hier extra gebruikers toe
 };
 
-// ================= LIVE LOCATIE UPDATEN =================
+// ================= LIVE LOCATIE =================
 async function updateMyLocation() {
     if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(async (pos) => {
@@ -81,13 +80,11 @@ async function updateMyLocation() {
     }
 }
 
-// update elke 30 seconden
 updateMyLocation();
 setInterval(updateMyLocation, 30000);
 
-// ================= LOCATIES VAN ALLE GEBRUIKERS TONEN =================
+// ================= TONEN VAN GEBRUIKERS =================
 const usersCol = collection(db, "users");
-
 onSnapshot(usersCol, (snapshot) => {
     snapshot.forEach((docSnap) => {
         const user = docSnap.id;
@@ -95,9 +92,8 @@ onSnapshot(usersCol, (snapshot) => {
         if (!data.latitude || !data.longitude) return;
 
         const pos = { lat: data.latitude, lng: data.longitude };
-        const color = userColors[user] || "green"; // standaard groen als niet ingesteld
+        const color = userColors[user.toLowerCase()] || "green";
 
-        // Marker en info window
         if (markers[user]) {
             markers[user].setPosition(pos);
             infoWindows[user].setContent(`<strong>${user}</strong><br>Laatste update: ${new Date(data.timestamp.seconds*1000).toLocaleTimeString()}`);
@@ -126,8 +122,8 @@ onSnapshot(usersCol, (snapshot) => {
     });
 });
 
-// ================= START =================
 initMap();
 </script>
+
 </body>
 </html>
