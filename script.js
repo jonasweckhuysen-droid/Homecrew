@@ -1,82 +1,62 @@
 /*************************
-  HOME CREW - SCRIPT.JS
+  HOME CREW - SCRIPT.JS (simpel)
 **************************/
 
-// =====================
-// GEBRUIKER KLEUR
-// =====================
-function getUserColor(user) {
-    const colors = {
-        jonas: "#3498db",
-        liese: "#e74c3c",
-        loreana: "#ff69b4"
-    };
-    return colors[user.toLowerCase()] || "#555";
-}
-
-// =====================
-// CHECK LOGIN STATUS
-// =====================
+// ✅ Check of gebruiker ingelogd is bij pagina load
 document.addEventListener("DOMContentLoaded", () => {
     const page = window.location.pathname.split("/").pop();
+    const loggedUser = localStorage.getItem("homecrewUser");
 
-    const logged =
-        localStorage.getItem("homecrew_loggedin") === "true" ||
-        sessionStorage.getItem("homecrew_loggedin") === "true";
-
-    // Indexpagina → al ingelogd? dan dashboard
-    if ((page === "" || page === "index.html") && logged) {
-        window.location.replace("dashboard.html");
+    // Als ingelogd en op index → naar dashboard
+    if ((page === "" || page === "index.html") && loggedUser) {
+        window.location.href = "dashboard.html";
     }
 
-    // Niet-indexpagina → niet ingelogd? dan index
-    if ((page !== "" && page !== "index.html") && !logged) {
-        window.location.replace("index.html");
+    // Als niet ingelogd en niet op index → terug naar index
+    if (page !== "index.html" && !loggedUser) {
+        window.location.href = "index.html";
     }
 
     // Taken automatisch laden als lijst aanwezig
     if (document.getElementById("tasks")) {
         loadTasks();
     }
+
+    // Welkom op dashboard
+    const welcomeEl = document.getElementById("welcome");
+    if (welcomeEl && loggedUser) {
+        welcomeEl.innerText = `Welkom, ${loggedUser} 👋`;
+    }
 });
 
 // =====================
-// LOGIN / REGISTRATIE
+// LOGIN
 // =====================
 function login() {
     const name = document.getElementById("username").value.trim();
     const pass = document.getElementById("password").value.trim();
-    const remember = document.getElementById("stayLoggedIn")?.checked;
 
     if (!name || !pass) {
-        alert("Vul naam en wachtwoord/pincode in");
+        alert("Vul naam en wachtwoord in");
         return;
     }
 
-    // Nieuwe of bestaande gebruiker
-    const users = JSON.parse(localStorage.getItem("homecrewUsers") || "{}");
+    // Eenvoudige gebruikerslijst (hardcoded)
+    const users = {
+        jonas: "1234",
+        liese: "1234",
+        loreana: "1234"
+    };
 
-    if (users[name]) {
-        // Bestaande gebruiker → check wachtwoord
-        if (users[name] !== pass) {
-            alert("Onjuist wachtwoord!");
-            return;
-        }
-    } else {
-        // Nieuwe gebruiker → account aanmaken
-        users[name] = pass;
-        localStorage.setItem("homecrewUsers", JSON.stringify(users));
+    if (!users[name.toLowerCase()] || users[name.toLowerCase()] !== pass) {
+        alert("Onbekende gebruiker of verkeerd wachtwoord");
+        return;
     }
 
-    // Opslaan ingelogde status
-    if (remember) {
-        localStorage.setItem("homecrew_loggedin", "true");
-        localStorage.setItem("homecrewUser", name);
-    } else {
-        sessionStorage.setItem("homecrew_loggedin", "true");
-        sessionStorage.setItem("homecrewUser", name);
-    }
+    // Opslaan ingelogde gebruiker
+    localStorage.setItem("homecrewUser", name.toLowerCase());
 
+    // Redirect naar dashboard
     window.location.href = "dashboard.html";
 }
 
@@ -84,16 +64,18 @@ function login() {
 // LOGOUT
 // =====================
 function logout() {
-    localStorage.removeItem("homecrew_loggedin");
     localStorage.removeItem("homecrewUser");
-    sessionStorage.removeItem("homecrew_loggedin");
-    sessionStorage.removeItem("homecrewUser");
     window.location.href = "index.html";
 }
 
 // =====================
-// TAKEN (GEMEENSCHAPPELIJK)
+// TAKEN
 // =====================
+function getUserColor(user) {
+    const colors = { jonas: "#3498db", liese: "#e74c3c", loreana: "#ff69b4" };
+    return colors[user.toLowerCase()] || "#555";
+}
+
 function loadTasks() {
     const tasks = JSON.parse(localStorage.getItem("homecrew_tasks")) || [];
     const ul = document.getElementById("tasks");
@@ -103,7 +85,6 @@ function loadTasks() {
 
     tasks.forEach((task, index) => {
         const color = getUserColor(task.user);
-
         const li = document.createElement("li");
         li.style.borderLeft = `6px solid ${color}`;
         li.style.padding = "10px";
@@ -128,21 +109,12 @@ function loadTasks() {
 function addTask() {
     const title = document.getElementById("taskTitle")?.value.trim();
     const desc = document.getElementById("taskDesc")?.value.trim();
-    const activeUser =
-        localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
+    const activeUser = localStorage.getItem("homecrewUser");
 
-    if (!title) {
-        alert("Vul een titel in");
-        return;
-    }
-
-    if (!activeUser) {
-        alert("Geen gebruiker gevonden, log opnieuw in");
-        return;
-    }
+    if (!title) return alert("Vul een titel in");
 
     const tasks = JSON.parse(localStorage.getItem("homecrew_tasks")) || [];
-    tasks.push({ title, desc, user: activeUser, created: Date.now() });
+    tasks.push({ title, desc, user: activeUser });
     localStorage.setItem("homecrew_tasks", JSON.stringify(tasks));
 
     if (document.getElementById("taskTitle")) document.getElementById("taskTitle").value = "";
@@ -157,9 +129,7 @@ function removeTask(index) {
     loadTasks();
 }
 
-// =====================
 // Exporteer functies
-// =====================
 window.login = login;
 window.logout = logout;
 window.addTask = addTask;
