@@ -432,3 +432,28 @@ textarea {
   border-radius: 10px;
   padding: 10px 14px;
       }
+
+.chat-box {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 16px;
+  padding: 15px;
+  background: #fdfdfd;
+  margin-bottom: 15px;
+}
+
+.chat-message {
+  padding: 8px 12px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  background: linear-gradient(135deg, #e0f7fa, #ffffff);
+  transition: all 0.2s ease;
+}
+
+.chat-message img.chat-image {
+  max-width: 150px;
+  border-radius: 12px;
+  margin-top: 5px;
+}
