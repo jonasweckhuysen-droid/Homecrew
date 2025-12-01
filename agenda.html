@@ -4,10 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Homecrew – Agenda</title>
-
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1e2a38">
-
 <link rel="stylesheet" href="style.css">
 <script src="https://cdn.jsdelivr.net/npm/ical.js@1.4.0/build/ical.min.js"></script>
 </head>
@@ -15,11 +11,10 @@
 <body class="app-body">
 
 <header class="topbar">
-  <button onclick="window.location.href='dashboard.html'" class="icon-btn">🏠</button>
+  <button onclick="window.location.href='dashboard.html'" class="home-btn">🏠 Home</button>
   <h2>📅 Homecrew agenda</h2>
-  <button onclick="logout()" class="icon-btn">🚪</button>
+  <button onclick="logout()" class="home-btn">🚪 Uitloggen</button>
 </header>
-
 
 <main class="content">
 
@@ -35,7 +30,6 @@
   <button class="main-btn" onclick="addEvent()">Toevoegen</button>
 </div>
 
-
 <div class="card">
   <h3>📌 Afspraak overzicht</h3>
   <ul id="eventList" class="event-list"></ul>
@@ -44,34 +38,30 @@
 </main>
 
 <script>
-
 // ===========================
 // USER CHECK
 // ===========================
-const user = localStorage.getItem("homecrewUser");
+const user = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
+if(!user) window.location.href = "index.html";
 
-if(!user){
-  window.location.href = "index.html";
+document.getElementById("welcomeUser").innerText = "Welkom, " + user + " 👋";
+
+// Gebruikerskleuren
+function getUserColor(user){
+  if(user.toLowerCase() === "jonas") return "#3498db";
+  if(user.toLowerCase() === "liese") return "#e74c3c";
+  if(user.toLowerCase() === "loreana") return "#ff69b4";
+  return "#555";
 }
-
-document.getElementById("welcomeUser").innerText = "Welkom " + user + " 👋";
-
-function getUserColor(user) {
-  if (user === "Jonas") return "blue";
-  if (user === "Liese") return "red";
-  if (user === "Loreana") return "pink";
-  return "gray";
-}
-
 
 // ===========================
 // LOGOUT
 // ===========================
 function logout(){
-  localStorage.removeItem("homecrewUser");
+  localStorage.clear();
+  sessionStorage.clear();
   location.href = "index.html";
 }
-
 
 // ===========================
 // LOCAL EVENTS
@@ -87,14 +77,7 @@ function addEvent(){
   }
 
   let events = JSON.parse(localStorage.getItem("homecrewEvents")) || [];
-
-  events.push({
-    user: user,
-    title: title,
-    date: date,
-    description: desc
-  });
-
+  events.push({ user, title, date, description: desc });
   localStorage.setItem("homecrewEvents", JSON.stringify(events));
 
   document.getElementById("eventTitle").value = "";
@@ -104,34 +87,24 @@ function addEvent(){
   loadLocalEvents();
 }
 
-
-// ===========================
-// LOAD LOCAL EVENTS
-// ===========================
 function loadLocalEvents(){
   const list = document.getElementById("eventList");
   list.innerHTML = "";
 
   let events = JSON.parse(localStorage.getItem("homecrewEvents")) || [];
-
-  events.sort((a, b) => new Date(a.date) - new Date(b.date));
+  events.sort((a,b) => new Date(a.date) - new Date(b.date));
 
   events.forEach((ev, index) => {
     const li = document.createElement("li");
-
     li.className = "event-item";
     li.style.borderLeft = "6px solid " + getUserColor(ev.user);
 
     li.innerHTML = `
       <strong>${ev.title}</strong>
-      <div class="event-meta">
-        ${new Date(ev.date).toLocaleString("nl-BE")}
-      </div>
-      <div class="event-user" style="color:${getUserColor(ev.user)}">
-        👤 ${ev.user}
-      </div>
+      <div class="event-meta">${new Date(ev.date).toLocaleString("nl-BE")}</div>
+      <div class="event-user" style="color:${getUserColor(ev.user)}">👤 ${ev.user}</div>
       <div>${ev.description || ""}</div>
-      <button onclick="deleteEvent(${index})">🗑️</button>
+      <button class="main-btn" onclick="deleteEvent(${index})">🗑️ Verwijderen</button>
     `;
 
     list.appendChild(li);
@@ -145,26 +118,22 @@ function deleteEvent(index){
   loadLocalEvents();
 }
 
-
 // ===========================
 // GOOGLE CALENDAR ICS
 // ===========================
-const icsUrl = "https://calendar.google.com/calendar/ical/b3756ae16d0f11ea12a33407c6077e5925740ab0ce0d19514aa77a7fc6a6e0c0%40group.calendar.google.com/public/basic.ics";
+const icsUrl = "https://calendar.google.com/calendar/ical/.../public/basic.ics";
 
 async function loadGoogleCalendar(){
   try{
     const response = await fetch(icsUrl);
     const data = await response.text();
-
     const jcalData = ICAL.parse(data);
     const comp = new ICAL.Component(jcalData);
     const vevents = comp.getAllSubcomponents("vevent");
 
     const list = document.getElementById("eventList");
-
-    vevents.forEach(v => {
+    vevents.forEach(v=>{
       const ev = new ICAL.Event(v);
-
       const li = document.createElement("li");
       li.className = "event-item";
       li.style.borderLeft = "6px solid black";
@@ -175,16 +144,10 @@ async function loadGoogleCalendar(){
         <div style="color:black;">📅 Google agenda</div>
         <div>${ev.description || ""}</div>
       `;
-
       list.appendChild(li);
-
     });
-
-  }catch(err){
-    console.error("Google kalender fout:", err);
-  }
+  }catch(err){ console.error("Google kalender fout:", err); }
 }
-
 
 // ===========================
 // INIT
