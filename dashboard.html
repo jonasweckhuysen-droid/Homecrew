@@ -31,23 +31,32 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-    // Login check
-    const user = getActiveUser();
+    // Active user ophalen (localStorage of sessionStorage)
+    const user = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
     if (!user) {
         window.location.href = "index.html";
         return;
     }
+
     document.getElementById("welcome").innerText = "Welkom, " + user + " 👋";
 
-    // Navigatie knoppen
-    document.getElementById("btnAgenda").onclick = () => window.location.href = "agenda.html";
-    document.getElementById("btnBoodschappen").onclick = () => window.location.href = "boodschappen.html";
-    document.getElementById("btnBerichten").onclick = () => window.location.href = "berichten.html";
-    document.getElementById("btnTaken").onclick = () => window.location.href = "taken.html";
-    document.getElementById("btnLocatie").onclick = () => window.location.href = "locatie.html";
+    // Navigatieknoppen koppelen
+    const dashboardButtons = [
+        { id: "btnAgenda", page: "agenda.html" },
+        { id: "btnBoodschappen", page: "boodschappen.html" },
+        { id: "btnBerichten", page: "berichten.html" },
+        { id: "btnTaken", page: "taken.html" },
+        { id: "btnLocatie", page: "locatie.html" }
+    ];
 
-    // Logout
-    document.getElementById("logoutBtn").onclick = logout;
+    dashboardButtons.forEach(btn => {
+        const el = document.getElementById(btn.id);
+        if (el) el.onclick = () => window.location.href = btn.page;
+    });
+
+    // Logout knop
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) logoutBtn.onclick = logout;
 });
 </script>
 
