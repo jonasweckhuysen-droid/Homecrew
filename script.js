@@ -3,59 +3,71 @@
 **************************/
 
 // =====================
-// HELPER FUNCTIES
+// GEBRUIKER KLEUR
 // =====================
-
-// Kleur per gebruiker
 function getUserColor(user) {
-    if (user === "jonas") return "#3498db";   // blauw
-    if (user === "liese") return "#e74c3c";   // rood
-    if (user === "loreana") return "#ff69b4"; // roze
-    return "#555"; // standaard
+    if (user.toLowerCase() === "jonas") return "#3498db";   // blauw
+    if (user.toLowerCase() === "liese") return "#e74c3c";   // rood
+    if (user.toLowerCase() === "loreana") return "#ff69b4"; // roze
+    return "#555"; // standaardkleur
 }
 
-// Check of gebruiker ingelogd is
-function isLoggedIn() {
-    return (
+// =====================
+// CHECK LOGIN STATUS
+// =====================
+document.addEventListener("DOMContentLoaded", () => {
+    const page = window.location.pathname.split("/").pop();
+
+    const logged =
         localStorage.getItem("homecrew_loggedin") === "true" ||
-        sessionStorage.getItem("homecrew_loggedin") === "true"
-    );
-}
+        sessionStorage.getItem("homecrew_loggedin") === "true";
 
-// Huidige actieve gebruiker ophalen
-function getActiveUser() {
-    return localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
-}
+    // Als je al ingelogd bent en op index zit → naar dashboard
+    if ((page === "" || page === "index.html") && logged) {
+        window.location.replace("dashboard.html");
+    }
+
+    // Als je NIET bent ingelogd en niet op index zit → terug naar index
+    if ((page !== "" && page !== "index.html") && !logged) {
+        window.location.replace("index.html");
+    }
+
+    // Taken automatisch laden als die lijst bestaat
+    if (document.getElementById("tasks")) {
+        loadTasks();
+    }
+});
 
 // =====================
 // LOGIN
 // =====================
-function login(username, password, stayLoggedIn) {
-    if (!username || !password) {
+function login() {
+    const name = document.getElementById("username").value.trim().toLowerCase();
+    const pass = document.getElementById("password").value.trim();
+    const remember = document.getElementById("stayLoggedIn")?.checked;
+
+    if (!name || !pass) {
         alert("Vul naam en pincode in");
-        return false;
+        return;
     }
 
-    const name = username.trim().toLowerCase();
-
-    // Alleen bekende gebruikers
-    if (!["jonas", "liese", "loreana"].includes(name)) {
+    // Toegestane gebruikers
+    if (name !== "jonas" && name !== "liese" && name !== "loreana") {
         alert("Onbekende gebruiker");
-        return false;
+        return;
     }
 
-    if (stayLoggedIn) {
+    if (remember) {
         localStorage.setItem("homecrew_loggedin", "true");
         localStorage.setItem("homecrewUser", name);
-        localStorage.setItem("homecrewPass", password);
+        localStorage.setItem("homecrewPass", pass);
     } else {
         sessionStorage.setItem("homecrew_loggedin", "true");
         sessionStorage.setItem("homecrewUser", name);
-        sessionStorage.setItem("homecrewPass", password);
+        sessionStorage.setItem("homecrewPass", pass);
     }
 
     window.location.href = "dashboard.html";
-    return true;
 }
 
 // =====================
@@ -68,10 +80,8 @@ function logout() {
 }
 
 // =====================
-// TAKEN
+// TAKEN (GEMEENSCHAPPELIJK)
 // =====================
-
-// Taken laden
 function loadTasks() {
     const tasks = JSON.parse(localStorage.getItem("homecrew_tasks")) || [];
     const ul = document.getElementById("tasks");
@@ -91,30 +101,45 @@ function loadTasks() {
         li.style.listStyle = "none";
 
         li.innerHTML = `
-            <strong style="color:${color};font-size:1.1em">${task.title}</strong>
+            <span class="user-dot" style="background:${color}"></span>
+            <strong>${task.title}</strong>
             ${task.desc ? `<p>${task.desc}</p>` : ""}
             <small style="color:${color}">👤 ${task.user}</small>
-            <button class="delete-btn" style="float:right;border:none;background:none;font-size:18px;cursor:pointer;">❌</button>
+            <button class="delete-btn">❌</button>
         `;
 
         li.querySelector(".delete-btn").onclick = () => removeTask(index);
-
         ul.appendChild(li);
     });
 }
 
-// Taak toevoegen
-function addTask(title, desc) {
-    const activeUser = getActiveUser();
-    if (!title || !activeUser) return;
+function addTask() {
+    const title = document.getElementById("taskTitle")?.value.trim();
+    const desc = document.getElementById("taskDesc")?.value.trim();
+    const activeUser =
+        localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
+
+    if (!title) {
+        alert("Vul een titel in");
+        return;
+    }
+
+    if (!activeUser) {
+        alert("Geen gebruiker gevonden, log opnieuw in");
+        return;
+    }
 
     const tasks = JSON.parse(localStorage.getItem("homecrew_tasks")) || [];
     tasks.push({ title, desc, user: activeUser, created: Date.now() });
+
     localStorage.setItem("homecrew_tasks", JSON.stringify(tasks));
+
+    // Velden leegmaken en lijst herladen
+    if (document.getElementById("taskTitle")) document.getElementById("taskTitle").value = "";
+    if (document.getElementById("taskDesc")) document.getElementById("taskDesc").value = "";
     loadTasks();
 }
 
-// Taak verwijderen
 function removeTask(index) {
     const tasks = JSON.parse(localStorage.getItem("homecrew_tasks")) || [];
     tasks.splice(index, 1);
@@ -123,11 +148,9 @@ function removeTask(index) {
 }
 
 // =====================
-// EXPORT
+// Exporteer functies
 // =====================
 window.login = login;
 window.logout = logout;
 window.addTask = addTask;
 window.loadTasks = loadTasks;
-window.isLoggedIn = isLoggedIn;
-window.getActiveUser = getActiveUser;
