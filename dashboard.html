@@ -22,9 +22,6 @@
     </div>
 
     <div class="dashboard-buttons">
-
-        <!-- ALFABETISCHE VOLGORDE -->
-
         <div class="dash-btn agenda" onclick="window.location.href='/Homecrew/agenda.html'">
             <i class="fas fa-calendar-alt"></i>
             <span>Agenda</span>
@@ -40,16 +37,15 @@
             <span>Berichten</span>
         </div>
 
-        <div class="dash-btn locatie" onclick="window.location.href='/Homecrew/locatie.html'">
-            <i class="fas fa-map-marker-alt"></i>
-            <span>Locatie</span>
-        </div>
-
         <div class="dash-btn taken" onclick="window.location.href='/Homecrew/taken.html'">
             <i class="fas fa-tasks"></i>
             <span>Taken</span>
         </div>
 
+        <div class="dash-btn locatie" onclick="window.location.href='/Homecrew/locatie.html'">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>Locatie</span>
+        </div>
     </div>
 
     <button class="logout-btn" id="logoutBtn">
@@ -58,20 +54,23 @@
 
 </div>
 
-<script type="module" src="script.js"></script>
-<script>
-    // Controleer ingelogde gebruiker
-    const activeUser = localStorage.getItem("homecrewUser");
-    if (!activeUser) {
-        window.location.href = "/Homecrew/index.html";
-    } else {
-        document.getElementById("welcome").innerText = "Welkom, " + activeUser + " 👋";
-    }
+<script type="module">
+import { auth, logout } from './script.js';
 
-    // Logout knop correct koppelen
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-        if(typeof logout === "function") logout();
-    });
+// Check actief ingelogde gebruiker
+const activeUser = localStorage.getItem("homecrewUser");
+if (!activeUser) window.location.href = "/Homecrew/index.html";
+document.getElementById("welcome").innerText = "Welkom, " + activeUser + " 👋";
+
+// Koppel de logout knop
+document.getElementById("logoutBtn").addEventListener("click", () => {
+    logout();
+});
+
+// Service Worker
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/Homecrew/sw.js');
+}
 </script>
 </body>
 </html>
