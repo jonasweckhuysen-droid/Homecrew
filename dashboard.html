@@ -2,55 +2,121 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <title>Homecrew - Dashboard</title>
+    <title>Homecrew - Boodschappen</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    
     <link rel="manifest" href="/Homecrew/manifest.json">
     <meta name="theme-color" content="#3a6ea5">
     <link rel="apple-touch-icon" href="/Homecrew/icons/icon-192.png">
 
-    <!-- Font Awesome voor iconen -->
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 
     <link rel="stylesheet" href="/Homecrew/style.css">
 </head>
+
 <body>
+
 <div class="dashboard-container">
 
     <div class="welcome-banner">
-        <h1 id="welcome">Welkom!</h1>
-        <p>Wat gaan we vandaag doen? 🌈</p>
+        <h1 id="welcome"></h1>
+        <p>Wat moeten we halen vandaag? 🛒</p>
     </div>
 
     <div class="dashboard-buttons">
-        <div class="dash-btn agenda" onclick="window.location.href='/Homecrew/agenda.html'">
-            <i class="fas fa-calendar-alt"></i>
-            <span>Agenda</span>
+
+        <!-- VINGARDIUM -->
+        <div class="dash-btn" onclick="document.getElementById('vingardium-box').classList.toggle('show')">
+            <i class="fas fa-seedling"></i>
+            <span>Vingardium</span>
         </div>
-        <div class="dash-btn boodschappenlijst" onclick="window.location.href='/Homecrew/boodschappen.html'">
-            <i class="fas fa-boodschappen"></i>
-            <span>Boodschappenlijst</span>
+
+        <!-- DRIJVELDEN -->
+        <div class="dash-btn" onclick="document.getElementById('drijvelden-box').classList.toggle('show')">
+            <i class="fas fa-tractor"></i>
+            <span>Drijvelden</span>
         </div>
-        <div class="dash-btn taken" onclick="window.location.href='/Homecrew/taken.html'">
-            <i class="fas fa-tasks"></i>
-            <span>Taken</span>
-        </div>
-        <!-- Voeg hier later extra knoppen toe -->
+
     </div>
 
-    <button class="logout-btn" onclick="logout()">
-        <i class="fas fa-sign-out-alt"></i> Uitloggen
+    <!-- VINGARDIUM LIJST -->
+    <div class="list-box" id="vingardium-box">
+        <h3>🪴 Vingardium</h3>
+        <div class="input-group">
+            <input type="text" id="vingardiumInput" placeholder="Nieuw item...">
+            <button class="add-btn" onclick="addItem('vingardium')">
+              <i class="fas fa-plus"></i>
+            </button>
+        </div>
+        <ul id="vingardiumList" class="events-list"></ul>
+    </div>
+
+    <!-- DRIJVELDEN LIJST -->
+    <div class="list-box" id="drijvelden-box">
+        <h3>🌾 Drijvelden</h3>
+        <div class="input-group">
+            <input type="text" id="drijveldenInput" placeholder="Nieuw item...">
+            <button class="add-btn" onclick="addItem('drijvelden')">
+              <i class="fas fa-plus"></i>
+            </button>
+        </div>
+        <ul id="drijveldenList" class="events-list"></ul>
+    </div>
+
+    <button class="dash-btn logout-btn" onclick="window.location.href='/Homecrew/dashboard.html'">
+        <i class="fas fa-home"></i>
+        <span>Dashboard</span>
     </button>
 
 </div>
 
-  <script type="module" src="script.js"></script>
 <script>
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('/Homecrew/sw.js');
-
 const activeUser = localStorage.getItem("homecrewUser");
 if (!activeUser) window.location.href = "/Homecrew/index.html";
+
 document.getElementById("welcome").innerText = "Welkom, " + activeUser + " 👋";
+
+// Laden
+function loadList(place) {
+  const list = JSON.parse(localStorage.getItem(`boodschappen_${place}`)) || [];
+  const ul = document.getElementById(place + "List");
+  ul.innerHTML = "";
+
+  list.forEach((item, index) => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      ${item}
+      <button onclick="removeItem('${place}', ${index})"
+      style="float:right;background:#DA4453;color:white;border:none;border-radius:8px;padding:5px 10px;">
+      ❌</button>
+    `;
+    ul.appendChild(li);
+  });
+}
+
+function addItem(place) {
+  const input = document.getElementById(place + "Input");
+  const value = input.value.trim();
+  if (!value) return;
+
+  const list = JSON.parse(localStorage.getItem(`boodschappen_${place}`)) || [];
+  list.push(value);
+  localStorage.setItem(`boodschappen_${place}`, JSON.stringify(list));
+
+  input.value = "";
+  loadList(place);
+}
+
+function removeItem(place, index) {
+  const list = JSON.parse(localStorage.getItem(`boodschappen_${place}`));
+  list.splice(index, 1);
+  localStorage.setItem(`boodschappen_${place}`, JSON.stringify(list));
+  loadList(place);
+}
+
+loadList("vingardium");
+loadList("drijvelden");
 </script>
+
 </body>
 </html>
