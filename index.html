@@ -10,17 +10,30 @@
     <link rel="stylesheet" href="/Homecrew/style.css">
 </head>
 <body>
+
 <div class="login-box">
+
     <h1>Homecrew</h1>
     <p>Familieplatform</p>
 
-    <input type="text" id="username" placeholder="Gebruikersnaam">
-    <input type="password" id="password" placeholder="Wachtwoord">
-    <button onclick="login()">Inloggen</button>
-    <button onclick="register()">Nieuw account aanmaken</button>
+    <!-- ================= REGISTER SECTION ================= -->
+    <div id="register-section" style="display:none;">
+        <h3>Eerste keer openen? Kies je pincode</h3>
+        <input type="text" id="username" placeholder="Gebruikersnaam (Jonas, Liese, Loreana)">
+        <input type="password" id="password" placeholder="Kies een wachtwoord/pincode">
+        <button class="add-btn" onclick="registerUser()">Registreren & Inloggen</button>
+    </div>
+
+    <!-- ================= LOGIN SECTION ================= -->
+    <div id="login-section">
+        <input type="text" id="loginUsername" placeholder="Gebruikersnaam">
+        <input type="password" id="loginPassword" placeholder="Wachtwoord/pincode">
+        <button class="add-btn" onclick="login()">Inloggen</button>
+    </div>
 
     <p id="error"></p>
 
+    <!-- ================= CHANGE PASSWORD ================= -->
     <h3>Wachtwoord wijzigen</h3>
     <input type="password" id="newPassword" placeholder="Nieuw wachtwoord/pincode">
     <button class="add-btn" onclick="changePassword(document.getElementById('newPassword').value)">
@@ -36,5 +49,6 @@ if ('serviceWorker' in navigator) {
     .catch(err => console.log('Service Worker fout', err));
 }
 </script>
+
 </body>
 </html>
