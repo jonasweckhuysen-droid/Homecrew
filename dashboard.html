@@ -8,9 +8,13 @@
 
 <!-- Font Awesome voor iconen -->
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-<script src="script.js"></script>
+
+<!-- BELANGRIJK: script met defer -->
+<script src="script.js" defer></script>
 </head>
+
 <body>
+
 <div class="dashboard-container">
 
     <div class="welcome-banner" style="background: linear-gradient(135deg, #ffecd2, #fcb69f); padding: 20px; border-radius: 25px; margin: 20px;">
@@ -54,40 +58,42 @@
 </div>
 
 <script>
-    // ✅ Check login
-    const username = localStorage.getItem("homecrewUser");
+document.addEventListener("DOMContentLoaded", () => {
 
-if (!username) {
-    window.location.replace("index.html");
-} else {
-    document.getElementById("welcome").innerText = "Welkom, " + username + " 👋";
-}
+    // ✅ Login controle
+    const username =
+        localStorage.getItem("homecrewUser") ||
+        sessionStorage.getItem("homecrewUser");
+
+    if (!username) {
+        window.location.replace("index.html");
+        return;
+    }
+
+    document.getElementById("welcome").innerText =
+        "Welkom, " + username + " 👋";
+
 
     // ✅ Navigatie knoppen
-    document.getElementById("btnAgenda").addEventListener("click", () => {
+    document.getElementById("btnAgenda").onclick = () =>
         window.location.href = "agenda.html";
-    });
 
-    document.getElementById("btnBoodschappen").addEventListener("click", () => {
+    document.getElementById("btnBoodschappen").onclick = () =>
         window.location.href = "boodschappen.html";
-    });
 
-    document.getElementById("btnBerichten").addEventListener("click", () => {
+    document.getElementById("btnBerichten").onclick = () =>
         window.location.href = "berichten.html";
-    });
 
-    document.getElementById("btnTaken").addEventListener("click", () => {
+    document.getElementById("btnTaken").onclick = () =>
         window.location.href = "taken.html";
-    });
 
-    document.getElementById("btnLocatie").addEventListener("click", () => {
+    document.getElementById("btnLocatie").onclick = () =>
         window.location.href = "locatie.html";
-    });
 
     // ✅ Logout
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-        logout();
-    });
+    document.getElementById("logoutBtn").onclick = logout;
+});
 </script>
+
 </body>
 </html>
