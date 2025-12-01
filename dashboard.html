@@ -57,11 +57,11 @@
     // ✅ Check login
     const username = localStorage.getItem("homecrewUser");
 
-    if (!username) {
-        window.location.href = "index.html";
-    } else {
-        document.getElementById("welcome").innerText = "Welkom, " + username + " 👋";
-    }
+if (!username) {
+    window.location.replace("index.html");
+} else {
+    document.getElementById("welcome").innerText = "Welkom, " + username + " 👋";
+}
 
     // ✅ Navigatie knoppen
     document.getElementById("btnAgenda").addEventListener("click", () => {
