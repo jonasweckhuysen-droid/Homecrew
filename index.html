@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <meta charset="UTF-8">
-    <title>Homecrew - Eerste keer</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>Homecrew - Eerste keer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="login-box">
@@ -13,7 +13,7 @@
 
     <input type="text" id="username" placeholder="Naam">
     <input type="password" id="password" placeholder="Wachtwoord/pincode">
-    
+
     <label style="display:flex; align-items:center; gap:10px; margin-top:10px;">
         <input type="checkbox" id="stayLoggedIn">
         Blijf ingelogd
@@ -26,8 +26,9 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } 
-    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { 
+    getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, setPersistence, browserLocalPersistence, inMemoryPersistence
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 // Firebase config
 const firebaseConfig = {
@@ -36,46 +37,45 @@ const firebaseConfig = {
     projectId: "homecrew-d8e21",
     storageBucket: "homecrew-d8e21.firebasestorage.app",
     messagingSenderId: "47664248188",
-    appId: "1:47664248188:web:0994c6b2ba07f6fee060f9",
-    measurementId: "G-5R58JL5D5K"
+    appId: "1:47664248188:web:0994c6b2ba07f6fee060f9"
 };
 
-// Init
+// Init Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Check automatisch ingelogd
-const localUser = localStorage.getItem("homecrewUser");
-if (localUser) window.location.href = "dashboard.html";
+// Automatisch redirect als al ingelogd
+if(localStorage.getItem("homecrewUser")) window.location.href = "dashboard.html";
 
-// Start knop
 document.getElementById("startBtn").addEventListener("click", async () => {
-    const user = document.getElementById("username").value.trim().toLowerCase();
-    const pass = document.getElementById("password").value.trim();
-    const stay = document.getElementById("stayLoggedIn").checked;
+    const username = document.getElementById("username").value.trim().toLowerCase();
+    const password = document.getElementById("password").value.trim();
+    const stayLoggedIn = document.getElementById("stayLoggedIn").checked;
     const errorEl = document.getElementById("error");
 
-    if (!user || !pass) {
+    if(!username || !password) {
         errorEl.textContent = "Vul naam en wachtwoord/pincode in";
         return;
     }
 
     try {
-        // Persistentie instellen
-        await setPersistence(auth, stay ? browserLocalPersistence : null);
+        // Kies persistentie
+        await setPersistence(auth, stayLoggedIn ? browserLocalPersistence : inMemoryPersistence);
 
         // Probeer in te loggen
-        await signInWithEmailAndPassword(auth, user + "@homecrew.local", pass);
-        localStorage.setItem("homecrewUser", user);
+        await signInWithEmailAndPassword(auth, username + "@homecrew.local", password);
+        localStorage.setItem("homecrewUser", username);
         window.location.href = "dashboard.html";
-    } catch {
+
+    } catch (loginErr) {
         try {
             // Als login faalt → maak account aan
-            await createUserWithEmailAndPassword(auth, user + "@homecrew.local", pass);
-            localStorage.setItem("homecrewUser", user);
+            await createUserWithEmailAndPassword(auth, username + "@homecrew.local", password);
+            localStorage.setItem("homecrewUser", username);
             window.location.href = "dashboard.html";
-        } catch (err) {
-            errorEl.textContent = "Fout bij aanmaken: " + err.message;
+        } catch (createErr) {
+            console.error("Registratie fout:", createErr);
+            errorEl.textContent = "Kon account niet aanmaken: " + createErr.message;
         }
     }
 });
