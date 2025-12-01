@@ -51,3 +51,14 @@ self.addEventListener("fetch", event => {
       .catch(() => caches.match(event.request))
   );
 });
+
+self.addEventListener('push', function(event) {
+const data = event.data?.json() || { title: "Homecrew", body: "Nieuw bericht" };
+
+event.waitUntil(
+self.registration.showNotification(data.title, {
+body: data.body,
+icon: "/Homecrew/icons/icon-192.png"
+})
+);
+});
