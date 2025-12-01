@@ -1,193 +1,201 @@
-// ================= FIREBASE IMPORT =================
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { 
-    getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, orderBy 
-} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-import { 
-    getAuth, setPersistence, browserLocalPersistence, 
-    signInWithEmailAndPassword, createUserWithEmailAndPassword, updatePassword, onAuthStateChanged 
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+/*************************
+  HOME CREW - SCRIPT.JS
+**************************/
 
-// ================= FIREBASE CONFIG =================
-const firebaseConfig = {
-    apiKey: "AIzaSyCwlr069pxNXEEhIEGNug5Ly_kKSuvxSzs",
-    authDomain: "homecrew-d8e21.firebaseapp.com",
-    projectId: "homecrew-d8e21",
-    storageBucket: "homecrew-d8e21.firebasestorage.app",
-    messagingSenderId: "47664248188",
-    appId: "1:47664248188:web:0994c6b2ba07f6fee060f9",
-    measurementId: "G-5R58JL5D5K"
-};
-
-// ================= INIT =================
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth();
-
-// ================= PERSISTENTIE =================
-setPersistence(auth, browserLocalPersistence)
-    .then(() => console.log("Gebruiker wordt onthouden op dit toestel"))
-    .catch(err => console.error("Fout persistentie:", err));
-
-// ================= CHECK LOCALSTORAGE =================
-document.addEventListener("DOMContentLoaded", () => {
-    const storedUser = localStorage.getItem("homecrewUser");
-    const registerSection = document.getElementById("register-section");
-    const loginSection = document.getElementById("login-section");
-
-    if (!storedUser) {
-        // Geen gebruiker bekend => eerste keer registratie tonen
-        registerSection.style.display = "block";
-        loginSection.style.display = "none";
-    } else {
-        // Gebruiker bekend => automatisch inloggen
-        loginSection.style.display = "block";
-        registerSection.style.display = "none";
-        autoLogin(storedUser);
-    }
-});
-
-// ================= AUTOMATISCH INLOGGEN =================
-async function autoLogin(user) {
-    try {
-        const pass = localStorage.getItem("homecrewPass");
-        if (!pass) return console.log("Geen opgeslagen wachtwoord, login handmatig");
-
-        const cred = await signInWithEmailAndPassword(auth, user + "@homecrew.local", pass);
-        console.log("Automatisch ingelogd:", cred.user.email);
-        localStorage.setItem("homecrewUser", user);
-        window.location.href = "dashboard.html";
-    } catch (err) {
-        console.error("Automatisch inloggen mislukt:", err);
-    }
+// =====================
+// GEBRUIKER KLEUR
+// =====================
+function getUserColor(user) {
+    if (user === "jonas") return "#3498db";   // blauw
+    if (user === "liese") return "#e74c3c";   // rood
+    if (user === "loreana") return "#ff69b4"; // roze
+    return "#555"; // standaard
 }
 
-// ================= LOGIN =================
-window.login = async function() {
-    const user = document.getElementById("loginUsername").value.trim().toLowerCase();
-    const pass = document.getElementById("loginPassword").value.trim();
-    const errorEl = document.getElementById("error");
 
-    if (!user || !pass) {
-        if (errorEl) errorEl.textContent = "Vul gebruikersnaam en wachtwoord in";
+// =====================
+// CHECK LOGIN STATUS
+// =====================
+document.addEventListener("DOMContentLoaded", () => {
+
+    const page = window.location.pathname.split("/").pop();
+
+    // Als je op login pagina bent
+    if (page === "" || page === "index.html") {
+
+        const remembered = localStorage.getItem("homecrew_loggedin");
+
+        if (remembered === "true") {
+            window.location.href = "dashboard.html";
+        }
+    }
+
+    // Als je op andere pagina bent → login vereist
+    else {
+
+        const logged = localStorage.getItem("homecrew_loggedin");
+
+        if (logged !== "true") {
+            window.location.href = "index.html";
+        }
+    }
+
+
+    // Taken automatisch laden
+    if (document.getElementById("tasks")) {
+        loadTasks();
+    }
+
+});
+
+
+// =====================
+// LOGIN
+// =====================
+function login() {
+
+    const name = document.getElementById("username").value.trim().toLowerCase();
+    const pass = document.getElementById("password").value.trim();
+    const remember = document.getElementById("rememberMe")?.checked;
+
+    if (!name || !pass) {
+        alert("Vul naam en pincode in");
         return;
     }
 
-    try {
-        const cred = await signInWithEmailAndPassword(auth, user + "@homecrew.local", pass);
-        console.log("Ingelogd als:", cred.user.email);
-        localStorage.setItem("homecrewUser", user);
-        localStorage.setItem("homecrewPass", pass); // Voor automatisch inloggen
-        window.location.href = "dashboard.html";
-    } catch (err) {
-        console.error(err);
-        if (errorEl) errorEl.textContent = "Ongeldige login of gebruiker bestaat niet";
+    // Alleen toegestane namen
+    if (name !== "jonas" && name !== "liese" && name !== "loreana") {
+        alert("Onbekende gebruiker");
+        return;
     }
-};
 
-// ================= REGISTREREN =================
-window.registerUser = async function() {
-    const user = document.getElementById("username").value.trim().toLowerCase();
-    const pass = document.getElementById("password").value.trim();
+    localStorage.setItem("homecrewUser", name);
+    localStorage.setItem("homecrewPass", pass);
 
-    if (!user || !pass) return alert("Vul gebruikersnaam en wachtwoord in");
-
-    try {
-        const cred = await createUserWithEmailAndPassword(auth, user + "@homecrew.local", pass);
-        console.log("Account aangemaakt:", cred.user.email);
-        localStorage.setItem("homecrewUser", user);
-        localStorage.setItem("homecrewPass", pass); // Opslaan voor automatisch inloggen
-        window.location.href = "dashboard.html";
-    } catch (err) {
-        console.error(err);
-        alert("Account kon niet aangemaakt worden: " + err.message);
+    if (remember) {
+        localStorage.setItem("homecrew_loggedin", "true");
+    } else {
+        localStorage.removeItem("homecrew_loggedin");
     }
-};
 
-// ================= WACHTWOORD WIJZIGEN =================
-window.changePassword = async function(newPass) {
-    if (!newPass || newPass.length < 4) return alert("Voer een geldig wachtwoord in");
-    const user = auth.currentUser;
-    if (!user) return alert("Je moet ingelogd zijn om het wachtwoord te wijzigen");
+    window.location.href = "dashboard.html";
+}
 
-    try {
-        await updatePassword(user, newPass);
-        localStorage.setItem("homecrewPass", newPass); // Update lokaal opgeslagen wachtwoord
-        alert("Wachtwoord succesvol gewijzigd!");
-    } catch (err) {
-        console.error(err);
-        alert("Wachtwoord kon niet gewijzigd worden: " + err.message);
-    }
-};
 
-// ================= LOGOUT =================
-window.logout = async function() {
-    try {
-        await auth.signOut();
-        localStorage.removeItem("homecrewUser");
-        localStorage.removeItem("homecrewPass");
-        window.location.href = "index.html";
-    } catch (err) {
-        console.error("Logout mislukt:", err);
-    }
-};
-export { auth, logout };
+// =====================
+// LOGOUT
+// =====================
+function logout() {
 
-// ===================== TAKEN FUNCTIES =====================
+    localStorage.removeItem("homecrew_loggedin");
+    localStorage.removeItem("homecrewUser");
+    localStorage.removeItem("homecrewPass");
+
+    window.location.href = "index.html";
+}
+
+
+
+// =====================
+// TAKEN (GEMEENSCHAPPELIJK)
+// =====================
 
 // Taken laden
-export function loadTasks() {
-    const activeUser = localStorage.getItem("homecrewUser");
-    const tasks = JSON.parse(localStorage.getItem(`tasks_${activeUser}`)) || [];
+function loadTasks() {
+
+    const tasks = JSON.parse(localStorage.getItem("homecrew_tasks")) || [];
     const ul = document.getElementById("tasks");
-    if (!ul) return; // check of ul bestaat
+
+    if (!ul) return;
+
     ul.innerHTML = "";
 
     tasks.forEach((task, index) => {
+
+        const color = getUserColor(task.user);
+
         const li = document.createElement("li");
+        li.style.borderLeft = `6px solid ${color}`;
+        li.style.padding = "10px";
+        li.style.marginBottom = "12px";
+        li.style.borderRadius = "12px";
+        li.style.background = "#f9f9f9";
+        li.style.listStyle = "none";
+
         li.innerHTML = `
-            <strong>${task.title}</strong>
-            <p>${task.desc}</p>
-            <button class="delete-btn">❌</button>
+            <strong style="color:${color};font-size:1.1em">${task.title}</strong>
+            ${task.desc ? `<p>${task.desc}</p>` : ""}
+            <small style="color:${color}">👤 ${task.user}</small>
+            <button 
+              class="delete-btn" 
+              style="float:right;border:none;background:none;font-size:18px;cursor:pointer;">
+              ❌
+            </button>
         `;
+
         li.querySelector(".delete-btn").addEventListener("click", () => {
             removeTask(index);
         });
+
         ul.appendChild(li);
     });
 }
 
+
 // Taak toevoegen
-export function addTask() {
+function addTask() {
+
     const title = document.getElementById("taskTitle").value.trim();
-    const desc = document.getElementById("taskDesc").value.trim();
+    const desc  = document.getElementById("taskDesc").value.trim();
+    const activeUser = localStorage.getItem("homecrewUser");
 
     if (!title) {
-        alert("Vul een titel in voor de taak");
+        alert("Vul een titel in");
         return;
     }
 
-    const activeUser = localStorage.getItem("homecrewUser");
-    const tasks = JSON.parse(localStorage.getItem(`tasks_${activeUser}`)) || [];
+    if (!activeUser) {
+        alert("Geen gebruiker gevonden, log opnieuw in");
+        return;
+    }
 
-    tasks.push({ title, desc });
-    localStorage.setItem(`tasks_${activeUser}`, JSON.stringify(tasks));
+    const tasks = JSON.parse(localStorage.getItem("homecrew_tasks")) || [];
+
+    tasks.push({
+        title,
+        desc,
+        user: activeUser,
+        created: Date.now()
+    });
+
+    localStorage.setItem("homecrew_tasks", JSON.stringify(tasks));
 
     document.getElementById("taskTitle").value = "";
-    document.getElementById("taskDesc").value = "";
+    document.getElementById("taskDesc").value  = "";
 
     loadTasks();
 }
+
 
 // Taak verwijderen
-export function removeTask(index) {
-    const activeUser = localStorage.getItem("homecrewUser");
-    const tasks = JSON.parse(localStorage.getItem(`tasks_${activeUser}`)) || [];
+function removeTask(index) {
+
+    const tasks = JSON.parse(localStorage.getItem("homecrew_tasks")) || [];
+
     tasks.splice(index, 1);
-    localStorage.setItem(`tasks_${activeUser}`, JSON.stringify(tasks));
+
+    localStorage.setItem("homecrew_tasks", JSON.stringify(tasks));
+
     loadTasks();
 }
 
-function gaNaar(pagina) {
-    window.location.href = pagina;
-}
+
+
+// =====================
+// EXPORTS
+// =====================
+
+window.login = login;
+window.logout = logout;
+window.addTask = addTask;
+window.loadTasks = loadTasks;
