@@ -12,90 +12,55 @@
 <body>
 <div class="dashboard-container">
 
-    <!-- Welkomst banner -->
     <div class="welcome-banner" style="background: linear-gradient(135deg, #ffecd2, #fcb69f); padding: 20px; border-radius: 25px; margin: 20px;">
         <h1 id="welcome">Welkom!</h1>
         <p>Wat gaan we vandaag doen? 🌈</p>
     </div>
 
-    <!-- Dashboard knoppen -->
     <div class="dashboard-buttons">
-        <div class="dash-btn agenda" onclick="location.href='agenda.html'">
-            <i class="fas fa-calendar-alt"></i>
-            <span>Agenda</span>
-            <span class="badge">📌</span>
+        <div class="dash-btn agenda" onclick="alert('Agenda');">
+            <i class="fas fa-calendar-alt"></i> <span>Agenda</span>
         </div>
-
-        <div class="dash-btn boodschappenlijst" onclick="location.href='boodschappen.html'">
-            <i class="fas fa-shopping-basket"></i>
-            <span>Boodschappenlijst</span>
-            <span class="badge">🛒</span>
+        <div class="dash-btn boodschappenlijst" onclick="alert('Boodschappenlijst');">
+            <i class="fas fa-shopping-basket"></i> <span>Boodschappenlijst</span>
         </div>
-
-        <div class="dash-btn berichten" onclick="location.href='berichten.html'">
-            <i class="fas fa-comments"></i>
-            <span>Berichten</span>
-            <span class="badge">💬</span>
+        <div class="dash-btn berichten" onclick="alert('Berichten');">
+            <i class="fas fa-comments"></i> <span>Berichten</span>
         </div>
-
-        <div class="dash-btn taken" onclick="location.href='taken.html'">
-            <i class="fas fa-tasks"></i>
-            <span>Taken</span>
-            <span class="badge">✅</span>
+        <div class="dash-btn taken" onclick="alert('Taken');">
+            <i class="fas fa-tasks"></i> <span>Taken</span>
         </div>
-
-        <div class="dash-btn locatie" onclick="location.href='locatie.html'">
-            <i class="fas fa-map-marker-alt"></i>
-            <span>Locatie</span>
-            <span class="badge">📍</span>
+        <div class="dash-btn locatie" onclick="alert('Locatie');">
+            <i class="fas fa-map-marker-alt"></i> <span>Locatie</span>
         </div>
     </div>
 
-    <!-- Uitloggen -->
-    <button class="logout-btn" id="logoutBtn">
+    <button id="logoutBtn" class="logout-btn" style="margin:20px; padding:12px 20px; font-size:18px; border-radius:12px;">
         <i class="fas fa-sign-out-alt"></i> Uitloggen
     </button>
 
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+<script>
+    // Haal de ingelogde gebruiker
+    let username = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
 
-// Firebase config
-const firebaseConfig = {
-    apiKey: "AIzaSyCwlr069pxNXEEhIEGNug5Ly_kKSuvxSzs",
-    authDomain: "homecrew-d8e21.firebaseapp.com",
-    projectId: "homecrew-d8e21",
-    storageBucket: "homecrew-d8e21.firebasestorage.app",
-    messagingSenderId: "47664248188",
-    appId: "1:47664248188:web:0994c6b2ba07f6fee060f9"
-};
-
-// Init Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
-// Toon ingelogde gebruiker
-const activeUser = localStorage.getItem("homecrewUser");
-if (!activeUser) {
-    // Niet ingelogd → terug naar start
-    window.location.href = "index.html";
-} else {
-    document.getElementById("welcome").innerText = "Welkom, " + activeUser + " 👋";
-}
-
-// Uitloggen
-document.getElementById("logoutBtn").addEventListener("click", async () => {
-    try {
-        await signOut(auth);
-        localStorage.removeItem("homecrewUser");
+    if(!username){
+        // Niet ingelogd → terug naar startpagina
         window.location.href = "index.html";
-    } catch (err) {
-        console.error("Logout mislukt:", err);
-        alert("Kon niet uitloggen. Probeer opnieuw.");
+    } else {
+        document.getElementById("welcome").innerText = "Welkom, " + username + " 👋";
     }
-});
+
+    // Uitloggen
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+        localStorage.removeItem("homecrewUser");
+        localStorage.removeItem("homecrewPass");
+        sessionStorage.removeItem("homecrewUser");
+        sessionStorage.removeItem("homecrewPass");
+
+        window.location.href = "index.html";
+    });
 </script>
 </body>
 </html>
