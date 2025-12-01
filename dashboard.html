@@ -9,7 +9,6 @@
 <!-- Font Awesome voor iconen -->
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
-
 <body>
 <div class="dashboard-container">
 
@@ -20,27 +19,27 @@
 
     <div class="dashboard-buttons">
 
-        <div class="dash-btn agenda" onclick="openPage('/Homecrew/agenda.html')">
+        <div class="dash-btn agenda" id="btnAgenda">
             <i class="fas fa-calendar-alt"></i> 
             <span>Agenda</span>
         </div>
 
-        <div class="dash-btn boodschappenlijst" onclick="openPage('/Homecrew/boodschappen.html')">
+        <div class="dash-btn boodschappenlijst" id="btnBoodschappen">
             <i class="fas fa-shopping-basket"></i> 
             <span>Boodschappenlijst</span>
         </div>
 
-        <div class="dash-btn berichten" onclick="openPage('/Homecrew/berichten.html')">
+        <div class="dash-btn berichten" id="btnBerichten">
             <i class="fas fa-comments"></i> 
             <span>Berichten</span>
         </div>
 
-        <div class="dash-btn taken" onclick="openPage('/Homecrew/taken.html')">
+        <div class="dash-btn taken" id="btnTaken">
             <i class="fas fa-tasks"></i> 
             <span>Taken</span>
         </div>
 
-        <div class="dash-btn locatie" onclick="openPage('/Homecrew/locatie.html')">
+        <div class="dash-btn locatie" id="btnLocatie">
             <i class="fas fa-map-marker-alt"></i> 
             <span>Locatie</span>
         </div>
@@ -53,30 +52,47 @@
 
 </div>
 
-<script>
-    // Check login
-    const username = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
+<!-- BELANGRIJK: dit moet ONDERAAN -->
+<script type="module">
 
-    if(!username){
-        window.location.href = "index.html";
-    } else {
-        document.getElementById("welcome").innerText = "Welkom, " + username + " 👋";
-    }
+import { logout } from "./script.js";
 
-    // Navigatie functie (werkt in PWA + browser)
-    function openPage(page) {
-        window.location.href = page;
-    }
+// ✅ Check login
+const username = localStorage.getItem("homecrewUser");
 
-    // Uitloggen
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-        localStorage.removeItem("homecrewUser");
-        localStorage.removeItem("homecrewPass");
-        sessionStorage.removeItem("homecrewUser");
-        sessionStorage.removeItem("homecrewPass");
+if (!username) {
+    window.location.href = "index.html";
+} else {
+    document.getElementById("welcome").innerText = "Welkom, " + username + " 👋";
+}
 
-        window.location.href = "index.html";
-    }
+// ✅ Navigatie
+document.getElementById("btnAgenda").addEventListener("click", () => {
+    window.location.href = "agenda.html";
+});
+
+document.getElementById("btnBoodschappen").addEventListener("click", () => {
+    window.location.href = "boodschappen.html";
+});
+
+document.getElementById("btnBerichten").addEventListener("click", () => {
+    window.location.href = "berichten.html";
+});
+
+document.getElementById("btnTaken").addEventListener("click", () => {
+    window.location.href = "taken.html";
+});
+
+document.getElementById("btnLocatie").addEventListener("click", () => {
+    window.location.href = "locatie.html";
+});
+
+// ✅ Logout via Firebase + localStorage
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+    await logout();
+});
+
 </script>
 </body>
+
 </html>
