@@ -5,8 +5,10 @@
 <title>Homecrew - Eerste keer</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="style.css">
+<script src="script.js" defer></script>
 </head>
 <body>
+
 <div class="login-box">
     <h1>Welkom bij Homecrew</h1>
     <p>Vul je naam in en kies een wachtwoord/pincode</p>
@@ -15,8 +17,7 @@
     <input type="password" id="password" placeholder="Wachtwoord/pincode">
 
     <label style="display:flex; align-items:center; gap:10px; margin-top:10px;">
-        <input type="checkbox" id="stayLoggedIn">
-        Blijf ingelogd
+        <input type="checkbox" id="stayLoggedIn"> Blijf ingelogd
     </label>
 
     <button id="startBtn">Start</button>
@@ -24,51 +25,21 @@
 </div>
 
 <script>
-// Check automatisch inloggen
-const savedUser = localStorage.getItem("homecrewUser");
-const savedPass = localStorage.getItem("homecrewPass");
-if(savedUser && savedPass){
-    window.location.href = "dashboard.html";
-}
-
-document.getElementById("startBtn").addEventListener("click", () => {
-    const username = document.getElementById("username").value.trim();
-    const password = document.getElementById("password").value.trim();
-    const stayLoggedIn = document.getElementById("stayLoggedIn").checked;
-    const errorEl = document.getElementById("error");
-
-    if(!username || !password){
-        errorEl.textContent = "Vul naam en wachtwoord/pincode in";
+document.addEventListener("DOMContentLoaded", () => {
+    // Auto-login
+    if (isLoggedIn()) {
+        window.location.href = "dashboard.html";
         return;
     }
 
-    // Check of gebruiker al bestaat
-    const storedUsers = JSON.parse(localStorage.getItem("homecrewUsers") || "{}");
-
-    if(storedUsers[username]){
-        // Bestaande gebruiker → check wachtwoord
-        if(storedUsers[username] !== password){
-            errorEl.textContent = "Onjuist wachtwoord!";
-            return;
-        }
-    } else {
-        // Nieuwe gebruiker → maak account aan
-        storedUsers[username] = password;
-        localStorage.setItem("homecrewUsers", JSON.stringify(storedUsers));
-    }
-
-    // Opslaan voor automatisch inloggen
-    if(stayLoggedIn){
-        localStorage.setItem("homecrewUser", username);
-        localStorage.setItem("homecrewPass", password);
-    } else {
-        sessionStorage.setItem("homecrewUser", username);
-        sessionStorage.setItem("homecrewPass", password);
-    }
-
-    // Ga naar dashboard
-    window.location.href = "dashboard.html";
+    document.getElementById("startBtn").addEventListener("click", () => {
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        const stay = document.getElementById("stayLoggedIn").checked;
+        login(username, password, stay);
+    });
 });
 </script>
+
 </body>
 </html>
