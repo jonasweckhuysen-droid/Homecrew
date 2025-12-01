@@ -23,61 +23,51 @@
     <p id="error" style="color:red; margin-top:10px;"></p>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { 
-    getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, setPersistence, browserLocalPersistence, inMemoryPersistence 
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+<script>
+// Check automatisch inloggen
+const savedUser = localStorage.getItem("homecrewUser");
+const savedPass = localStorage.getItem("homecrewPass");
+if(savedUser && savedPass){
+    window.location.href = "dashboard.html";
+}
 
-// Firebase config
-const firebaseConfig = {
-    apiKey: "AIzaSyCwlr069pxNXEEhIEGNug5Ly_kKSuvxSzs",
-    authDomain: "homecrew-d8e21.firebaseapp.com",
-    projectId: "homecrew-d8e21",
-    storageBucket: "homecrew-d8e21.firebasestorage.app",
-    messagingSenderId: "47664248188",
-    appId: "1:47664248188:web:0994c6b2ba07f6fee060f9"
-};
-
-// Init Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
-// Redirect als al ingelogd
-if(localStorage.getItem("homecrewUser")) window.location.href = "dashboard.html";
-
-// Start knop
-document.getElementById("startBtn").addEventListener("click", async () => {
-    const username = document.getElementById("username").value.trim().toLowerCase();
+document.getElementById("startBtn").addEventListener("click", () => {
+    const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value.trim();
     const stayLoggedIn = document.getElementById("stayLoggedIn").checked;
     const errorEl = document.getElementById("error");
 
     if(!username || !password){
-        errorEl.textContent = "Vul naam en wachtwoord in";
+        errorEl.textContent = "Vul naam en wachtwoord/pincode in";
         return;
     }
 
-    try {
-        // Kies persistentie
-        await setPersistence(auth, stayLoggedIn ? browserLocalPersistence : inMemoryPersistence);
+    // Check of gebruiker al bestaat
+    const storedUsers = JSON.parse(localStorage.getItem("homecrewUsers") || "{}");
 
-        // Probeer in te loggen
-        await signInWithEmailAndPassword(auth, username + "@homecrew.local", password);
-        localStorage.setItem("homecrewUser", username);
-        window.location.href = "dashboard.html";
-
-    } catch(loginErr){
-        // Als login faalt → maak account aan
-        try {
-            await createUserWithEmailAndPassword(auth, username + "@homecrew.local", password);
-            localStorage.setItem("homecrewUser", username);
-            window.location.href = "dashboard.html";
-        } catch(registerErr){
-            console.error("Registratie mislukt:", registerErr);
-            errorEl.textContent = "Kan niet registreren: " + registerErr.message;
+    if(storedUsers[username]){
+        // Bestaande gebruiker → check wachtwoord
+        if(storedUsers[username] !== password){
+            errorEl.textContent = "Onjuist wachtwoord!";
+            return;
         }
+    } else {
+        // Nieuwe gebruiker → maak account aan
+        storedUsers[username] = password;
+        localStorage.setItem("homecrewUsers", JSON.stringify(storedUsers));
     }
+
+    // Opslaan voor automatisch inloggen
+    if(stayLoggedIn){
+        localStorage.setItem("homecrewUser", username);
+        localStorage.setItem("homecrewPass", password);
+    } else {
+        sessionStorage.setItem("homecrewUser", username);
+        sessionStorage.setItem("homecrewPass", password);
+    }
+
+    // Ga naar dashboard
+    window.location.href = "dashboard.html";
 });
 </script>
 </body>
