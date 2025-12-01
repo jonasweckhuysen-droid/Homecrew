@@ -278,3 +278,17 @@ li button {
     padding: 5px 10px;
     cursor: pointer;
 }
+
+/* Specifiek voor de Boodschappen knoppen */
+#vingardium-box, #drijvelden-box {
+    color: black;
+}
+
+.dash-btn span {
+    color: black; /* zorgt dat de knoplabels zwart worden */
+}
+
+/* Eventueel ook de iconen iets donkerder */
+.dash-btn i {
+    color: black;
+}
