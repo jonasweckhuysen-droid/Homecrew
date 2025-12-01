@@ -1,164 +1,70 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <meta charset="UTF-8">
-    <title>Homecrew - Boodschappen</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <link rel="manifest" href="/Homecrew/manifest.json">
-    <meta name="theme-color" content="#3a6ea5">
-    <link rel="apple-touch-icon" href="/Homecrew/icons/icon-192.png">
-
-    <!-- Font Awesome voor iconen -->
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-
-    <link rel="stylesheet" href="/Homecrew/style.css">
-
-    <style>
-    /* Extra styling voor deze pagina */
-    .dashboard-buttons { 
-        display: flex; 
-        flex-direction: column; 
-        gap: 15px; 
-        margin-top: 20px; 
-    }
-    .dash-btn { 
-        display: flex; 
-        align-items: center; 
-        gap: 12px; 
-        padding: 20px; 
-        border-radius: 16px; 
-        font-size: 18px; 
-        color: white; 
-        cursor: pointer; 
-        justify-content: space-between;
-        box-shadow: 0 6px 12px rgba(0,0,0,0.2); 
-        transition: all 0.2s ease; 
-        background: linear-gradient(135deg, #ff9a9e, #fad0c4);
-    }
-    .dash-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
-
-    .list-box { 
-        display: none; 
-        margin-top: 15px; 
-        padding: 15px; 
-        border-radius: 20px; 
-        box-shadow: 0 8px 15px rgba(0,0,0,0.1); 
-        background: #fff; 
-        animation: fadeIn 0.4s ease; 
-    }
-    .list-box.show { display: block; }
-
-    .list-box h3 { 
-        margin-bottom: 10px; 
-        text-align: center; 
-    }
-
-    .input-group { display: flex; gap: 10px; margin-bottom: 10px; }
-    .input-group input { flex: 1; padding: 10px; border-radius: 12px; border: 1px solid #ccc; font-size: 16px; }
-    .input-group button { padding: 10px 14px; border:none; border-radius:10px; background:#3a6ea5; color:white; cursor:pointer; }
-
-    li { 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-        padding: 12px 15px; 
-        background: #f3f1ec; 
-        margin-bottom: 10px; 
-        border-radius: 12px; 
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
-    }
-    li button { 
-        background: #DA4453; 
-        color: white; 
-        border: none; 
-        border-radius: 8px; 
-        padding: 5px 10px; 
-        cursor: pointer; 
-    }
-
-    /* Terug naar dashboard */
-    .home-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        margin-top: 20px;
-        padding: 14px;
-        border-radius: 14px;
-        background: linear-gradient(135deg, #36d1dc, #5b86e5);
-        color: white;
-        font-size: 18px;
-        cursor: pointer;
-        box-shadow: 0 6px 12px rgba(0,0,0,0.2);
-        transition: all 0.2s ease;
-    }
-    .home-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 16px rgba(0,0,0,0.3); }
-
-    @keyframes fadeIn { from {opacity:0; transform: translateY(10px);} to {opacity:1; transform: translateY(0);} }
-    </style>
+<meta charset="UTF-8">
+<title>Homecrew - Boodschappen</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
+<body class="app-body">
 
-<body>
-<div class="dashboard-container">
+<header class="topbar">
+  <button onclick="window.location.href='dashboard.html'" class="home-btn"><i class="fas fa-home"></i> Dashboard</button>
+  <h2>🛒 Boodschappen</h2>
+  <button onclick="logout()" class="home-btn">🚪 Uitloggen</button>
+</header>
 
-    <div class="welcome-banner" style="background: linear-gradient(135deg, #ffecd2, #fcb69f); padding: 20px; border-radius: 25px; margin: 20px;">
-        <h1 id="welcome"></h1>
-        <p>Wat moeten we halen vandaag? 🛒</p>
-    </div>
+<main class="content">
+  <h3 id="welcomeUser"></h3>
 
+  <div class="card">
     <div class="dashboard-buttons">
 
-        <!-- VINGARDIUM -->
-        <div class="dash-btn" onclick="document.getElementById('vingardium-box').classList.toggle('show')">
-            <i class="fas fa-seedling"></i>
-            <span>Vingardium</span>
-            <i class="fas fa-chevron-down"></i>
-        </div>
+      <!-- VINGARDIUM -->
+      <div class="dash-btn" onclick="document.getElementById('vingardium-box').classList.toggle('show')">
+        <i class="fas fa-seedling"></i> <span>Vingardium</span> <i class="fas fa-chevron-down"></i>
+      </div>
 
-        <!-- DRIJVELDEN -->
-        <div class="dash-btn" onclick="document.getElementById('drijvelden-box').classList.toggle('show')">
-            <i class="fas fa-tractor"></i>
-            <span>Drijvelden</span>
-            <i class="fas fa-chevron-down"></i>
-        </div>
+      <!-- DRIJVELDEN -->
+      <div class="dash-btn" onclick="document.getElementById('drijvelden-box').classList.toggle('show')">
+        <i class="fas fa-tractor"></i> <span>Drijvelden</span> <i class="fas fa-chevron-down"></i>
+      </div>
 
     </div>
 
     <!-- VINGARDIUM LIJST -->
     <div class="list-box" id="vingardium-box">
-        <h3>🪴 Vingardium</h3>
-        <div class="input-group">
-            <input type="text" id="vingardiumInput" placeholder="Nieuw item...">
-            <button onclick="addItem('vingardium')"><i class="fas fa-plus"></i></button>
-        </div>
-        <ul id="vingardiumList"></ul>
+      <div class="input-group">
+        <input type="text" id="vingardiumInput" placeholder="Nieuw item...">
+        <button class="main-btn" onclick="addItem('vingardium')"><i class="fas fa-plus"></i></button>
+      </div>
+      <ul id="vingardiumList"></ul>
     </div>
 
     <!-- DRIJVELDEN LIJST -->
     <div class="list-box" id="drijvelden-box">
-        <h3>🌾 Drijvelden</h3>
-        <div class="input-group">
-            <input type="text" id="drijveldenInput" placeholder="Nieuw item...">
-            <button onclick="addItem('drijvelden')"><i class="fas fa-plus"></i></button>
-        </div>
-        <ul id="drijveldenList"></ul>
+      <div class="input-group">
+        <input type="text" id="drijveldenInput" placeholder="Nieuw item...">
+        <button class="main-btn" onclick="addItem('drijvelden')"><i class="fas fa-plus"></i></button>
+      </div>
+      <ul id="drijveldenList"></ul>
     </div>
-
-    <!-- Terug naar dashboard -->
-    <div class="home-btn" onclick="window.location.href='/Homecrew/dashboard.html'">
-        <i class="fas fa-home"></i>
-        <span>Dashboard</span>
-    </div>
-
-</div>
+  </div>
+</main>
 
 <script>
-const activeUser = localStorage.getItem("homecrewUser");
-if (!activeUser) window.location.href = "/Homecrew/index.html";
-document.getElementById("welcome").innerText = "Welkom, " + activeUser + " 👋";
+const user = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
+if(!user) window.location.href = "index.html";
+document.getElementById("welcomeUser").innerText = "Welkom, " + user + " 👋";
 
-function loadList(place) {
+function logout(){
+  localStorage.clear();
+  sessionStorage.clear();
+  location.href = "index.html";
+}
+
+function loadList(place){
   const list = JSON.parse(localStorage.getItem(`boodschappen_${place}`)) || [];
   const ul = document.getElementById(place + "List");
   ul.innerHTML = "";
@@ -168,7 +74,7 @@ function loadList(place) {
     li.textContent = item;
 
     const btn = document.createElement("button");
-    btn.textContent = "❌";
+    btn.innerHTML = "<i class='fas fa-trash'></i>";
     btn.addEventListener("click", () => removeItem(place, index));
 
     li.appendChild(btn);
@@ -176,27 +82,26 @@ function loadList(place) {
   });
 }
 
-function addItem(place) {
+function addItem(place){
   const input = document.getElementById(place + "Input");
   const value = input.value.trim();
-  if (!value) return;
+  if(!value) return;
 
   const list = JSON.parse(localStorage.getItem(`boodschappen_${place}`)) || [];
   list.push(value);
   localStorage.setItem(`boodschappen_${place}`, JSON.stringify(list));
-
   input.value = "";
   loadList(place);
 }
 
-function removeItem(place, index) {
+function removeItem(place, index){
   const list = JSON.parse(localStorage.getItem(`boodschappen_${place}`)) || [];
-  list.splice(index, 1);
+  list.splice(index,1);
   localStorage.setItem(`boodschappen_${place}`, JSON.stringify(list));
   loadList(place);
 }
 
-// Initialiseer lijsten
+// Initialiseren
 loadList("vingardium");
 loadList("drijvelden");
 </script>
