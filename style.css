@@ -2,15 +2,17 @@
 body {
     margin: 0;
     padding: 0;
-    background: linear-gradient(135deg, #f3f1ec, #e0f7fa);
+    background: linear-gradient(135deg, #ffe6f0, #b2ebf2); /* kleurrijker */
     font-family: 'Comic Sans MS', Arial, sans-serif;
     color: #333;
 }
 
+/* -------------------- Headers -------------------- */
 h1, h2, h3 {
     text-align: center;
-    color: #444;
+    color: #222;
     margin: 0 0 10px 0;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.2); /* subtiele text shadow */
 }
 
 /* -------------------- Login / Dashboard box -------------------- */
@@ -18,9 +20,9 @@ h1, h2, h3 {
     max-width: 420px;
     margin: 50px auto;
     padding: 25px;
-    background: #ffffff;
-    border-radius: 20px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    background: linear-gradient(145deg, #ffffff, #f7f9fa); /* licht gekleurd */
+    border-radius: 25px;
+    box-shadow: 0 12px 25px rgba(0,0,0,0.25);
     text-align: center;
 }
 
@@ -29,82 +31,111 @@ input[type="text"], input[type="password"], input[type="date"], textarea {
     width: 100%;
     padding: 14px;
     margin: 10px 0;
-    border-radius: 12px;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
+    border-radius: 16px;
+    border: none;
     font-size: 16px;
-    transition: 0.2s;
+    box-sizing: border-box;
+    transition: all 0.3s;
+    background: #f0f8ff;
+    box-shadow: inset 0 4px 8px rgba(0,0,0,0.1);
 }
 
 input:focus, textarea:focus {
-    border-color: #007bff;
     outline: none;
-    box-shadow: 0 0 8px rgba(0,123,255,0.3);
+    box-shadow: 0 0 10px rgba(0,123,255,0.5);
 }
 
 /* -------------------- Knoppen algemeen -------------------- */
 button {
     padding: 14px;
     border: none;
-    border-radius: 14px;
+    border-radius: 20px;
     cursor: pointer;
     font-size: 16px;
     margin-top: 10px;
     width: 100%;
     color: white;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.2);
 }
 
 button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
 }
 
-/* Specifieke knoppen */
-button.logout-btn { background: #dc3545; }
-button.logout-btn:hover { background: #c82333; }
-
-button.add-btn { background: #007bff; }
-button.add-btn:hover { background: #0069d9; }
+/* Logout knop opvallender */
+button.logout-btn { 
+    background: linear-gradient(45deg, #ff5f6d, #ffc371);
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
 
 /* -------------------- Dashboard knoppen -------------------- */
 .dashboard-buttons {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 18px;
     margin-top: 20px;
 }
 
 .dash-btn {
-    padding: 20px;
-    border-radius: 16px;
+    padding: 22px;
+    border-radius: 20px;
     font-size: 20px;
     color: white;
     text-align: center;
     cursor: pointer;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
-    transition: all 0.2s ease;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 12px;
+    justify-content: flex-start;
+    gap: 15px;
 }
 
 .dash-btn i {
-    font-size: 24px;
+    font-size: 28px;
 }
 
+/* Hover effecten met lichte gradient */
 .dash-btn:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+    box-shadow: 0 12px 22px rgba(0,0,0,0.35);
+    filter: brightness(1.1);
 }
 
-/* Dashboard knop kleuren */
-.dash-btn.agenda { background: #3a6ea5; }          /* blauw */
-.dash-btn.boodschappenlijst { background: #ff9800; } /* oranje */
-.dash-btn.berichten { background: #9c27b0; }       /* paars */
-.dash-btn.locatie { background: #4caf50; }         /* groen */
-.dash-btn.taken { background: #f44336; }           /* rood */
+/* Dashboard knop kleuren met gradient */
+.dash-btn.agenda { background: linear-gradient(135deg, #3a6ea5, #70a1ff); }
+.dash-btn.boodschappenlijst { background: linear-gradient(135deg, #ff9800, #ffc947); }
+.dash-btn.berichten { background: linear-gradient(135deg, #9c27b0, #d46ee5); }
+.dash-btn.locatie { background: linear-gradient(135deg, #4caf50, #81c784); }
+.dash-btn.taken { background: linear-gradient(135deg, #f44336, #ff7961); }
+
+/* -------------------- Terug naar home / iconen -------------------- */
+.home-btn {
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+    border-radius: 25px;
+    padding: 12px 20px;
+    color: white;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 15px auto;
+    width: fit-content;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.home-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    filter: brightness(1.2);
+}
 
 /* -------------------- Lijsten (Agenda / Taken) -------------------- */
 ul {
@@ -114,63 +145,25 @@ ul {
 }
 
 li {
-    background: #ffffff;
+    background: linear-gradient(145deg, #ffffff, #f1f1f1);
     margin-bottom: 15px;
-    padding: 15px;
-    border-radius: 16px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    padding: 18px;
+    border-radius: 20px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
     display: flex;
     flex-direction: column;
-    transition: all 0.2s;
+    transition: all 0.3s;
     position: relative;
 }
 
 li:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
 }
 
 /* Iconen per item type */
-li.agenda::before { content: "📅"; position: absolute; left: 12px; top: 15px; font-size: 20px; }
-li.taken::before { content: "📝"; position: absolute; left: 12px; top: 15px; font-size: 20px; }
-
-/* Checkbox in takenlijst */
-li input[type="checkbox"] {
-    transform: scale(1.4);
-    margin-right: 12px;
-}
-
-/* Event / taak titel */
-li strong {
-    font-size: 18px;
-    margin-bottom: 5px;
-}
-
-/* Delete knop */
-li button {
-    padding: 6px 12px;
-    font-size: 14px;
-    border-radius: 10px;
-    background: #dc3545;
-    color: white;
-    width: auto;
-    align-self: flex-start;
-    margin-top: 10px;
-}
-
-li button:hover {
-    background: #c82333;
-}
-
-/* -------------------- Kleur per gebruiker -------------------- */
-.user-jonas { border-left: 6px solid #3a6ea5; }   /* blauw */
-.user-liese { border-left: 6px solid #dc3545; }   /* rood */
-.user-loreana { border-left: 6px solid #ff69b4; }/* roze */
-
-/* Checkbox accent kleuren per gebruiker */
-.user-jonas input[type="checkbox"] { accent-color: #3a6ea5; }
-.user-liese input[type="checkbox"] { accent-color: #dc3545; }
-.user-loreana input[type="checkbox"] { accent-color: #ff69b4; }
+li.agenda::before { content: "📅"; position: absolute; left: 12px; top: 15px; font-size: 22px; }
+li.taken::before { content: "📝"; position: absolute; left: 12px; top: 15px; font-size: 22px; }
 
 /* -------------------- Mobiel responsiveness -------------------- */
 @media (max-width: 480px) {
@@ -182,77 +175,10 @@ li button:hover {
     .dash-btn {
         font-size: 18px;
         padding: 18px;
+        justify-content: center;
     }
 
     li {
         padding: 12px;
     }
-}
-
-/* -------------------- Chat & extra componenten -------------------- */
-.chat-box {
-    height: 50vh;
-    overflow-y: auto;
-    background: white;
-    padding: 15px;
-    border-radius: 20px;
-    box-shadow: 0 8px 15px rgba(0,0,0,0.08);
-    margin-bottom: 15px;
-}
-
-.my-message {
-    background: #3a6ea5;
-    color: white;
-    padding: 10px 14px;
-    border-radius: 20px 20px 5px 20px;
-    margin: 8px 0;
-    max-width: 80%;
-    align-self: flex-end;
-}
-
-.other-message {
-    background: #f1f1f1;
-    padding: 10px 14px;
-    border-radius: 20px 20px 20px 5px;
-    margin: 8px 0;
-    max-width: 80%;
-}
-
-.chat-input {
-    display: flex;
-    gap: 10px;
-}
-
-.chat-input input {
-    flex: 1;
-    padding: 10px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-}
-
-.chat-input button {
-    background: #3a6ea5;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 10px 14px;
-}
-
-/* -------------------- Animaties -------------------- */
-.list-box {
-    display: none;
-    width: 100%;
-    margin-top: 15px;
-    background: white;
-    padding: 15px;
-    border-radius: 20px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    animation: fadeIn 0.4s ease;
-}
-
-.list-box.show { display: block; }
-
-@keyframes fadeIn {
-    from {opacity:0; transform: translateY(10px);}
-    to {opacity:1; transform: translateY(0);}
 }
