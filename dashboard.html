@@ -11,27 +11,49 @@
 <body>
 
 <div class="dashboard-container">
-    <div class="welcome-banner" style="background: linear-gradient(135deg, #ffecd2, #fcb69f); padding: 20px; border-radius: 25px; margin: 20px;">
+    <!-- Welkomstbanner -->
+    <div class="welcome-banner">
         <h1 id="welcome">Welkom!</h1>
         <p>Wat gaan we vandaag doen? 🌈</p>
     </div>
 
+    <!-- Dashboard knoppen -->
     <div class="dashboard-buttons">
-        <div class="dash-btn" id="btnAgenda"><i class="fas fa-calendar-alt"></i> <span>Agenda</span></div>
-        <div class="dash-btn" id="btnBoodschappen"><i class="fas fa-shopping-basket"></i> <span>Boodschappenlijst</span></div>
-        <div class="dash-btn" id="btnBerichten"><i class="fas fa-comments"></i> <span>Berichten</span></div>
-        <div class="dash-btn" id="btnTaken"><i class="fas fa-tasks"></i> <span>Taken</span></div>
-        <div class="dash-btn" id="btnLocatie"><i class="fas fa-map-marker-alt"></i> <span>Locatie</span></div>
+        <div class="dash-btn agenda" id="btnAgenda">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Agenda</span>
+        </div>
+
+        <div class="dash-btn boodschappenlijst" id="btnBoodschappen">
+            <i class="fas fa-shopping-basket"></i>
+            <span>Boodschappenlijst</span>
+        </div>
+
+        <div class="dash-btn berichten" id="btnBerichten">
+            <i class="fas fa-comments"></i>
+            <span>Berichten</span>
+        </div>
+
+        <div class="dash-btn taken" id="btnTaken">
+            <i class="fas fa-tasks"></i>
+            <span>Taken</span>
+        </div>
+
+        <div class="dash-btn locatie" id="btnLocatie">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>Locatie</span>
+        </div>
     </div>
 
-    <button id="logoutBtn" class="logout-btn" style="margin:20px; padding:12px 20px; font-size:18px; border-radius:12px;">
+    <!-- Logout knop -->
+    <button id="logoutBtn" class="logout-btn">
         <i class="fas fa-sign-out-alt"></i> Uitloggen
     </button>
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-    // Active user ophalen (localStorage of sessionStorage)
+    // Active user ophalen
     const user = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
     if (!user) {
         window.location.href = "index.html";
