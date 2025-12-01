@@ -12,12 +12,16 @@
     <link rel="stylesheet" href="/Homecrew/style.css">
 </head>
 <body>
-    <div class="topbar">
-  <button class="back-btn" onclick="window.location.href='dashboard.html'">
-    ⬅ Terug
+
+<!-- TOPBAR MET HUIS-ICOON -->
+<div class="topbar">
+  <button class="back-btn" onclick="window.location.href='/Homecrew/dashboard.html'">
+    🏠 Home
   </button>
 </div>
+
 <div class="login-box">
+
     <h1 id="welcome"></h1>
 
     <h3>Nieuwe gebeurtenis</h3>
@@ -33,14 +37,19 @@
 </div>
 
 <script type="module" src="script.js"></script>
+
 <script>
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('/Homecrew/sw.js');
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/Homecrew/sw.js');
+}
 
 const activeUser = localStorage.getItem("homecrewUser");
 if (!activeUser) window.location.href = "/Homecrew/index.html";
+
 document.getElementById("welcome").innerText = "Welkom, " + activeUser + " 👋";
 
 loadEvents();
 </script>
+
 </body>
 </html>
