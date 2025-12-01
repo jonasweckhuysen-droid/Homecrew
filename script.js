@@ -187,3 +187,7 @@ export function removeTask(index) {
     localStorage.setItem(`tasks_${activeUser}`, JSON.stringify(tasks));
     loadTasks();
 }
+
+function gaNaar(pagina) {
+    window.location.href = pagina;
+}
