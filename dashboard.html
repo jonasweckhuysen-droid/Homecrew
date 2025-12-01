@@ -9,6 +9,7 @@
 <!-- Font Awesome voor iconen -->
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
+
 <body>
 <div class="dashboard-container">
 
@@ -18,21 +19,32 @@
     </div>
 
     <div class="dashboard-buttons">
-        <div class="dash-btn agenda" onclick="alert('Agenda');">
-            <i class="fas fa-calendar-alt"></i> <span>Agenda</span>
+
+        <div class="dash-btn agenda" onclick="openPage('agenda.html')">
+            <i class="fas fa-calendar-alt"></i> 
+            <span>Agenda</span>
         </div>
-        <div class="dash-btn boodschappenlijst" onclick="alert('Boodschappenlijst');">
-            <i class="fas fa-shopping-basket"></i> <span>Boodschappenlijst</span>
+
+        <div class="dash-btn boodschappenlijst" onclick="openPage('boodschappen.html')">
+            <i class="fas fa-shopping-basket"></i> 
+            <span>Boodschappenlijst</span>
         </div>
-        <div class="dash-btn berichten" onclick="alert('Berichten');">
-            <i class="fas fa-comments"></i> <span>Berichten</span>
+
+        <div class="dash-btn berichten" onclick="openPage('berichten.html')">
+            <i class="fas fa-comments"></i> 
+            <span>Berichten</span>
         </div>
-        <div class="dash-btn taken" onclick="alert('Taken');">
-            <i class="fas fa-tasks"></i> <span>Taken</span>
+
+        <div class="dash-btn taken" onclick="openPage('taken.html')">
+            <i class="fas fa-tasks"></i> 
+            <span>Taken</span>
         </div>
-        <div class="dash-btn locatie" onclick="alert('Locatie');">
-            <i class="fas fa-map-marker-alt"></i> <span>Locatie</span>
+
+        <div class="dash-btn locatie" onclick="openPage('locatie.html')">
+            <i class="fas fa-map-marker-alt"></i> 
+            <span>Locatie</span>
         </div>
+
     </div>
 
     <button id="logoutBtn" class="logout-btn" style="margin:20px; padding:12px 20px; font-size:18px; border-radius:12px;">
@@ -42,14 +54,18 @@
 </div>
 
 <script>
-    // Haal de ingelogde gebruiker
-    let username = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
+    // Check login
+    const username = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
 
     if(!username){
-        // Niet ingelogd → terug naar startpagina
         window.location.href = "index.html";
     } else {
         document.getElementById("welcome").innerText = "Welkom, " + username + " 👋";
+    }
+
+    // Navigatie functie (werkt in PWA + browser)
+    function openPage(page) {
+        window.location.href = page;
     }
 
     // Uitloggen
@@ -60,7 +76,7 @@
         sessionStorage.removeItem("homecrewPass");
 
         window.location.href = "index.html";
-    });
+    }
 </script>
 </body>
 </html>
