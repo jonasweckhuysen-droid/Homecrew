@@ -11,29 +11,47 @@
 
     <link rel="stylesheet" href="/Homecrew/style.css">
 </head>
-<body>
+<body class="agenda-body">
 
-<!-- TOPBAR MET HUIS-ICOON -->
+<!-- TOPBAR -->
 <div class="topbar">
   <button class="back-btn" onclick="window.location.href='/Homecrew/dashboard.html'">
-    🏠 Home
+    🏠
   </button>
+  <span class="top-title">Mijn agenda</span>
 </div>
 
 <div class="login-box">
 
     <h1 id="welcome"></h1>
 
-    <h3>Nieuwe gebeurtenis</h3>
-    <input type="date" id="date">
-    <input type="text" id="title" placeholder="Titel">
-    <textarea id="description" placeholder="Beschrijving"></textarea>
-    <button class="add-btn" onclick="addEvent()">Toevoegen</button>
+    <div class="card">
+      <h3>➕ Nieuwe gebeurtenis</h3>
 
-    <h3>Gebeurtenissen</h3>
-    <ul id="events"></ul>
+      <div class="input-group">
+        <label>📅 Datum</label>
+        <input type="date" id="date">
+      </div>
 
-    <button class="logout-btn" onclick="logout()">Uitloggen</button>
+      <div class="input-group">
+        <label>📝 Titel</label>
+        <input type="text" id="title" placeholder="Titel">
+      </div>
+
+      <div class="input-group">
+        <label>📖 Beschrijving</label>
+        <textarea id="description" placeholder="Beschrijving"></textarea>
+      </div>
+
+      <button class="add-btn" onclick="addEvent()">✅ Toevoegen</button>
+    </div>
+
+    <div class="card">
+      <h3>📌 Gebeurtenissen</h3>
+      <ul id="events" class="events-list"></ul>
+    </div>
+
+    <button class="logout-btn" onclick="logout()">🚪 Uitloggen</button>
 </div>
 
 <script type="module" src="script.js"></script>
