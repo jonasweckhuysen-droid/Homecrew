@@ -4,29 +4,90 @@
 <meta charset="UTF-8">
 <title>Homecrew - Berichten</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="manifest" href="/Homecrew/manifest.json">
-<link rel="apple-touch-icon" href="/Homecrew/icons/icon-192.png">
-<link rel="stylesheet" href="/Homecrew/style.css">
+<link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="app-body">
 
-<!-- TOPBAR MET HUIS-ICOON -->
-<div class="topbar">
-  <button class="back-btn" onclick="window.location.href='/Homecrew/dashboard.html'">🏠 Home</button>
-</div>
+<header class="topbar">
+  <button onclick="window.location.href='dashboard.html'" class="home-btn">🏠 Home</button>
+  <h2>💬 Berichten</h2>
+  <button onclick="logout()" class="home-btn">🚪 Uitloggen</button>
+</header>
 
-<div class="login-box">
-  <h1 id="welcome"></h1>
+<main class="content">
+  <h3 id="welcomeUser"></h3>
 
-  <div id="chatBox" class="chat-box"></div>
+  <div class="card">
+    <div id="chatBox" class="chat-box" style="max-height:300px; overflow-y:auto; padding:10px;"></div>
 
-  <input type="text" id="messageInput" placeholder="Typ je bericht..." />
-  <input type="file" id="imageInput" accept="image/*" />
-  <button class="add-btn" onclick="sendMessage()">Verstuur</button>
+    <input type="text" id="messageInput" placeholder="Typ je bericht..." />
+    <input type="file" id="imageInput" accept="image/*" />
+    <button class="main-btn" onclick="sendMessage()">Verstuur</button>
+  </div>
+</main>
 
-  <button class="logout-btn" onclick="logout()">Uitloggen</button>
-</div>
+<script>
+// ===========================
+// USER CHECK
+// ===========================
+const user = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
+if(!user) window.location.href = "index.html";
+document.getElementById("welcomeUser").innerText = "Welkom, " + user + " 👋";
 
-<script type="module" src="berichten.js"></script>
+// Gebruikerskleuren
+function getUserColor(user){
+  if(user.toLowerCase() === "jonas") return "#3498db";
+  if(user.toLowerCase() === "liese") return "#e74c3c";
+  if(user.toLowerCase() === "loreana") return "#ff69b4";
+  return "#555";
+}
+
+// ===========================
+// LOGOUT
+// ===========================
+function logout(){
+  localStorage.clear();
+  sessionStorage.clear();
+  location.href = "index.html";
+}
+
+// ===========================
+// MESSAGES
+// ===========================
+function sendMessage(){
+  const input = document.getElementById("messageInput");
+  const text = input.value.trim();
+  if(!text) return;
+
+  let messages = JSON.parse(localStorage.getItem("homecrewMessages")) || [];
+  messages.push({ user, text, time: new Date().toISOString() });
+  localStorage.setItem("homecrewMessages", JSON.stringify(messages));
+  input.value = "";
+  loadMessages();
+}
+
+function loadMessages(){
+  const chatBox = document.getElementById("chatBox");
+  chatBox.innerHTML = "";
+  let messages = JSON.parse(localStorage.getItem("homecrewMessages")) || [];
+
+  messages.forEach(msg => {
+    const div = document.createElement("div");
+    div.style.background = getUserColor(msg.user);
+    div.style.color = "white";
+    div.style.padding = "8px 12px";
+    div.style.borderRadius = "12px";
+    div.style.marginBottom = "8px";
+    div.innerHTML = `<strong>${msg.user}</strong>: ${msg.text} <small style="opacity:0.7;">${new Date(msg.time).toLocaleString("nl-BE")}</small>`;
+    chatBox.appendChild(div);
+  });
+
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// Initial load
+loadMessages();
+</script>
+
 </body>
 </html>
