@@ -18,32 +18,26 @@
     </div>
 
     <div class="dashboard-buttons">
-
         <div class="dash-btn agenda" id="btnAgenda">
-            <i class="fas fa-calendar-alt"></i> 
+            <i class="fas fa-calendar-alt"></i>   
             <span>Agenda</span>
         </div>
-
         <div class="dash-btn boodschappenlijst" id="btnBoodschappen">
-            <i class="fas fa-shopping-basket"></i> 
+            <i class="fas fa-shopping-basket"></i>   
             <span>Boodschappenlijst</span>
         </div>
-
         <div class="dash-btn berichten" id="btnBerichten">
-            <i class="fas fa-comments"></i> 
+            <i class="fas fa-comments"></i>   
             <span>Berichten</span>
         </div>
-
         <div class="dash-btn taken" id="btnTaken">
-            <i class="fas fa-tasks"></i> 
+            <i class="fas fa-tasks"></i>   
             <span>Taken</span>
         </div>
-
         <div class="dash-btn locatie" id="btnLocatie">
-            <i class="fas fa-map-marker-alt"></i> 
+            <i class="fas fa-map-marker-alt"></i>   
             <span>Locatie</span>
         </div>
-
     </div>
 
     <button id="logoutBtn" class="logout-btn" style="margin:20px; padding:12px 20px; font-size:18px; border-radius:12px;">
@@ -52,47 +46,35 @@
 
 </div>
 
-<!-- BELANGRIJK: dit moet ONDERAAN -->
 <script type="module">
-
 import { logout } from "./script.js";
 
 // ✅ Check login
 const username = localStorage.getItem("homecrewUser");
+if (!username) window.location.href = "index.html";
+else document.getElementById("welcome").innerText = "Welkom, " + username + " 👋";
 
-if (!username) {
-    window.location.href = "index.html";
-} else {
-    document.getElementById("welcome").innerText = "Welkom, " + username + " 👋";
-}
-
-// ✅ Navigatie
+// ✅ Navigatie knoppen
 document.getElementById("btnAgenda").addEventListener("click", () => {
     window.location.href = "agenda.html";
 });
-
 document.getElementById("btnBoodschappen").addEventListener("click", () => {
     window.location.href = "boodschappen.html";
 });
-
 document.getElementById("btnBerichten").addEventListener("click", () => {
     window.location.href = "berichten.html";
 });
-
 document.getElementById("btnTaken").addEventListener("click", () => {
     window.location.href = "taken.html";
 });
-
 document.getElementById("btnLocatie").addEventListener("click", () => {
     window.location.href = "locatie.html";
 });
 
-// ✅ Logout via Firebase + localStorage
+// ✅ Logout
 document.getElementById("logoutBtn").addEventListener("click", async () => {
     await logout();
 });
-
 </script>
 </body>
-
 </html>
