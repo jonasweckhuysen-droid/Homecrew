@@ -6,10 +6,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="style.css">
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-
-<!-- OneSignal SDK -->
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-  <script>
+<script>
   window.OneSignal = window.OneSignal || [];
   OneSignal.push(function() {
     OneSignal.init({
@@ -17,11 +15,9 @@
       notifyButton: { enable: true },
       allowLocalhostAsSecureOrigin: true
     });
-
-    // Vraag toestemming direct bij openen van de pagina
     OneSignal.showSlidedownPrompt();
   });
-  </script>
+</script>
 </head>
 <body class="app-body">
 
@@ -43,7 +39,6 @@
 </main>
 
 <script type="module">
-// ================= FIREBASE =================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
@@ -51,9 +46,8 @@ import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "h
 const firebaseConfig = {
   apiKey: "AIzaSyCwlr069pxNXEEhIEGNug5Ly_kKSuvxSzs",
   authDomain: "homecrew-d8e21.firebaseapp.com",
-  databaseURL: "https://homecrew-d8e21-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "homecrew-d8e21",
-  storageBucket: "homecrew-d8e21.firebasestorage.app",
+  storageBucket: "homecrew-d8e21.appspot.com",
   messagingSenderId: "47664248188",
   appId: "1:47664248188:web:0994c6b2ba07f6fee060f9",
   measurementId: "G-5R58JL5D5K"
@@ -90,30 +84,30 @@ onSnapshot(messagesCol, (snapshot) => {
     const chatBox = document.getElementById("chatBox");
     chatBox.innerHTML = "";
     snapshot.docs
-        .sort((a,b) => a.data().timestamp?.seconds - b.data().timestamp?.seconds)
+        .sort((a,b) => (a.data().timestamp?.seconds || 0) - (b.data().timestamp?.seconds || 0))
         .forEach(docSnap => {
-        const msg = docSnap.data();
-        const div = document.createElement("div");
-        div.style.background = getUserColor(msg.user);
-        div.style.color = "white";
-        div.style.padding = "8px 12px";
-        div.style.borderRadius = "12px";
-        div.style.marginBottom = "8px";
-        div.innerHTML = `<strong>${msg.user}</strong>: ${msg.text} <small style="opacity:0.7;">${new Date(msg.timestamp.seconds*1000).toLocaleString("nl-BE")}</small>`;
-        chatBox.appendChild(div);
+            const msg = docSnap.data();
+            const div = document.createElement("div");
+            div.style.background = getUserColor(msg.user);
+            div.style.color = "white";
+            div.style.padding = "8px 12px";
+            div.style.borderRadius = "12px";
+            div.style.marginBottom = "8px";
+            div.innerHTML = `<strong>${msg.user}</strong>: ${msg.text} <small style="opacity:0.7;">${msg.timestamp?.seconds ? new Date(msg.timestamp.seconds*1000).toLocaleString("nl-BE") : "Onbekend tijdstip"}</small>`;
+            chatBox.appendChild(div);
 
-        // Push notificatie voor nieuwe berichten van andere gebruikers
-        if(msg.user !== user){
-          OneSignal.push(function() {
-            OneSignal.sendSelfNotification(
-              `Nieuw bericht van ${msg.user}`,
-              msg.text,
-              '', // optionele URL bij klikken
-              { user: msg.user }
-            );
-          });
-        }
-    });
+            // Push notificatie voor nieuwe berichten van andere gebruikers
+            if(msg.user !== user){
+              OneSignal.push(function() {
+                OneSignal.sendSelfNotification(
+                  `Nieuw bericht van ${msg.user}`,
+                  msg.text,
+                  '',
+                  { user: msg.user }
+                );
+              });
+            }
+        });
     chatBox.scrollTop = chatBox.scrollHeight;
 });
 
@@ -123,13 +117,18 @@ async function sendMessage(){
     const text = input.value.trim();
     if(!text) return;
 
-    await addDoc(messagesCol, {
-        user,
-        text,
-        timestamp: serverTimestamp()
-    });
-
-    input.value = "";
+    try {
+        await addDoc(messagesCol, {
+            user,
+            text,
+            timestamp: serverTimestamp()
+        });
+        console.log("Bericht succesvol verzonden:", text);
+        input.value = "";
+    } catch (error) {
+        console.error("Fout bij verzenden:", error);
+        alert("Kan bericht niet verzenden. Controleer console voor details.");
+    }
 }
 </script>
 
