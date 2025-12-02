@@ -4,107 +4,248 @@
 <meta charset="UTF-8">
 <title>Homecrew - Boodschappen</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <link rel="stylesheet" href="style.css">
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCwlr069pxNXEEhIEGNug5Ly_kKSuvxSzs",
+  authDomain: "homecrew-d8e21.firebaseapp.com",
+  databaseURL: "https://homecrew-d8e21-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "homecrew-d8e21",
+  storageBucket: "homecrew-d8e21.firebasestorage.app",
+  messagingSenderId: "47664248188",
+  appId: "1:47664248188:web:0994c6b2ba07f6fee060f9"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// USER CHECK
+const user = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
+if(!user) window.location.href = "index.html";
+
+document.addEventListener("DOMContentLoaded", ()=>{
+    document.getElementById("welcomeUser").innerText = "Welkom, " + user + " 👋";
+})
+
+// -------- LIVE LOAD --------
+function liveLoad(place){
+    const listRef = ref(db, "boodschappen/" + place);
+
+    onValue(listRef, (snapshot)=>{
+        const ul = document.getElementById(place + "List");
+        ul.innerHTML = "";
+
+        if(snapshot.exists()){
+            const data = snapshot.val();
+
+            Object.keys(data).forEach(key=>{
+                const li = document.createElement("li");
+                li.innerHTML = `<span>${data[key].item}</span>`;
+
+                const del = document.createElement("button");
+                del.innerHTML = `<i class="fas fa-trash"></i>`;
+                del.onclick = ()=> removeItem(place,key);
+
+                li.appendChild(del);
+                ul.appendChild(li);
+            });
+        }
+    })
+}
+
+// -------- ADD --------
+window.addItem = function(place){
+    const input = document.getElementById(place + "Input");
+    const value = input.value.trim();
+    if(!value) return;
+
+    const listRef = ref(db, "boodschappen/" + place);
+    push(listRef, {
+        item: value,
+        user: user,
+        time: Date.now()
+    });
+
+    input.value = "";
+}
+
+// -------- REMOVE --------
+function removeItem(place,key){
+    const itemRef = ref(db, "boodschappen/" + place + "/" + key);
+    remove(itemRef);
+}
+
+// -------- LOGOUT --------
+window.logout = function(){
+  localStorage.clear();
+  sessionStorage.clear();
+  window.location.href = "index.html";
+}
+
+// START LIVE
+liveLoad("vingardium");
+liveLoad("drijvelden");
+
+</script>
+
+<style>
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px;
+  background:linear-gradient(135deg,#667eea,#764ba2);
+  color:white;
+}
+
+.home-btn{
+  padding:8px 12px;
+  border:none;
+  border-radius:10px;
+  background:white;
+  color:black;
+  font-weight:bold;
+}
+
+.content{
+  padding:15px;
+}
+
+.card{
+  background:white;
+  padding:15px;
+  border-radius:20px;
+}
+
+.list-box{
+  display:none;
+  margin-top:10px;
+}
+
+.list-box.show{
+  display:block;
+}
+
+.input-group{
+  display:flex;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+.input-group input{
+  flex:1;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #ccc;
+}
+
+.main-btn{
+  padding:10px 15px;
+  background:#667eea;
+  border:none;
+  color:white;
+  border-radius:10px;
+}
+
+ul{
+  list-style:none;
+  padding:0;
+}
+
+li{
+  background:#f1f4ff;
+  margin-bottom:8px;
+  padding:10px;
+  border-radius:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+/* Knoppen */
+.dashboard-buttons{
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+}
+
+.dash-btn{
+  padding:15px;
+  border-radius:20px;
+  text-align:center;
+  font-size:18px;
+  cursor:pointer;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:10px;
+}
+
+/* KLEUR + ZWARTE TEKST */
+#vingardiumBtn{
+  background:linear-gradient(135deg,#11998e,#38ef7d);
+  color:black;
+}
+#drijveldenBtn{
+  background:linear-gradient(135deg,#f7971e,#ffd200);
+  color:black;
+}
+</style>
 </head>
+
 <body class="app-body">
 
 <header class="topbar">
-  <button onclick="window.location.href='dashboard.html'" class="home-btn"><i class="fas fa-home"></i> Dashboard</button>
+  <button onclick="window.location.href='dashboard.html'" class="home-btn">
+    <i class="fas fa-home"></i>
+  </button>
+
   <h2>🛒 Boodschappen</h2>
-  <button onclick="logout()" class="home-btn">🚪 Uitloggen</button>
+
+  <button onclick="logout()" class="home-btn">
+    <i class="fas fa-sign-out-alt"></i>
+  </button>
 </header>
 
 <main class="content">
-  <h3 id="welcomeUser"></h3>
 
-  <div class="card">
-    <div class="dashboard-buttons">
+<h3 id="welcomeUser"></h3>
 
-      <!-- VINGARDIUM -->
-      <div class="dash-btn" onclick="document.getElementById('vingardium-box').classList.toggle('show')">
-        <i class="fas fa-seedling"></i> <span>Vingardium</span> <i class="fas fa-chevron-down"></i>
-      </div>
+<div class="card">
 
-      <!-- DRIJVELDEN -->
-      <div class="dash-btn" onclick="document.getElementById('drijvelden-box').classList.toggle('show')">
-        <i class="fas fa-tractor"></i> <span>Drijvelden</span> <i class="fas fa-chevron-down"></i>
-      </div>
-
-    </div>
-
-    <!-- VINGARDIUM LIJST -->
-    <div class="list-box" id="vingardium-box">
-      <div class="input-group">
-        <input type="text" id="vingardiumInput" placeholder="Nieuw item...">
-        <button class="main-btn" onclick="addItem('vingardium')"><i class="fas fa-plus"></i></button>
-      </div>
-      <ul id="vingardiumList"></ul>
-    </div>
-
-    <!-- DRIJVELDEN LIJST -->
-    <div class="list-box" id="drijvelden-box">
-      <div class="input-group">
-        <input type="text" id="drijveldenInput" placeholder="Nieuw item...">
-        <button class="main-btn" onclick="addItem('drijvelden')"><i class="fas fa-plus"></i></button>
-      </div>
-      <ul id="drijveldenList"></ul>
-    </div>
+<div class="dashboard-buttons">
+  <div id="vingardiumBtn" class="dash-btn" onclick="document.getElementById('vingardium-box').classList.toggle('show')">
+    <i class="fas fa-seedling"></i> Vingardium <i class="fas fa-chevron-down"></i>
   </div>
+
+  <div id="drijveldenBtn" class="dash-btn" onclick="document.getElementById('drijvelden-box').classList.toggle('show')">
+    <i class="fas fa-tractor"></i> Drijvelden <i class="fas fa-chevron-down"></i>
+  </div>
+</div>
+
+<div class="list-box" id="vingardium-box">
+  <div class="input-group">
+    <input type="text" id="vingardiumInput" placeholder="Nieuw item...">
+    <button class="main-btn" onclick="addItem('vingardium')"><i class="fas fa-plus"></i></button>
+  </div>
+  <ul id="vingardiumList"></ul>
+</div>
+
+<div class="list-box" id="drijvelden-box">
+  <div class="input-group">
+    <input type="text" id="drijveldenInput" placeholder="Nieuw item...">
+    <button class="main-btn" onclick="addItem('drijvelden')"><i class="fas fa-plus"></i></button>
+  </div>
+  <ul id="drijveldenList"></ul>
+</div>
+
+</div>
 </main>
-
-<script>
-const user = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
-if(!user) window.location.href = "index.html";
-document.getElementById("welcomeUser").innerText = "Welkom, " + user + " 👋";
-
-function logout(){
-  localStorage.clear();
-  sessionStorage.clear();
-  location.href = "index.html";
-}
-
-function loadList(place){
-  const list = JSON.parse(localStorage.getItem(`boodschappen_${place}`)) || [];
-  const ul = document.getElementById(place + "List");
-  ul.innerHTML = "";
-
-  list.forEach((item, index) => {
-    const li = document.createElement("li");
-    li.textContent = item;
-
-    const btn = document.createElement("button");
-    btn.innerHTML = "<i class='fas fa-trash'></i>";
-    btn.addEventListener("click", () => removeItem(place, index));
-
-    li.appendChild(btn);
-    ul.appendChild(li);
-  });
-}
-
-function addItem(place){
-  const input = document.getElementById(place + "Input");
-  const value = input.value.trim();
-  if(!value) return;
-
-  const list = JSON.parse(localStorage.getItem(`boodschappen_${place}`)) || [];
-  list.push(value);
-  localStorage.setItem(`boodschappen_${place}`, JSON.stringify(list));
-  input.value = "";
-  loadList(place);
-}
-
-function removeItem(place, index){
-  const list = JSON.parse(localStorage.getItem(`boodschappen_${place}`)) || [];
-  list.splice(index,1);
-  localStorage.setItem(`boodschappen_${place}`, JSON.stringify(list));
-  loadList(place);
-}
-
-// Initialiseren
-loadList("vingardium");
-loadList("drijvelden");
-</script>
-
 </body>
 </html>
