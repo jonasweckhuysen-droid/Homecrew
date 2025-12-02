@@ -31,6 +31,24 @@ body {
     margin-bottom: 20px;
 }
 
+.welcome-banner h1 {
+    margin: 0 0 8px 0;
+}
+
+.weather-block {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+    font-size: 18px;
+}
+
+.weather-block i {
+    font-size: 28px;
+    color: #FFD700;
+}
+
 /* Knoppen grid */
 .dashboard-buttons {
     display: grid;
@@ -80,7 +98,6 @@ body {
     font-weight: bold;
 }
 .logout-btn i { margin-right: 6px; }
-
 </style>
 </head>
 <body>
@@ -88,61 +105,55 @@ body {
 <div class="dashboard-container">
 
     <div class="welcome-banner">
-    <h1 id="welcome"></h1>
-    <p>Wat gaan we vandaag doen? 🌈</p>
-    <!-- Nieuw weerblok -->
-    <div id="weather" style="margin-top:15px; font-size:18px; display:flex; align-items:center; justify-content:center; gap:10px;">
-        <i id="weatherIcon" class="fas fa-sun"></i>
-        <span id="weatherTemp">--°C</span>
-        <span id="weatherTime">--:--</span>
-    </div>
+        <h1 id="welcome"></h1>
+        <p>Wat gaan we vandaag doen? 🌈</p>
+        <div class="weather-block">
+            <i id="weatherIcon" class="fas fa-sun"></i>
+            <span id="weatherTemp">--°C</span>
+            <span id="weatherTime">--:--</span>
+        </div>
     </div>
 
     <div class="dashboard-buttons">
-
-        <div class="dash-btn agenda" id="btnAgenda">
-            <i class="fas fa-calendar-alt"></i>
-            Agenda
-        </div>
-
-        <div class="dash-btn boodschappenlijst" id="btnBoodschappen">
-            <i class="fas fa-shopping-basket"></i>
-            Boodschappen
-        </div>
-
-        <div class="dash-btn berichten" id="btnBerichten">
-            <i class="fas fa-comments"></i>
-            Berichten
-        </div>
-
-        <div class="dash-btn taken" id="btnTaken">
-            <i class="fas fa-list-check"></i>
-            Taken
-        </div>
-
-        <div class="dash-btn locatie" id="btnLocatie">
-            <i class="fas fa-location-dot"></i>
-            Locatie
-        </div>
-
+        <div class="dash-btn agenda" id="btnAgenda"><i class="fas fa-calendar-alt"></i>Agenda</div>
+        <div class="dash-btn boodschappenlijst" id="btnBoodschappen"><i class="fas fa-shopping-basket"></i>Boodschappen</div>
+        <div class="dash-btn berichten" id="btnBerichten"><i class="fas fa-comments"></i>Berichten</div>
+        <div class="dash-btn taken" id="btnTaken"><i class="fas fa-list-check"></i>Taken</div>
+        <div class="dash-btn locatie" id="btnLocatie"><i class="fas fa-location-dot"></i>Locatie</div>
     </div>
 
-    <button class="logout-btn" id="logoutBtn">
-        <i class="fas fa-sign-out-alt"></i> Uitloggen
-    </button>
+    <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Uitloggen</button>
 
 </div>
-
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
 
+    // ================== Gebruiker ==================
+    const user = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
+    if(!user) { window.location.href = "index.html"; return; }
+    document.getElementById("welcome").innerText = `Welkom, ${user} 👋`;
+
+    // ================== Navigatie ==================
+    document.getElementById("btnAgenda").onclick = () => window.location.href = "agenda.html";
+    document.getElementById("btnBoodschappen").onclick = () => window.location.href = "boodschappen.html";
+    document.getElementById("btnBerichten").onclick = () => window.location.href = "berichten.html";
+    document.getElementById("btnTaken").onclick = () => window.location.href = "taken.html";
+    document.getElementById("btnLocatie").onclick = () => window.location.href = "locatie.html";
+
+    document.getElementById("logoutBtn").onclick = () => {
+        localStorage.removeItem("homecrewUser");
+        sessionStorage.removeItem("homecrewUser");
+        window.location.href = "index.html";
+    };
+
+    // ================== Weer ==================
     const weatherIcon = document.getElementById("weatherIcon");
     const weatherTemp = document.getElementById("weatherTemp");
     const weatherTime = document.getElementById("weatherTime");
 
     const API_KEY = "ngEVGAF3TMlmft2R";
-    const LAT = 51.2012; // Herentals
+    const LAT = 51.2012;
     const LON = 4.8170;
 
     async function updateWeather() {
@@ -151,13 +162,13 @@ document.addEventListener("DOMContentLoaded", () => {
             if(!res.ok) throw new Error("Meteoblue API response niet OK");
             const data = await res.json();
 
-            // Meteoblue returned verschillende objecten, we nemen 'current_conditions'
-            const temp = Math.round(data.current_conditions.temperature);
-            const symbol = data.current_conditions.weathercode; // 0=zon, 1=bewolkt, 2=regen, etc.
+            // Meteoblue gebruikt nu vaak current.temp_air
+            const temp = Math.round(data.current?.temp_air ?? data.current_conditions?.temperature ?? 0);
+            const code = data.current?.icon_code ?? data.current_conditions?.weathercode ?? 0;
 
             // Icon mapping
             let iconClass = "fa-sun";
-            switch(symbol) {
+            switch(code){
                 case 0: iconClass = "fa-sun"; break; // zon
                 case 1: iconClass = "fa-cloud"; break; // bewolkt
                 case 2: iconClass = "fa-cloud-showers-heavy"; break; // regen
@@ -170,13 +181,10 @@ document.addEventListener("DOMContentLoaded", () => {
             weatherIcon.className = `fas ${iconClass}`;
             weatherTemp.innerText = temp + "°C";
 
-            // Tijd
             const now = new Date();
-            const hours = now.getHours().toString().padStart(2,"0");
-            const minutes = now.getMinutes().toString().padStart(2,"0");
-            weatherTime.innerText = `${hours}:${minutes}`;
-
-        } catch(e) {
+            weatherTime.innerText = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        }
+        catch(e){
             console.error("Weer kon niet geladen worden:", e);
             weatherTemp.innerText = "--°C";
             weatherTime.innerText = "--:--";
@@ -185,10 +193,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     updateWeather();
-    setInterval(updateWeather, 60000); // update elke minuut
+    setInterval(updateWeather, 60000);
+
 });
 </script>
-    
 
 </body>
 </html>
