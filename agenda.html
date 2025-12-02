@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Homecrew – Agenda</title>
 <link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/ical.js@1.4.0/build/ical.min.js"></script>
 <style>
   .app-body { padding:10px; }
   .card { background:#fff; padding:12px; margin:12px 0; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.08); }
@@ -45,7 +44,9 @@
   </div>
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/ical.js@1.4.0/build/ical.min.js"></script>
 <script>
+// ====== USER ======
 const user = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
 if (!user) window.location.href = "index.html";
 document.getElementById("welcomeUser").innerText = "Welkom, " + user + " 👋";
@@ -65,23 +66,37 @@ function getUserColor(u){
   return "#777";
 }
 
+// ====== LOKAAL TOEVOEGEN ======
 function addLocalEvent(){
   const title = document.getElementById("eventTitle").value.trim();
   const date = document.getElementById("eventDate").value;
   const desc = document.getElementById("eventDescription").value.trim();
+
   if (!title || !date) { alert("Titel en datum zijn verplicht"); return; }
+
   const events = JSON.parse(localStorage.getItem("homecrewLocalEvents") || "[]");
   events.push({ user, title, date, description: desc });
   localStorage.setItem("homecrewLocalEvents", JSON.stringify(events));
+
   document.getElementById("eventTitle").value = "";
   document.getElementById("eventDate").value = "";
   document.getElementById("eventDescription").value = "";
+
   loadEvents();
 }
 
-// ICS feed URL
+// ====== GOOGLE ICS (CORS-PROXY) ======
 const ICS_URL = "https://calendar.google.com/calendar/ical/b3756ae16d0f11ea12a33407c6077e5925740ab0ce0d19514aa77a7fc6a6e0c0%40group.calendar.google.com/public/basic.ics";
+const PROXY_URL = "https://api.allorigins.win/raw?url=" + encodeURIComponent(ICS_URL);
 
+// ====== HELPERS ======
+function escapeHtml(str){
+  if (!str) return "";
+  return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+                    .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+
+// ====== PARSE ICS EVENTS ======
 async function loadEvents(){
   const list = document.getElementById("eventList");
   list.innerHTML = "";
@@ -89,45 +104,53 @@ async function loadEvents(){
   // 1) lokale events
   const localEvents = JSON.parse(localStorage.getItem("homecrewLocalEvents") || "[]");
   localEvents.sort((a,b)=> new Date(a.date) - new Date(b.date));
-  localEvents.forEach(ev=>{
+  for (const ev of localEvents){
     const li = document.createElement("li");
     li.className = "event-item";
     li.style.borderLeft = "6px solid " + getUserColor(ev.user);
-    li.innerHTML = `<strong>${ev.title}</strong>
-                    <div class="event-meta">${new Date(ev.date).toLocaleString("nl-BE")}</div>
-                    <div class="event-user" style="color:${getUserColor(ev.user)}">👤 ${ev.user}</div>
-                    <div>${ev.description||""}</div>`;
+    li.innerHTML = `
+      <strong>${escapeHtml(ev.title)}</strong>
+      <div class="event-meta">${new Date(ev.date).toLocaleString("nl-BE")}</div>
+      <div class="event-user" style="color:${getUserColor(ev.user)}">👤 ${escapeHtml(ev.user)}</div>
+      <div>${escapeHtml(ev.description || "")}</div>
+    `;
     list.appendChild(li);
-  });
+  }
 
-  // 2) ICS feed
-  try{
-    const resp = await fetch(ICS_URL);
-    const text = await resp.text();
-    const jcalData = ICAL.parse(text);
+  // 2) ICS via proxy
+  try {
+    const res = await fetch(PROXY_URL);
+    if (!res.ok) throw new Error("ICS kon niet geladen worden");
+
+    const icsText = await res.text();
+    const jcalData = ICAL.parse(icsText);
     const comp = new ICAL.Component(jcalData);
     const vevents = comp.getAllSubcomponents("vevent");
 
-    vevents.forEach(v=>{
+    vevents.forEach(v => {
       const ev = new ICAL.Event(v);
       const li = document.createElement("li");
       li.className = "event-item google-event";
-      li.innerHTML = `<strong>${ev.summary || "Geen titel"}</strong>
-                      <div class="event-meta">${ev.startDate.toJSDate().toLocaleString("nl-BE")}</div>
-                      <div style="color:black;">📅 Google Agenda</div>
-                      ${ev.location ? `<div>📍 ${ev.location}</div>` : ""}`;
+      li.innerHTML = `
+        <strong>${escapeHtml(ev.summary || "Geen titel")}</strong>
+        <div class="event-meta">${ev.startDate.toJSDate().toLocaleString("nl-BE")}</div>
+        <div style="color:black;">📅 Google Agenda</div>
+        ${ev.location ? `<div>📍 ${escapeHtml(ev.location)}</div>` : ""}
+      `;
       list.appendChild(li);
     });
-  }catch(err){
+
+  } catch(err){
     console.error("Fout bij ICS laden:", err);
     const li = document.createElement("li");
     li.className = "event-item google-event";
-    li.innerText = "Fout bij laden Google Agenda.";
+    li.innerText = "Kon Google Agenda niet laden (check console)";
     list.appendChild(li);
   }
 }
 
-setInterval(loadEvents,5*60*1000);
+// auto-refresh
+setInterval(loadEvents, 5*60*1000);
 loadEvents();
 </script>
 </body>
