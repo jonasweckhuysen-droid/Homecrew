@@ -1,8 +1,81 @@
-// ===============================
-// Firebase configuratie (jij vult zelf API in)
-// ===============================
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, collection, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Homecrew - Live Locatie</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDo7KIQjAWmr6mNE413sky28HRM74yUaXQ"></script>
+
+<style>
+#statusBar {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: black;
+  color: white;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  z-index: 9999;
+}
+
+.control-bar {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.control-bar button {
+  padding: 8px 18px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  margin: 4px;
+  font-weight: bold;
+}
+
+.start-btn { background: #00c850; color: white; }
+.stop-btn { background: #ff3b30; color: white; }
+</style>
+</head>
+
+<body class="app-body">
+
+<div id="statusBar">🔄 Verbinden...</div>
+
+<header class="topbar">
+  <button class="home-btn" onclick="window.location.href='dashboard.html'">
+    <i class="fas fa-home"></i> Dashboard
+  </button>
+
+  <h2>📍 Live Locatie</h2>
+
+  <button class="home-btn" onclick="logout()">
+    <i class="fas fa-sign-out-alt"></i> Uitloggen
+  </button>
+</header>
+
+<main class="content">
+  <h3 id="welcomeUser"></h3>
+
+  <div class="control-bar">
+    <button class="start-btn" onclick="startTracking()">▶ Start delen</button>
+    <button class="stop-btn" onclick="stopTracking()">⏹ Stop delen</button>
+  </div>
+
+  <div class="card">
+    <div id="map" style="width:100%; height:500px; border-radius:16px;"></div>
+  </div>
+</main>
+
+<script type="module">
+
+// ================= FIREBASE =================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getFirestore, collection, doc, setDoc, onSnapshot, serverTimestamp } 
+from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCwlr069pxNXEEhIEGNug5Ly_kKSuvxSzs",
@@ -17,168 +90,157 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ===============================
-// Variabelen
-// ===============================
-const activeUser = localStorage.getItem("gebruikersnaam") || "Onbekend";
-let map;
-let myMarker;
-let userMarkers = {};
+// ================= STATUS =================
+const statusBar = document.getElementById("statusBar");
 
-// ===============================
-// Google Map opstarten
-// ===============================
-window.initMap = function () {
-  map = new google.maps.Map(document.getElementById("map"), {
-    center: { lat: 51.2, lng: 4.4 },
-    zoom: 10,
-    disableDefaultUI: true,
-    zoomControl: true
-  });
+// ================= GEBRUIKER =================
+const activeUser = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
 
-  startLocationTracking();
-  subscribeToOthers();
+if (!activeUser) {
+  window.location.href = "index.html";
+}
+
+document.getElementById("welcomeUser").textContent = "Welkom, " + activeUser + " 👋";
+
+window.logout = function () {
+  localStorage.removeItem("homecrewUser");
+  sessionStorage.removeItem("homecrewUser");
+  window.location.href = "index.html";
 };
 
-// ===============================
-// Live locatie volgen (batterij vriendelijk)
-// ===============================
-function startLocationTracking() {
+// ================= GOOGLE MAP =================
+let map;
+let markers = {};
+let infoWindows = {};
 
+function initMap() {
+  map = new google.maps.Map(document.getElementById("map"), {
+    center: { lat: 51.2194, lng: 4.4025 },
+    zoom: 10,
+    mapTypeId: "roadmap"
+  });
+}
+
+initMap();
+
+// ================= KLEUREN PER GEBRUIKER =================
+const userColors = {
+  "jonas": "blue",
+  "liese": "red",
+  "loreana": "pink"
+};
+
+// ================= LIVE TRACKING =================
+let watchId = null;
+
+window.startTracking = function () {
   if (!navigator.geolocation) {
-    alert("Geolocatie wordt niet ondersteund op dit toestel.");
+    alert("Locatie wordt niet ondersteund");
     return;
   }
 
-  navigator.geolocation.watchPosition(
-    async (position) => {
+  statusBar.textContent = "🟢 Locatie delen actief";
 
-      const { latitude, longitude } = position.coords;
+  watchId = navigator.geolocation.watchPosition(async (position) => {
+    const { latitude, longitude } = position.coords;
 
-      // Marker op eigen locatie
-      const pos = { lat: latitude, lng: longitude };
+    map.setCenter({ lat: latitude, lng: longitude });
 
-      if (!myMarker) {
-        myMarker = new google.maps.Marker({
-          position: pos,
-          map: map,
-          title: "Ik (" + activeUser + ")",
-          icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 8,
-            fillColor: "#0066ff",
-            fillOpacity: 1,
-            strokeColor: "#ffffff",
-            strokeWeight: 2
-          }
-        });
+    await setDoc(doc(db, "users_locations", activeUser), {
+      latitude,
+      longitude,
+      timestamp: serverTimestamp()
+    }, { merge: true });
 
-        map.setCenter(pos);
-      } else {
-        myMarker.setPosition(pos);
-      }
+  }, (error) => {
+    console.error(error);
+    statusBar.textContent = "🔴 Locatie fout: " + error.message;
+  },{
+    enableHighAccuracy: true,
+    maximumAge: 0,
+    timeout: 10000
+  });
+};
 
-      // Opslaan in Firestore
-      await setDoc(doc(db, "users_locations", activeUser), {
-        latitude,
-        longitude,
-        username: activeUser,
-        status: "online",
-        timestamp: serverTimestamp()
-      }, { merge: true });
+window.stopTracking = function () {
+  if (watchId !== null) {
+    navigator.geolocation.clearWatch(watchId);
+    watchId = null;
+  }
+  statusBar.textContent = "⛔ Locatie delen gestopt";
+};
 
-      updateStatus("🟢 Online");
+// Start automatisch
+startTracking();
 
-    },
-    (error) => {
-      updateStatus("🔴 Geen toestemming");
-      alert("Je moet je locatie toestaan om deze pagina te gebruiken.");
-      window.location.href = "index.html";
-    },
-    {
-      enableHighAccuracy: true,
-      maximumAge: 10000,
-      timeout: 10000
-    }
-  );
-}
+// ================= LIVE WEERGAVE ANDEREN =================
+const locationsRef = collection(db, "users_locations");
 
-// ===============================
-// Andere gebruikers in real-time
-// ===============================
-function subscribeToOthers() {
+onSnapshot(locationsRef, (snapshot) => {
+  snapshot.forEach((userDoc) => {
 
-  const locationsRef = collection(db, "users_locations");
+    const user = userDoc.id;
+    const data = userDoc.data();
 
-  onSnapshot(locationsRef, (snapshot) => {
+    if (!data.latitude || !data.longitude) return;
 
-    const now = Date.now();
+    const position = {
+      lat: data.latitude,
+      lng: data.longitude
+    };
 
-    snapshot.forEach((docSnap) => {
-      const data = docSnap.data();
+    const color = userColors[user.toLowerCase()] || "green";
 
-      if (!data || !data.latitude || !data.longitude) return;
-      if (docSnap.id === activeUser) return;
+    const lastUpdate = data.timestamp?.seconds
+      ? new Date(data.timestamp.seconds * 1000).toLocaleTimeString()
+      : "net bijgewerkt";
 
-      const lastUpdate = data.timestamp?.seconds * 1000 || 0;
-      const secondsAgo = (now - lastUpdate) / 1000;
+    if (markers[user]) {
 
-      let opacity = 1;
-      let status = "🟢 Online";
+      markers[user].setPosition(position);
 
-      if (secondsAgo > 120) {
-        opacity = 0.3;
-        status = "⚫ Offline";
-      }
+      infoWindows[user].setContent(`
+        <strong>${user}</strong><br>
+        Laatste update: ${lastUpdate}
+      `);
 
-      const position = {
-        lat: data.latitude,
-        lng: data.longitude
-      };
+    } else {
 
-      if (userMarkers[docSnap.id]) {
-
-        userMarkers[docSnap.id].setPosition(position);
-        userMarkers[docSnap.id].setIcon({
+      const marker = new google.maps.Marker({
+        position,
+        map,
+        title: user,
+        icon: {
           path: google.maps.SymbolPath.CIRCLE,
-          scale: 7,
-          fillColor: "#ff0000",
-          fillOpacity: opacity,
-          strokeColor: "#ffffff",
-          strokeWeight: 1
-        });
+          scale: 10,
+          fillColor: color,
+          fillOpacity: 1,
+          strokeWeight: 1,
+          strokeColor: "#000"
+        }
+      });
 
-      } else {
+      const infoWindow = new google.maps.InfoWindow({
+        content: `
+          <strong>${user}</strong><br>
+          Laatste update: ${lastUpdate}
+        `
+      });
 
-        const marker = new google.maps.Marker({
-          position: position,
-          map: map,
-          title: `${data.username || docSnap.id} - ${status}`,
-          icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 7,
-            fillColor: "#ff0000",
-            fillOpacity: opacity,
-            strokeColor: "#ffffff",
-            strokeWeight: 1
-          }
-        });
+      marker.addListener("click", () => {
+        infoWindow.open(map, marker);
+      });
 
-        userMarkers[docSnap.id] = marker;
-
-      }
-
-    });
+      markers[user] = marker;
+      infoWindows[user] = infoWindow;
+    }
 
   });
-}
 
-// ===============================
-// Status tekst tonen
-// ===============================
-function updateStatus(text) {
-  const statusEl = document.getElementById("status");
-  if (statusEl) {
-    statusEl.textContent = text;
-  }
-}
+  statusBar.textContent = "✅ Live verbinding actief";
+});
+
+</script>
+
+</body>
+</html>
