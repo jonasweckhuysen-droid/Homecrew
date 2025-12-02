@@ -9,20 +9,25 @@ function isLoggedIn() {
     return !!(localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser"));
 }
 
+function getActiveUser() {
+    return localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
+}
+
 function login(username, password, stayLoggedIn) {
     if (!username || !password) {
-        alert("Vul naam en wachtwoord/pincode in");
+        document.getElementById("error").innerText = "Vul naam en wachtwoord/pincode in";
         return;
     }
 
-    // Bestaande users ophalen of nieuwe maken
     const users = JSON.parse(localStorage.getItem("homecrewUsers") || "{}");
 
+    // Bestaat al maar wachtwoord fout
     if (users[username] && users[username] !== password) {
-        alert("Onjuist wachtwoord!");
+        document.getElementById("error").innerText = "Onjuist wachtwoord!";
         return;
     }
 
+    // Nieuwe gebruiker registreren
     users[username] = password;
     localStorage.setItem("homecrewUsers", JSON.stringify(users));
 
@@ -50,12 +55,18 @@ function loadTasks() {
     if (!ul) return;
 
     ul.innerHTML = "";
-    const user = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
+    const user = getActiveUser();
 
     tasks.forEach((task, index) => {
         const li = document.createElement("li");
-        li.innerHTML = `<strong>${task.title}</strong><p>${task.desc}</p><small>${task.user}</small>
-                        <button class="delete-btn">❌</button>`;
+
+        li.innerHTML = `
+            <strong>${task.title}</strong>
+            <p>${task.desc}</p>
+            <small>${task.user || ""}</small>
+            <button class="delete-btn">❌</button>
+        `;
+
         li.querySelector(".delete-btn").onclick = () => removeTask(index);
         ul.appendChild(li);
     });
@@ -66,9 +77,11 @@ function addTask() {
     const desc = document.getElementById("taskDesc")?.value.trim();
     if (!title) return alert("Vul een titel in");
 
-    const user = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
+    const user = getActiveUser();
     const tasks = JSON.parse(localStorage.getItem("tasks_all") || "[]");
+
     tasks.push({ title, desc, user });
+
     localStorage.setItem("tasks_all", JSON.stringify(tasks));
 
     if (document.getElementById("taskTitle")) document.getElementById("taskTitle").value = "";
@@ -85,21 +98,48 @@ function removeTask(index) {
 }
 
 // =====================
-// EVENT LISTENERS TOEVOEGEN
+// EVENT LISTENERS
 // =====================
 document.addEventListener("DOMContentLoaded", () => {
-    // Dashboard welcome
-    const welcomeEl = document.getElementById("welcome");
-    const user = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
-    if (welcomeEl && user) welcomeEl.innerText = "Welkom, " + user + " 👋";
 
-    // Knoppen
+    // AUTO-LOGIN
+    if (document.getElementById("username") && isLoggedIn()) {
+        window.location.href = "dashboard.html";
+        return;
+    }
+
+    // LOGIN KNOP
+    const startBtn = document.getElementById("startBtn");
+    if (startBtn) {
+        startBtn.addEventListener("click", () => {
+            const username = document.getElementById("username").value.trim();
+            const password = document.getElementById("password").value.trim();
+            const stay = document.getElementById("stayLoggedIn").checked;
+
+            login(username, password, stay);
+        });
+    }
+
+    // DASHBOARD WELCOME
+    const welcomeEl = document.getElementById("welcome");
+    const user = getActiveUser();
+    if (welcomeEl && user) {
+        welcomeEl.innerText = "Welkom, " + user + " 👋";
+    }
+
+    // TAKEN
     const addBtn = document.getElementById("addTaskBtn");
     if (addBtn) addBtn.onclick = addTask;
 
     const logoutBtn = document.getElementById("logoutBtn");
     if (logoutBtn) logoutBtn.onclick = logout;
 
+    if (document.getElementById("tasks")) {
+        loadTasks();
+    }
+
+    // Navigatie
     const btnTaken = document.getElementById("btnTaken");
     if (btnTaken) btnTaken.onclick = () => window.location.href = "taken.html";
+
 });
