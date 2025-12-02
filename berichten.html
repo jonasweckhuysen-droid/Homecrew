@@ -9,7 +9,7 @@
 
 <!-- OneSignal SDK -->
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
+  <script>
   window.OneSignal = window.OneSignal || [];
   OneSignal.push(function() {
     OneSignal.init({
@@ -17,8 +17,11 @@
       notifyButton: { enable: true },
       allowLocalhostAsSecureOrigin: true
     });
+
+    // Vraag toestemming direct bij openen van de pagina
+    OneSignal.showSlidedownPrompt();
   });
-</script>
+  </script>
 </head>
 <body class="app-body">
 
