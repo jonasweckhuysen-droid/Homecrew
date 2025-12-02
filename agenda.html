@@ -10,6 +10,7 @@
   .card { background:#fff; padding:12px; margin:12px 0; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.08); }
   ul.event-list { padding:0; margin:0; }
   .event-item { list-style:none; padding:10px; margin-bottom:8px; border-left:6px solid #3498db; background:#fbfbfb; border-radius:6px; }
+  .google-event { border-left-color:#222; }
   .event-meta { font-size:0.85em; color:#666; margin-top:4px; }
   .event-user { font-weight:600; margin-top:6px; }
   input, textarea { width:100%; padding:8px; margin:6px 0; box-sizing:border-box; border-radius:6px; border:1px solid #ddd; }
@@ -43,10 +44,11 @@
   </div>
 </main>
 
-<!-- agenda.js regelt alles: lokaal + Google ICS -->
+<script src="https://cdn.jsdelivr.net/npm/ical.js@1.4.0/build/ical.min.js"></script>
 <script src="agenda.js"></script>
+
 <script>
-// ====== USER LOGIC ======
+// ====== USER LOGICA ======
 const user = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
 if (!user) window.location.href = "index.html";
 document.getElementById("welcomeUser").innerText = "Welkom, " + user + " 👋";
@@ -82,9 +84,9 @@ function addLocalEvent(){
   document.getElementById("eventDate").value = "";
   document.getElementById("eventDescription").value = "";
 
-  // roep agenda.js aan om opnieuw te laden
-  if (typeof loadEvents === "function") loadEvents();
+  loadEvents();
 }
 </script>
+
 </body>
 </html>
