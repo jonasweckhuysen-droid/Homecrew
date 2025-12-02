@@ -15,8 +15,10 @@ body { margin:0; background:#f2f6ff; font-family:Arial,sans-serif; }
 /* Welkomstblok */
 .welcome-banner { text-align:center; background:linear-gradient(135deg,#667eea,#764ba2); color:white; padding:20px 15px; border-radius:20px; margin-bottom:20px; }
 .welcome-banner h1 { margin:0 0 8px 0; }
+
+/* Weerblok */
 .weather-block { display:flex; justify-content:center; align-items:center; gap:12px; margin-top:10px; font-size:18px; }
-.weather-block i { font-size:28px; color:#FFD700; }
+.weather-block i { font-size:28px; }
 
 /* Knoppen grid */
 .dashboard-buttons { display:grid; grid-template-columns:1fr 1fr; gap:15px; }
@@ -37,6 +39,7 @@ body { margin:0; background:#f2f6ff; font-family:Arial,sans-serif; }
 <body>
 
 <div class="dashboard-container">
+
     <div class="welcome-banner">
         <h1 id="welcome"></h1>
         <p>Wat gaan we vandaag doen? 🌈</p>
@@ -56,6 +59,7 @@ body { margin:0; background:#f2f6ff; font-family:Arial,sans-serif; }
     </div>
 
     <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Uitloggen</button>
+
 </div>
 
 <script>
@@ -81,43 +85,47 @@ document.addEventListener("DOMContentLoaded", () => {
     const weatherIcon = document.getElementById("weatherIcon");
     const weatherTemp = document.getElementById("weatherTemp");
     const weatherTime = document.getElementById("weatherTime");
+
     const API_KEY = "ngEVGAF3TMlmft2R";
     const LAT = 51.2012;
     const LON = 4.8170;
 
     async function updateWeather(){
         try{
-            const res = await fetch(`https://my.meteoblue.com/forecast?lat=${LAT}&lon=${LON}&apikey=${API_KEY}&format=json`);
+            const res = await fetch(`https://my.meteoblue.com/nowcast?lat=${LAT}&lon=${LON}&apikey=${API_KEY}&format=json`);
             if(!res.ok) throw new Error("Meteoblue API response niet OK");
             const data = await res.json();
 
-            // Werkelijke huidige temperatuur
-            const temp = Math.round(data.current.temperature.value);
+            // Temperatuur en code
+            const temp = Math.round(data.current.temperature);
+            const code = data.current.weathercode;
 
-            // Meteocode
-            const code = data.current.weather.value; // 0=zon, 1=bewolkt, 2=regen, etc.
-
-            let iconClass = "fa-sun";
+            // Icon mapping en kleur
+            let iconClass="fa-sun";
+            let iconColor="#FFD700";
             switch(code){
-                case 0: iconClass="fa-sun"; break;
-                case 1: iconClass="fa-cloud"; break;
-                case 2: iconClass="fa-cloud-showers-heavy"; break;
-                case 3: iconClass="fa-snowflake"; break;
-                case 4: iconClass="fa-cloud-meatball"; break;
-                case 5: iconClass="fa-bolt"; break;
-                default: iconClass="fa-sun";
+                case 0: iconClass="fa-sun"; iconColor="#FFD700"; break;
+                case 1: iconClass="fa-cloud"; iconColor="#B0C4DE"; break;
+                case 2: iconClass="fa-cloud-showers-heavy"; iconColor="#1E90FF"; break;
+                case 3: iconClass="fa-snowflake"; iconColor="#00CED1"; break;
+                case 4: iconClass="fa-cloud-meatball"; iconColor="#A9A9A9"; break;
+                case 5: iconClass="fa-bolt"; iconColor="#FFA500"; break;
+                default: iconClass="fa-sun"; iconColor="#FFD700";
             }
 
-            weatherIcon.className = `fas ${iconClass}`;
+            weatherIcon.className=`fas ${iconClass}`;
+            weatherIcon.style.color = iconColor;
             weatherTemp.innerText = temp + "°C";
 
             const now = new Date();
             weatherTime.innerText = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+
         }catch(e){
             console.error("Weer kon niet geladen worden:", e);
             weatherTemp.innerText="--°C";
             weatherTime.innerText="--:--";
             weatherIcon.className="fas fa-sun";
+            weatherIcon.style.color="#FFD700";
         }
     }
 
