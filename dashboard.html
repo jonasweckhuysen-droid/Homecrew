@@ -88,8 +88,14 @@ body {
 <div class="dashboard-container">
 
     <div class="welcome-banner">
-        <h1 id="welcome"></h1>
-        <p>Wat gaan we vandaag doen? 🌈</p>
+    <h1 id="welcome"></h1>
+    <p>Wat gaan we vandaag doen? 🌈</p>
+    <!-- Nieuw weerblok -->
+    <div id="weather" style="margin-top:15px; font-size:18px; display:flex; align-items:center; justify-content:center; gap:10px;">
+        <i id="weatherIcon" class="fas fa-sun"></i>
+        <span id="weatherTemp">--°C</span>
+        <span id="weatherTime">--:--</span>
+    </div>
     </div>
 
     <div class="dashboard-buttons">
@@ -153,9 +159,55 @@ document.addEventListener("DOMContentLoaded", () => {
         sessionStorage.removeItem("homecrewUser");
         window.location.href = "index.html";
     };
+    // ================= WEER =================
+const weatherIcon = document.getElementById("weatherIcon");
+const weatherTemp = document.getElementById("weatherTemp");
+const weatherTime = document.getElementById("weatherTime");
+
+// OpenWeatherMap API Key
+const OWM_API_KEY = "JE_API_KEY_HIER"; // Vervang door jouw API key van OpenWeatherMap
+// Coördinaten van de locatie, bv. Herentals
+const LAT = 51.2012;
+const LON = 4.8170;
+
+// Functie om weer op te halen
+async function updateWeather() {
+    try {
+        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${LAT}&lon=${LON}&units=metric&lang=nl&appid=${OWM_API_KEY}`);
+        const data = await res.json();
+        const temp = Math.round(data.main.temp);
+        const weather = data.weather[0].main.toLowerCase();
+
+        // Kies icoon op basis van weather
+        let iconClass = "fa-sun"; // standaard
+        if(weather.includes("cloud")) iconClass = "fa-cloud";
+        else if(weather.includes("rain")) iconClass = "fa-cloud-showers-heavy";
+        else if(weather.includes("snow")) iconClass = "fa-snowflake";
+        else if(weather.includes("storm") || weather.includes("thunder")) iconClass = "fa-bolt";
+        else if(weather.includes("hail")) iconClass = "fa-cloud-meatball";
+
+        weatherIcon.className = `fas ${iconClass}`;
+        weatherTemp.innerText = temp + "°C";
+
+        // Tijd
+        const now = new Date();
+        const hours = now.getHours().toString().padStart(2,"0");
+        const minutes = now.getMinutes().toString().padStart(2,"0");
+        weatherTime.innerText = `${hours}:${minutes}`;
+    } catch(e) {
+        console.error("Weer kon niet geladen worden:", e);
+        weatherTemp.innerText = "--°C";
+        weatherTime.innerText = "--:--";
+    }
+}
+
+// Update weer direct + elke minuut
+updateWeather();
+setInterval(updateWeather, 60000);
 
 });
 </script>
+    
 
 </body>
 </html>
