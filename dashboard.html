@@ -4,57 +4,135 @@
 <meta charset="UTF-8">
 <title>Homecrew - Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <link rel="stylesheet" href="style.css">
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-<script src="script.js" defer></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+<style>
+body {
+    margin: 0;
+    background: #f2f6ff;
+    font-family: Arial, sans-serif;
+}
+
+.dashboard-container {
+    padding: 15px;
+    max-width: 480px;
+    margin: auto;
+}
+
+/* Welkomstblok */
+.welcome-banner {
+    text-align: center;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 20px 15px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+}
+
+/* Knoppen grid */
+.dashboard-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+/* Algemene knop */
+.dash-btn {
+    padding: 20px 10px;
+    border-radius: 18px;
+    color: white;
+    text-align: center;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+    transition: 0.2s ease;
+}
+
+.dash-btn i {
+    font-size: 28px;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.dash-btn:active {
+    transform: scale(0.95);
+}
+
+/* KLEUREN PER KNOP */
+.agenda { background: linear-gradient(135deg,#ff9966,#ff5e62); }
+.boodschappenlijst { background: linear-gradient(135deg,#56ccf2,#2f80ed); }
+.berichten { background: linear-gradient(135deg,#a8ff78,#78ffd6); }
+.taken { background: linear-gradient(135deg,#f7971e,#ffd200); }
+.locatie { background: linear-gradient(135deg,#c471f5,#fa71cd); }
+
+/* Logout */
+.logout-btn {
+    margin-top: 25px;
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 30px;
+    background: #ff4d4d;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+}
+.logout-btn i { margin-right: 6px; }
+
+</style>
 </head>
 <body>
 
 <div class="dashboard-container">
-    <!-- Welkomstbanner -->
+
     <div class="welcome-banner">
-        <h1 id="welcome">Welkom!</h1>
+        <h1 id="welcome"></h1>
         <p>Wat gaan we vandaag doen? 🌈</p>
     </div>
 
-    <!-- Dashboard knoppen -->
     <div class="dashboard-buttons">
+
         <div class="dash-btn agenda" id="btnAgenda">
             <i class="fas fa-calendar-alt"></i>
-            <span>Agenda</span>
+            Agenda
         </div>
 
         <div class="dash-btn boodschappenlijst" id="btnBoodschappen">
             <i class="fas fa-shopping-basket"></i>
-            <span>Boodschappenlijst</span>
+            Boodschappen
         </div>
 
         <div class="dash-btn berichten" id="btnBerichten">
             <i class="fas fa-comments"></i>
-            <span>Berichten</span>
+            Berichten
         </div>
 
         <div class="dash-btn taken" id="btnTaken">
-            <i class="fas fa-tasks"></i>
-            <span>Taken</span>
+            <i class="fas fa-list-check"></i>
+            Taken
         </div>
 
         <div class="dash-btn locatie" id="btnLocatie">
-            <i class="fas fa-map-marker-alt"></i>
-            <span>Locatie</span>
+            <i class="fas fa-location-dot"></i>
+            Locatie
         </div>
+
     </div>
 
-    <!-- Logout knop -->
-    <button id="logoutBtn" class="logout-btn">
+    <button class="logout-btn" id="logoutBtn">
         <i class="fas fa-sign-out-alt"></i> Uitloggen
     </button>
+
 </div>
+
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-    // Active user ophalen
+
     const user = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
+
     if (!user) {
         window.location.href = "index.html";
         return;
@@ -62,23 +140,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("welcome").innerText = "Welkom, " + user + " 👋";
 
-    // Navigatieknoppen koppelen
-    const dashboardButtons = [
-        { id: "btnAgenda", page: "agenda.html" },
-        { id: "btnBoodschappen", page: "boodschappen.html" },
-        { id: "btnBerichten", page: "berichten.html" },
-        { id: "btnTaken", page: "taken.html" },
-        { id: "btnLocatie", page: "locatie.html" }
-    ];
+    // Navigatie
+    document.getElementById("btnAgenda").onclick = () => window.location.href = "agenda.html";
+    document.getElementById("btnBoodschappen").onclick = () => window.location.href = "boodschappen.html";
+    document.getElementById("btnBerichten").onclick = () => window.location.href = "berichten.html";
+    document.getElementById("btnTaken").onclick = () => window.location.href = "taken.html";
+    document.getElementById("btnLocatie").onclick = () => window.location.href = "locatie.html";
 
-    dashboardButtons.forEach(btn => {
-        const el = document.getElementById(btn.id);
-        if (el) el.onclick = () => window.location.href = btn.page;
-    });
+    // Logout
+    document.getElementById("logoutBtn").onclick = () => {
+        localStorage.removeItem("homecrewUser");
+        sessionStorage.removeItem("homecrewUser");
+        window.location.href = "index.html";
+    };
 
-    // Logout knop
-    const logoutBtn = document.getElementById("logoutBtn");
-    if (logoutBtn) logoutBtn.onclick = logout;
 });
 </script>
 
