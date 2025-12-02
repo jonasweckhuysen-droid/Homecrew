@@ -10,7 +10,6 @@
   .card { background:#fff; padding:12px; margin:12px 0; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.08); }
   ul.event-list { padding:0; margin:0; }
   .event-item { list-style:none; padding:10px; margin-bottom:8px; border-left:6px solid #3498db; background:#fbfbfb; border-radius:6px; }
-  .google-event { border-left-color:#222; }
   .event-meta { font-size:0.85em; color:#666; margin-top:4px; }
   .event-user { font-weight:600; margin-top:6px; }
   input, textarea { width:100%; padding:8px; margin:6px 0; box-sizing:border-box; border-radius:6px; border:1px solid #ddd; }
@@ -44,9 +43,10 @@
   </div>
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/ical.js@1.4.0/build/ical.min.js"></script>
+<!-- agenda.js regelt alles: lokaal + Google ICS -->
+<script src="agenda.js"></script>
 <script>
-// ====== USER ======
+// ====== USER LOGIC ======
 const user = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
 if (!user) window.location.href = "index.html";
 document.getElementById("welcomeUser").innerText = "Welkom, " + user + " 👋";
@@ -82,83 +82,9 @@ function addLocalEvent(){
   document.getElementById("eventDate").value = "";
   document.getElementById("eventDescription").value = "";
 
-  loadEvents();
+  // roep agenda.js aan om opnieuw te laden
+  if (typeof loadEvents === "function") loadEvents();
 }
-
-// ====== GOOGLE ICS (CORS-PROXY) ======
-const ICS_URL = "https://calendar.google.com/calendar/ical/b3756ae16d0f11ea12a33407c6077e5925740ab0ce0d19514aa77a7fc6a6e0c0%40group.calendar.google.com/public/basic.ics";
-const PROXY_URL = "https://api.allorigins.win/raw?url=" + encodeURIComponent(ICS_URL);
-
-// ====== HELPERS ======
-function escapeHtml(str){
-  if (!str) return "";
-  return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
-                    .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
-}
-
-// ====== PARSE ICS EVENTS ======
-async function loadEvents(){
-  const list = document.getElementById("eventList");
-  list.innerHTML = "";
-
-  // 1) lokale events
-  const localEvents = JSON.parse(localStorage.getItem("homecrewLocalEvents") || "[]");
-  localEvents.sort((a,b)=> new Date(a.date) - new Date(b.date));
-  for (const ev of localEvents){
-    const li = document.createElement("li");
-    li.className = "event-item";
-    li.style.borderLeft = "6px solid " + getUserColor(ev.user);
-    li.innerHTML = `
-      <strong>${escapeHtml(ev.title)}</strong>
-      <div class="event-meta">${new Date(ev.date).toLocaleString("nl-BE")}</div>
-      <div class="event-user" style="color:${getUserColor(ev.user)}">👤 ${escapeHtml(ev.user)}</div>
-      <div>${escapeHtml(ev.description || "")}</div>
-    `;
-    list.appendChild(li);
-  }
-
-  // 2) ICS via proxy
-  try {
-    const res = await fetch(PROXY_URL);
-    if (!res.ok) throw new Error("ICS kon niet geladen worden");
-
-    const icsText = await res.text();
-    const jcalData = ICAL.parse(icsText);
-    const comp = new ICAL.Component(jcalData);
-    const vevents = comp.getAllSubcomponents("vevent");
-
-    vevents.forEach(v => {
-      const ev = new ICAL.Event(v);
-      const start = ev.startDate.toJSDate();
-      const li = document.createElement("li");
-      li.className = "event-item google-event";
-
-      // fallback: title uit summary of description
-      let title = ev.summary || "";
-      if (!title && ev.description) title = ev.description.split("\n")[0];
-      if (!title) title = "Geen titel";
-
-      li.innerHTML = `
-        <strong>${escapeHtml(title)}</strong>
-        <div class="event-meta">${start.toLocaleString("nl-BE")}</div>
-        <div style="color:black;">📅 Google Agenda</div>
-        ${ev.location ? `<div>📍 ${escapeHtml(ev.location)}</div>` : ""}
-      `;
-      list.appendChild(li);
-    });
-
-  } catch(err){
-    console.error("Fout bij ICS laden:", err);
-    const li = document.createElement("li");
-    li.className = "event-item google-event";
-    li.innerText = "Kon Google Agenda niet laden (check console)";
-    list.appendChild(li);
-  }
-}
-
-// auto-refresh
-setInterval(loadEvents, 5*60*1000);
-loadEvents();
 </script>
 </body>
 </html>
