@@ -2,6 +2,7 @@ import fs from "fs";
 import fetch from "node-fetch";
 import ical from "ical";
 import admin from "firebase-admin";
+import cron from "node-cron";
 
 // === FIREBASE ADMIN INITIALISEREN ===
 const serviceAccount = JSON.parse(fs.readFileSync("./serviceAccountKey.json", "utf8"));
@@ -14,15 +15,18 @@ const db = admin.firestore();
 const eventsCol = db.collection("homecrewEvents");
 
 // === GOOGLE CALENDAR ICS URL ===
-const icsUrl = "https://calendar.google.com/calendar/ical/YOUR_CALENDAR_ID/public/basic.ics";
+const icsUrl = "https://calendar.google.com/calendar/ical/b3756ae16d0f11ea12a33407c6077e5925740ab0ce0d19514aa77a7fc6a6e0c0%40group.calendar.google.com/public/basic.ics";
 
-// === IMPORTEREN ===
+// === FUNCTIE: IMPORTEREN ===
 async function importCalendar() {
   try {
+    console.log("Start import Google Calendar...");
+
     const res = await fetch(icsUrl);
     const icsData = await res.text();
 
     const parsed = ical.parseICS(icsData);
+    let addedCount = 0;
 
     for (const k in parsed) {
       const ev = parsed[k];
@@ -31,7 +35,7 @@ async function importCalendar() {
         const date = ev.start.toISOString();
         const description = ev.description || "";
 
-        // Check of event al bestaat in Firestore
+        // Controleer of event al bestaat
         const snapshot = await eventsCol
           .where("title", "==", title)
           .where("date", "==", date)
@@ -45,18 +49,22 @@ async function importCalendar() {
             description,
             timestamp: admin.firestore.FieldValue.serverTimestamp()
           });
+          addedCount++;
           console.log(`Toegevoegd: ${title} (${date})`);
-        } else {
-          console.log(`Bestaat al: ${title} (${date})`);
         }
       }
     }
 
-    console.log("Import klaar!");
+    console.log(`Import klaar! Nieuwe events toegevoegd: ${addedCount}`);
   } catch (err) {
     console.error("Fout bij importeren:", err);
   }
 }
 
-// === SCRIPT RUNNEN ===
+// === CRON JOB: AUTOMATISCH ELKE 5 MINUTEN ===
+cron.schedule("*/5 * * * *", () => {
+  importCalendar();
+});
+
+// Eerste keer meteen draaien
 importCalendar();
