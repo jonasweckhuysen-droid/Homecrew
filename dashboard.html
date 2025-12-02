@@ -16,6 +16,10 @@ body { margin:0; background:#f2f6ff; font-family:Arial,sans-serif; }
 .welcome-banner { text-align:center; background:linear-gradient(135deg,#667eea,#764ba2); color:white; padding:20px 15px; border-radius:20px; margin-bottom:20px; }
 .welcome-banner h1 { margin:0 0 8px 0; }
 
+/* Weerblok */
+.weather-block { display:flex; justify-content:center; align-items:center; gap:12px; margin-top:10px; font-size:18px; }
+.weather-block i { font-size:28px; color:#FFD700; }
+
 /* Knoppen grid */
 .dashboard-buttons { display:grid; grid-template-columns:1fr 1fr; gap:15px; }
 .dash-btn { padding:20px 10px; border-radius:18px; color:white; text-align:center; font-weight:bold; cursor:pointer; box-shadow:0 10px 15px rgba(0,0,0,0.1); transition:0.2s ease; }
@@ -30,28 +34,26 @@ body { margin:0; background:#f2f6ff; font-family:Arial,sans-serif; }
 /* Logout */
 .logout-btn { margin-top:25px; width:100%; padding:15px; border:none; border-radius:30px; background:#ff4d4d; color:white; font-size:16px; font-weight:bold; }
 .logout-btn i { margin-right:6px; }
-
-/* Meteoblue widget styling */
-#meteoblue-widget { margin-top:15px; display:flex; justify-content:center; }
 </style>
 </head>
 <body>
 
 <div class="dashboard-container">
 
+    <!-- Welkomstblok -->
     <div class="welcome-banner">
         <h1 id="welcome"></h1>
         <p>Wat gaan we vandaag doen? 🌈</p>
 
-        <!-- Meteoblue weer-widget -->
-        <div id="meteoblue-widget">
-            <a class="meteoblue-weather-widget" 
-               href="https://www.meteoblue.com/nl/weer/widget?geoloc=ip&days=1&tempunit=CELSIUS">
-            </a>
-            <script type="text/javascript" src="https://www.meteoblue.com/widget/js/?id=weather"></script>
+        <!-- Live weer -->
+        <div class="weather-block">
+            <i id="weatherIcon" class="fas fa-sun"></i>
+            <span id="weatherTemp">--°C</span>
+            <span id="weatherTime">--:--</span>
         </div>
     </div>
 
+    <!-- Dashboard knoppen -->
     <div class="dashboard-buttons">
         <div class="dash-btn agenda" id="btnAgenda"><i class="fas fa-calendar-alt"></i>Agenda</div>
         <div class="dash-btn boodschappenlijst" id="btnBoodschappen"><i class="fas fa-shopping-basket"></i>Boodschappen</div>
@@ -60,29 +62,77 @@ body { margin:0; background:#f2f6ff; font-family:Arial,sans-serif; }
         <div class="dash-btn locatie" id="btnLocatie"><i class="fas fa-location-dot"></i>Locatie</div>
     </div>
 
+    <!-- Uitloggen -->
     <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Uitloggen</button>
 
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-    // Gebruiker
+    // ================== Gebruiker ==================
     const user = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
     if(!user){ window.location.href="index.html"; return; }
     document.getElementById("welcome").innerText = `Welkom, ${user} 👋`;
 
-    // Navigatie
-    document.getElementById("btnAgenda").onclick = ()=>window.location.href="agenda.html";
-    document.getElementById("btnBoodschappen").onclick = ()=>window.location.href="boodschappen.html";
-    document.getElementById("btnBerichten").onclick = ()=>window.location.href="berichten.html";
-    document.getElementById("btnTaken").onclick = ()=>window.location.href="taken.html";
-    document.getElementById("btnLocatie").onclick = ()=>window.location.href="locatie.html";
+    // ================== Navigatie ==================
+    document.getElementById("btnAgenda").onclick = () => window.location.href="agenda.html";
+    document.getElementById("btnBoodschappen").onclick = () => window.location.href="boodschappen.html";
+    document.getElementById("btnBerichten").onclick = () => window.location.href="berichten.html";
+    document.getElementById("btnTaken").onclick = () => window.location.href="taken.html";
+    document.getElementById("btnLocatie").onclick = () => window.location.href="locatie.html";
 
-    document.getElementById("logoutBtn").onclick = ()=>{
+    document.getElementById("logoutBtn").onclick = () => {
         localStorage.removeItem("homecrewUser");
         sessionStorage.removeItem("homecrewUser");
         window.location.href="index.html";
     };
+
+    // ================== Weer ==================
+    const weatherIcon = document.getElementById("weatherIcon");
+    const weatherTemp = document.getElementById("weatherTemp");
+    const weatherTime = document.getElementById("weatherTime");
+
+    const API_KEY = "ngEVGAF3TMlmft2R";
+    const LAT = 51.2012;
+    const LON = 4.8170;
+
+    async function updateWeather() {
+        try {
+            const res = await fetch(`https://my.meteoblue.com/packages/meteoforecast?lat=${LAT}&lon=${LON}&apikey=${API_KEY}&format=json&temperature_unit=°C`);
+            if(!res.ok) throw new Error("Meteoblue API response niet OK");
+            const data = await res.json();
+
+            // Huidige temperatuur en code
+            const temp = Math.round(data.current?.temp_air ?? 0);
+            const code = data.current?.icon_code ?? 0;
+
+            // Icon mapping
+            let iconClass = "fa-sun";
+            switch(code){
+                case 0: iconClass="fa-sun"; break;
+                case 1: iconClass="fa-cloud"; break;
+                case 2: iconClass="fa-cloud-showers-heavy"; break;
+                case 3: iconClass="fa-snowflake"; break;
+                case 4: iconClass="fa-cloud-meatball"; break;
+                case 5: iconClass="fa-bolt"; break;
+                default: iconClass="fa-sun";
+            }
+
+            weatherIcon.className = `fas ${iconClass}`;
+            weatherTemp.innerText = temp + "°C";
+
+            const now = new Date();
+            weatherTime.innerText = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        } catch(e) {
+            console.error("Weer kon niet geladen worden:", e);
+            weatherTemp.innerText="--°C";
+            weatherTime.innerText="--:--";
+            weatherIcon.className="fas fa-sun";
+        }
+    }
+
+    updateWeather();
+    setInterval(updateWeather, 60000);
 });
 </script>
 
