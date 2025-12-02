@@ -133,7 +133,7 @@ onSnapshot(eventsCol, (snapshot) => {
 // ================= GOOGLE CALENDAR ICS =================
 import ICAL from "https://cdn.jsdelivr.net/npm/ical.js@1.4.0/build/ical.min.js";
 
-// Voeg hier je publieke ICS URL in
+// Vul hier je publieke ICS URL in
 const icsUrl = "https://calendar.google.com/calendar/ical/b3756ae16d0f11ea12a33407c6077e5925740ab0ce0d19514aa77a7fc6a6e0c0%40group.calendar.google.com/public/basic.ics";
 
 // ICS import naar Firestore (voorkomt duplicaten)
@@ -166,9 +166,10 @@ async function importGoogleCalendar(){
   }
 }
 
-// ================= INIT =================
-importGoogleCalendar();
-
+// ================= AUTO-UPDATE =================
+// Importeer ICS elke 5 minuten automatisch
+importGoogleCalendar(); // eerste keer meteen
+setInterval(importGoogleCalendar, 5 * 60 * 1000); // daarna elke 5 minuten
 </script>
 
 </body>
