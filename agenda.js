@@ -8,6 +8,18 @@ const PROXY_URL = "https://api.allorigins.win/raw?url=" + encodeURIComponent(ICS
 const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minuten
 
 // =====================
+// Get user kleur
+// =====================
+function getUserColor(u){
+    if (!u) return "#999";
+    const s = u.toLowerCase();
+    if (s === "jonas") return "#3498db";
+    if (s === "liese") return "#e74c3c";
+    if (s === "loreana") return "#ff69b4";
+    return "#777";
+}
+
+// =====================
 // Escape HTML
 // =====================
 function escapeHtml(str){
