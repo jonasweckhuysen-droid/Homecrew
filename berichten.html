@@ -5,6 +5,7 @@
 <title>Homecrew - Berichten</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="style.css">
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
 <body class="app-body">
 
@@ -26,15 +27,39 @@
   </div>
 </main>
 
-<script>
-// ===========================
-// USER CHECK
-// ===========================
+<script type="module">
+// ================= FIREBASE =================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+// Jouw Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyCwlr069pxNXEEhIEGNug5Ly_kKSuvxSzs",
+  authDomain: "homecrew-d8e21.firebaseapp.com",
+  databaseURL: "https://homecrew-d8e21-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "homecrew-d8e21",
+  storageBucket: "homecrew-d8e21.firebasestorage.app",
+  messagingSenderId: "47664248188",
+  appId: "1:47664248188:web:0994c6b2ba07f6fee060f9",
+  measurementId: "G-5R58JL5D5K"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ================= GEBRUIKER =================
 const user = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
-if(!user) window.location.href = "index.html";
+if (!user) window.location.href = "index.html";
 document.getElementById("welcomeUser").innerText = "Welkom, " + user + " 👋";
 
-// Gebruikerskleuren
+// ================= LOGOUT =================
+function logout(){
+  localStorage.clear();
+  sessionStorage.clear();
+  location.href = "index.html";
+}
+
+// ================= KLEUREN =================
 function getUserColor(user){
   if(user.toLowerCase() === "jonas") return "#3498db";
   if(user.toLowerCase() === "liese") return "#e74c3c";
@@ -42,51 +67,42 @@ function getUserColor(user){
   return "#555";
 }
 
-// ===========================
-// LOGOUT
-// ===========================
-function logout(){
-  localStorage.clear();
-  sessionStorage.clear();
-  location.href = "index.html";
+// ================= MESSAGES =================
+const messagesCol = collection(db, "homecrewMessages");
+
+// Realtime ophalen van berichten
+onSnapshot(messagesCol, (snapshot) => {
+    const chatBox = document.getElementById("chatBox");
+    chatBox.innerHTML = "";
+    snapshot.docs.sort((a,b) => a.data().timestamp?.seconds - b.data().timestamp?.seconds);
+    snapshot.docs.forEach(docSnap => {
+        const msg = docSnap.data();
+        const div = document.createElement("div");
+        div.style.background = getUserColor(msg.user);
+        div.style.color = "white";
+        div.style.padding = "8px 12px";
+        div.style.borderRadius = "12px";
+        div.style.marginBottom = "8px";
+        div.innerHTML = `<strong>${msg.user}</strong>: ${msg.text} <small style="opacity:0.7;">${new Date(msg.timestamp.seconds*1000).toLocaleString("nl-BE")}</small>`;
+        chatBox.appendChild(div);
+    });
+    chatBox.scrollTop = chatBox.scrollHeight;
+});
+
+// Verstuur een bericht
+async function sendMessage(){
+    const input = document.getElementById("messageInput");
+    const text = input.value.trim();
+    if(!text) return;
+
+    await addDoc(messagesCol, {
+        user,
+        text,
+        timestamp: serverTimestamp()
+    });
+
+    input.value = "";
 }
-
-// ===========================
-// MESSAGES
-// ===========================
-function sendMessage(){
-  const input = document.getElementById("messageInput");
-  const text = input.value.trim();
-  if(!text) return;
-
-  let messages = JSON.parse(localStorage.getItem("homecrewMessages")) || [];
-  messages.push({ user, text, time: new Date().toISOString() });
-  localStorage.setItem("homecrewMessages", JSON.stringify(messages));
-  input.value = "";
-  loadMessages();
-}
-
-function loadMessages(){
-  const chatBox = document.getElementById("chatBox");
-  chatBox.innerHTML = "";
-  let messages = JSON.parse(localStorage.getItem("homecrewMessages")) || [];
-
-  messages.forEach(msg => {
-    const div = document.createElement("div");
-    div.style.background = getUserColor(msg.user);
-    div.style.color = "white";
-    div.style.padding = "8px 12px";
-    div.style.borderRadius = "12px";
-    div.style.marginBottom = "8px";
-    div.innerHTML = `<strong>${msg.user}</strong>: ${msg.text} <small style="opacity:0.7;">${new Date(msg.time).toLocaleString("nl-BE")}</small>`;
-    chatBox.appendChild(div);
-  });
-
-  chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-// Initial load
-loadMessages();
 </script>
 
 </body>
