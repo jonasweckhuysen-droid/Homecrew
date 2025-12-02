@@ -41,20 +41,26 @@
   <div class="card">
     <h4>📌 Afspraak overzicht</h4>
     <ul id="eventList" class="event-list"></ul>
+    <p id="agenda-error" style="color:red; display:none;"></p>
   </div>
 </main>
 
-<script src="agenda.js"></script>
 <script>
-// ====== USER LOGICA ======
-const user = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
-if (!user) window.location.href = "index.html";
-document.getElementById("welcomeUser").innerText = "Welkom, " + user + " 👋";
+// ====== CONFIG ======
+const LOCAL_EVENTS_KEY = "homecrewLocalEvents";
+const GOOGLE_API_KEY = "AIzaSyDLOdqVeA-SSjSN-0RtzDP4R451nqov0lE";
+const CALENDAR_ID = "df2fa36fb8ea4044f8276cf20d9922d6c350e7f7604bb5ad4a53521324f78727@group.calendar.google.com";
+const MAX_GOOGLE_EVENTS = 50;
 
-function logout(){
-  localStorage.clear();
-  sessionStorage.clear();
-  location.href = "index.html";
+// ====== HELPERS ======
+function escapeHtml(str){
+  if (!str) return "";
+  return String(str)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
 }
 
 function getUserColor(u){
@@ -66,6 +72,17 @@ function getUserColor(u){
   return "#777";
 }
 
+// ====== USER MANAGEMENT ======
+const user = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
+if (!user) window.location.href = "index.html";
+document.getElementById("welcomeUser").innerText = "Welkom, " + user + " 👋";
+
+function logout(){
+  localStorage.clear();
+  sessionStorage.clear();
+  location.href = "index.html";
+}
+
 // ====== LOKAAL TOEVOEGEN ======
 function addLocalEvent(){
   const title = document.getElementById("eventTitle").value.trim();
@@ -74,18 +91,80 @@ function addLocalEvent(){
 
   if (!title || !date) { alert("Titel en datum zijn verplicht"); return; }
 
-  const events = JSON.parse(localStorage.getItem("homecrewLocalEvents") || "[]");
+  const events = JSON.parse(localStorage.getItem(LOCAL_EVENTS_KEY) || "[]");
   events.push({ user, title, date, description: desc });
-  localStorage.setItem("homecrewLocalEvents", JSON.stringify(events));
+  localStorage.setItem(LOCAL_EVENTS_KEY, JSON.stringify(events));
 
   document.getElementById("eventTitle").value = "";
   document.getElementById("eventDate").value = "";
   document.getElementById("eventDescription").value = "";
 
-  // **Laat agenda.js het renderen doen**
-  if (typeof loadEvents === "function") loadEvents();
+  loadEvents();
 }
-</script>
 
+// ====== GOOGLE CALENDAR API ======
+async function fetchGoogleEvents(){
+  const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events?key=${GOOGLE_API_KEY}&maxResults=${MAX_GOOGLE_EVENTS}&orderBy=startTime&singleEvents=true&timeMin=${new Date().toISOString()}`;
+  
+  try{
+    const res = await fetch(url);
+    if(!res.ok) throw new Error(res.statusText);
+
+    const data = await res.json();
+    return (data.items || []).map(ev => ({
+      title: ev.summary || "Geen titel",
+      start: ev.start.dateTime ? new Date(ev.start.dateTime) : new Date(ev.start.date),
+      end: ev.end.dateTime ? new Date(ev.end.dateTime) : new Date(ev.end.date),
+      location: ev.location || ""
+    }));
+  } catch(err){
+    console.error("Fout bij Google Agenda:", err);
+    document.getElementById("agenda-error").style.display = "block";
+    document.getElementById("agenda-error").innerText = "Kan Google Agenda niet laden…";
+    return [];
+  }
+}
+
+// ====== LOAD EVENTS ======
+async function loadEvents(){
+  const list = document.getElementById("eventList");
+  list.innerHTML = "";
+
+  // --- Lokale events ---
+  const localEvents = JSON.parse(localStorage.getItem(LOCAL_EVENTS_KEY) || "[]");
+  localEvents.sort((a,b)=> new Date(a.date) - new Date(b.date));
+  localEvents.forEach(ev=>{
+    const li = document.createElement("li");
+    li.className = "event-item";
+    li.style.borderLeft = "6px solid " + getUserColor(ev.user);
+    li.innerHTML = `
+      <strong>${escapeHtml(ev.title)}</strong>
+      <div class="event-meta">${new Date(ev.date).toLocaleString("nl-BE")}</div>
+      <div class="event-user" style="color:${getUserColor(ev.user)}">👤 ${escapeHtml(ev.user)}</div>
+      <div>${escapeHtml(ev.description || "")}</div>
+    `;
+    list.appendChild(li);
+  });
+
+  // --- Google events ---
+  const googleEvents = await fetchGoogleEvents();
+  googleEvents.sort((a,b)=>a.start-b.start);
+  googleEvents.forEach(ev=>{
+    const li = document.createElement("li");
+    li.className = "event-item google-event";
+    li.innerHTML = `
+      <strong>${escapeHtml(ev.title)}</strong>
+      <div class="event-meta">${ev.start.toLocaleString("nl-BE")}</div>
+      <div style="color:black;">📅 Google Agenda</div>
+      ${ev.location ? `<div>📍 ${escapeHtml(ev.location)}</div>` : ""}
+    `;
+    list.appendChild(li);
+  });
+}
+
+// ====== AUTO REFRESH ======
+setInterval(loadEvents, 5*60*1000);
+document.addEventListener("DOMContentLoaded", loadEvents);
+</script>
 </body>
 </html>
