@@ -35,7 +35,6 @@
     <div id="chatBox" class="chat-box" style="max-height:300px; overflow-y:auto; padding:10px;"></div>
 
     <input type="text" id="messageInput" placeholder="Typ je bericht..." />
-    <input type="file" id="imageInput" accept="image/*" />
     <button class="main-btn" onclick="sendMessage()">Verstuur</button>
   </div>
 </main>
@@ -87,8 +86,9 @@ const messagesCol = collection(db, "homecrewMessages");
 onSnapshot(messagesCol, (snapshot) => {
     const chatBox = document.getElementById("chatBox");
     chatBox.innerHTML = "";
-    snapshot.docs.sort((a,b) => a.data().timestamp?.seconds - b.data().timestamp?.seconds);
-    snapshot.docs.forEach(docSnap => {
+    snapshot.docs
+        .sort((a,b) => a.data().timestamp?.seconds - b.data().timestamp?.seconds)
+        .forEach(docSnap => {
         const msg = docSnap.data();
         const div = document.createElement("div");
         div.style.background = getUserColor(msg.user);
