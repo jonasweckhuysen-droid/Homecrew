@@ -5,28 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Homecrew – Agenda</title>
 <link rel="stylesheet" href="style.css">
-<style>
-  body.app-body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f2f2f2; }
-  .topbar { display:flex; justify-content:space-between; align-items:center; padding:10px 15px; background:#333; color:#fff; }
-  .home-btn { background:#555; color:#fff; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; }
-  .home-btn:hover { background:#777; }
-  .content { padding:15px; }
-  .card { background:#fff; padding:15px; margin-bottom:15px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
-  .main-btn { background:#3498db; color:#fff; border:none; padding:8px 12px; border-radius:5px; cursor:pointer; margin-top:5px; }
-  .main-btn:hover { background:#2980b9; }
-  .event-list { list-style:none; padding:0; margin:0; }
-  .event-item { padding:10px; margin-bottom:8px; background:#f9f9f9; border-left:6px solid #555; border-radius:5px; }
-  .event-meta { font-size:0.9em; color:#555; }
-  .event-user { font-size:0.9em; margin-top:3px; }
-</style>
 <script src="https://cdn.jsdelivr.net/npm/ical.js@1.4.0/build/ical.min.js"></script>
+<style>
+  body { font-family: sans-serif; margin:0; padding:0; background:#f4f4f4; }
+  .app-body { padding:10px; }
+  .topbar { display:flex; justify-content:space-between; align-items:center; background:#222; color:#fff; padding:10px; }
+  .home-btn { background:#555; color:#fff; border:none; padding:5px 10px; cursor:pointer; }
+  .card { background:#fff; padding:10px; margin:10px 0; border-radius:6px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+  .event-item { padding:8px; margin-bottom:5px; border-left:6px solid #3498db; background:#f9f9f9; border-radius:4px; }
+</style>
 </head>
 
 <body class="app-body">
 
 <header class="topbar">
   <button onclick="window.location.href='dashboard.html'" class="home-btn">🏠 Home</button>
-  <h2>📅 Homecrew agenda</h2>
+  <h2>📅 Homecrew Agenda</h2>
   <button onclick="logout()" class="home-btn">🚪 Uitloggen</button>
 </header>
 
@@ -39,7 +33,7 @@
   <input type="text" id="eventTitle" placeholder="Titel">
   <input type="datetime-local" id="eventDate">
   <textarea id="eventDescription" placeholder="Beschrijving (optioneel)"></textarea>
-  <button class="main-btn" onclick="addLocalEvent()">Toevoegen</button>
+  <button class="home-btn" onclick="addLocalEvent()">Toevoegen</button>
 </div>
 
 <div class="card">
@@ -47,44 +41,28 @@
   <ul id="eventList" class="event-list"></ul>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-
-// ========== FIREBASE CONFIG ==========
-const firebaseConfig = {
-  apiKey: "AIzaSyCwlr069pxNXEEhIEGNug5Ly_kKSuvxSzs",
-  authDomain: "homecrew-d8e21.firebaseapp.com",
-  projectId: "homecrew-d8e21",
-  storageBucket: "homecrew-d8e21.appspot.com",
-  messagingSenderId: "47664248188",
-  appId: "1:47664248188:web:0994c6b2ba07f6fee060f9",
-};
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const eventsCol = collection(db,"homecrewEvents");
-
-// ========== GEBRUIKER ==========
+<script>
+// ================== GEBRUIKER ==================
 const user = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
 if (!user) window.location.href = "index.html";
 document.getElementById("welcomeUser").innerText = "Welkom, " + user + " 👋";
 
-// ========== LOGOUT ==========
+// ================== LOGOUT ==================
 function logout(){
   localStorage.clear();
   sessionStorage.clear();
   location.href = "index.html";
 }
 
-// ========== KLEUREN ==========
-function getUserColor(u){
-  if(u.toLowerCase()==="jonas") return "#3498db";
-  if(u.toLowerCase()==="liese") return "#e74c3c";
-  if(u.toLowerCase()==="loreana") return "#ff69b4";
+// ================== KLEUREN ==================
+function getUserColor(user){
+  if(user.toLowerCase() === "jonas") return "#3498db";
+  if(user.toLowerCase() === "liese") return "#e74c3c";
+  if(user.toLowerCase() === "loreana") return "#ff69b4";
   return "#555";
 }
 
-// ========== LOKALE EVENTS ==========
+// ================== LOKALE EVENTS ==================
 function addLocalEvent(){
   const title = document.getElementById("eventTitle").value.trim();
   const date = document.getElementById("eventDate").value;
@@ -96,7 +74,7 @@ function addLocalEvent(){
   }
 
   let events = JSON.parse(localStorage.getItem("homecrewLocalEvents")) || [];
-  events.push({ user, title, date, description: desc, source:"local" });
+  events.push({ user, title, date, description: desc });
   localStorage.setItem("homecrewLocalEvents", JSON.stringify(events));
 
   document.getElementById("eventTitle").value = "";
@@ -106,50 +84,66 @@ function addLocalEvent(){
   loadEvents();
 }
 
-// ========== LOAD EVENTS ==========
-function loadEvents(){
+// ================== LOAD EVENTS ==================
+async function loadEvents(){
   const list = document.getElementById("eventList");
   list.innerHTML = "";
 
-  // 1. Lokale events
+  // Lokale events
   const localEvents = JSON.parse(localStorage.getItem("homecrewLocalEvents")) || [];
-  localEvents.sort((a,b)=> new Date(a.date)-new Date(b.date));
+  localEvents.sort((a,b)=> new Date(a.date) - new Date(b.date));
   localEvents.forEach(ev=>{
     const li = document.createElement("li");
     li.className = "event-item";
-    li.style.borderLeft = "6px solid "+getUserColor(ev.user);
-    li.innerHTML = `<strong>${ev.title}</strong>
-                    <div class="event-meta">${new Date(ev.date).toLocaleString("nl-BE")}</div>
-                    <div class="event-user" style="color:${getUserColor(ev.user)}">👤 ${ev.user}</div>
-                    <div>${ev.description || ""}</div>`;
+    li.style.borderLeft = "6px solid " + getUserColor(ev.user);
+    li.innerHTML = `
+      <strong>${ev.title}</strong>
+      <div class="event-meta">${new Date(ev.date).toLocaleString("nl-BE")}</div>
+      <div class="event-user" style="color:${getUserColor(ev.user)}">👤 ${ev.user}</div>
+      <div>${ev.description || ""}</div>
+    `;
     list.appendChild(li);
   });
 
-  // 2. Firestore events (realtime)
-  onSnapshot(eventsCol, snapshot=>{
-    snapshot.docs.map(docSnap=>({id: docSnap.id, ...docSnap.data()}))
-      .sort((a,b)=>new Date(a.date)-new Date(b.date))
-      .forEach(ev=>{
-        const li = document.createElement("li");
-        li.className = "event-item";
-        li.style.borderLeft = "6px solid "+getUserColor(ev.user);
-        li.innerHTML = `<strong>${ev.title}</strong>
-                        <div class="event-meta">${new Date(ev.date).toLocaleString("nl-BE")}</div>
-                        <div class="event-user" style="color:${getUserColor(ev.user)}">👤 ${ev.user}</div>
-                        <div>${ev.description || ""}</div>
-                        <button class="main-btn" onclick="deleteEvent('${ev.id}')">🗑️ Verwijderen</button>`;
-        list.appendChild(li);
-      });
-  });
+  // Google ICS events
+  await loadGoogleCalendar(list);
 }
 
-// ========== DELETE FIRESTORE ==========
-async function deleteEvent(id){
-  await deleteDoc(doc(db,"homecrewEvents",id));
+// ================== GOOGLE CALENDAR ==================
+const icsUrl = "https://calendar.google.com/calendar/ical/b3756ae16d0f11ea12a33407c6077e5925740ab0ce0d19514aa77a7fc6a6e0c0%40group.calendar.google.com/public/basic.ics";
+
+async function loadGoogleCalendar(list){
+  try{
+    const response = await fetch(icsUrl);
+    const data = await response.text();
+
+    const jcalData = ICAL.parse(data);
+    const comp = new ICAL.Component(jcalData);
+    const vevents = comp.getAllSubcomponents("vevent");
+
+    vevents.forEach(v=>{
+      const ev = new ICAL.Event(v);
+      const li = document.createElement("li");
+      li.className = "event-item";
+      li.style.borderLeft = "6px solid black"; // ICS-events in zwart
+      li.innerHTML = `
+        <strong>${ev.summary}</strong>
+        <div class="event-meta">${ev.startDate.toJSDate().toLocaleString("nl-BE")}</div>
+        <div style="color:black;">📅 Google Agenda</div>
+        <div>${ev.description || ""}</div>
+      `;
+      list.appendChild(li);
+    });
+
+  } catch(err){
+    console.error("Fout bij laden Google Calendar ICS:", err);
+  }
 }
 
-// ========== INIT ==========
+// ================== AUTO-REFRESH ==================
+setInterval(loadEvents, 5*60*1000); // elke 5 minuten
 loadEvents();
+
 </script>
 
 </body>
