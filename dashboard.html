@@ -40,7 +40,6 @@ body { margin:0; background:#f2f6ff; font-family:Arial,sans-serif; }
 
 <div class="dashboard-container">
 
-    <!-- Welkomstblok -->
     <div class="welcome-banner">
         <h1 id="welcome"></h1>
         <p>Wat gaan we vandaag doen? 🌈</p>
@@ -53,7 +52,6 @@ body { margin:0; background:#f2f6ff; font-family:Arial,sans-serif; }
         </div>
     </div>
 
-    <!-- Dashboard knoppen -->
     <div class="dashboard-buttons">
         <div class="dash-btn agenda" id="btnAgenda"><i class="fas fa-calendar-alt"></i>Agenda</div>
         <div class="dash-btn boodschappenlijst" id="btnBoodschappen"><i class="fas fa-shopping-basket"></i>Boodschappen</div>
@@ -62,7 +60,6 @@ body { margin:0; background:#f2f6ff; font-family:Arial,sans-serif; }
         <div class="dash-btn locatie" id="btnLocatie"><i class="fas fa-location-dot"></i>Locatie</div>
     </div>
 
-    <!-- Uitloggen -->
     <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Uitloggen</button>
 
 </div>
@@ -92,37 +89,34 @@ document.addEventListener("DOMContentLoaded", () => {
     const weatherTemp = document.getElementById("weatherTemp");
     const weatherTime = document.getElementById("weatherTime");
 
-    const API_KEY = "ngEVGAF3TMlmft2R";
+    const API_KEY = "4a993261a71ece889094805bab5b864a"; // Jouw key
     const LAT = 51.2012;
     const LON = 4.8170;
 
     async function updateWeather() {
         try {
-            const res = await fetch(`https://my.meteoblue.com/packages/meteoforecast?lat=${LAT}&lon=${LON}&apikey=${API_KEY}&format=json&temperature_unit=°C`);
-            if(!res.ok) throw new Error("Meteoblue API response niet OK");
+            const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${LAT}&lon=${LON}&appid=${API_KEY}&units=metric&lang=nl`);
+            if(!res.ok) throw new Error("OpenWeatherMap API response niet OK");
             const data = await res.json();
 
-            // Huidige temperatuur en code
-            const temp = Math.round(data.current?.temp_air ?? 0);
-            const code = data.current?.icon_code ?? 0;
-
-            // Icon mapping
+            const temp = Math.round(data.main.temp);
+            const weatherId = data.weather[0].id;
             let iconClass = "fa-sun";
-            switch(code){
-                case 0: iconClass="fa-sun"; break;
-                case 1: iconClass="fa-cloud"; break;
-                case 2: iconClass="fa-cloud-showers-heavy"; break;
-                case 3: iconClass="fa-snowflake"; break;
-                case 4: iconClass="fa-cloud-meatball"; break;
-                case 5: iconClass="fa-bolt"; break;
-                default: iconClass="fa-sun";
-            }
+
+            // Icon mapping op basis van OpenWeatherMap weather id
+            if(weatherId >= 200 && weatherId < 300) iconClass="fa-bolt"; // Thunderstorm
+            else if(weatherId >= 300 && weatherId < 600) iconClass="fa-cloud-showers-heavy"; // Rain
+            else if(weatherId >= 600 && weatherId < 700) iconClass="fa-snowflake"; // Snow
+            else if(weatherId >= 700 && weatherId < 800) iconClass="fa-smog"; // Atmosphere
+            else if(weatherId === 800) iconClass="fa-sun"; // Clear
+            else if(weatherId > 800) iconClass="fa-cloud"; // Clouds
 
             weatherIcon.className = `fas ${iconClass}`;
             weatherTemp.innerText = temp + "°C";
 
             const now = new Date();
             weatherTime.innerText = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+
         } catch(e) {
             console.error("Weer kon niet geladen worden:", e);
             weatherTemp.innerText="--°C";
