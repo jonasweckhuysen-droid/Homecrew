@@ -2,26 +2,88 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
-<title>Homecrew - Eerste keer</title>
+<title>Homecrew – Login</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <link rel="stylesheet" href="style.css">
-<script src="script.js" defer></script>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCwlr069pxNXEEhIEGNug5Ly_kKSuvxSzs",
+    authDomain: "homecrew-d8e21.firebaseapp.com",
+    databaseURL: "https://homecrew-d8e21-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "homecrew-d8e21",
+    storageBucket: "homecrew-d8e21.firebasestorage.app",
+    messagingSenderId: "47664248188",
+    appId: "1:47664248188:web:0994c6b2ba07f6fee060f9"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  window.addEventListener("DOMContentLoaded", () => {
+    const startBtn = document.getElementById("startBtn");
+
+    startBtn.addEventListener("click", async () => {
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const stayLoggedIn = document.getElementById("stayLoggedIn").checked;
+      const error = document.getElementById("error");
+
+      if (username === "" || password === "") {
+        error.textContent = "Vul een naam en wachtwoord in";
+        return;
+      }
+
+      const userRef = ref(db, "users/" + username);
+      const snapshot = await get(userRef);
+
+      if (snapshot.exists()) {
+        // Controleer wachtwoord
+        if (snapshot.val().password !== password) {
+          error.textContent = "Fout wachtwoord";
+          return;
+        }
+      } else {
+        // Nieuwe gebruiker aanmaken
+        await set(userRef, {
+          username: username,
+          password: password,
+          createdAt: new Date().toISOString()
+        });
+      }
+
+      if (stayLoggedIn) {
+        localStorage.setItem("homecrewUser", username);
+      } else {
+        sessionStorage.setItem("homecrewUser", username);
+      }
+
+      window.location.href = "dashboard.html";
+    });
+  });
+</script>
+
 </head>
 <body>
 
 <div class="login-box">
-    <h1>Welkom bij Homecrew</h1>
-    <p>Vul je naam in en kies een wachtwoord/pincode</p>
+  <h1>Welkom bij Homecrew</h1>
+  <p>Vul je naam in en kies een wachtwoord / pincode</p>
 
-    <input type="text" id="username" placeholder="Naam">
-    <input type="password" id="password" placeholder="Wachtwoord/pincode">
+  <input type="text" id="username" placeholder="Naam">
+  <input type="password" id="password" placeholder="Wachtwoord / pincode">
 
-    <label class="remember-label">
-        <input type="checkbox" id="stayLoggedIn"> Blijf ingelogd
-    </label>
+  <label class="remember-label">
+      <input type="checkbox" id="stayLoggedIn"> Blijf ingelogd
+  </label>
 
-    <button id="startBtn" class="main-btn">Start</button>
-    <p id="error" class="error-msg"></p>
+  <button id="startBtn" class="main-btn">Start</button>
+  <p id="error" class="error-msg"></p>
 </div>
 
 </body>
