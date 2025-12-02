@@ -37,8 +37,8 @@
     <button class="main-btn" onclick="sendMessage()">Verstuur</button>
   </div>
 </main>
-
 <script type="module">
+// ================= FIREBASE =================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
@@ -62,11 +62,11 @@ if (!user) window.location.href = "index.html";
 document.getElementById("welcomeUser").innerText = "Welkom, " + user + " 👋";
 
 // ================= LOGOUT =================
-function logout(){
+window.logout = function(){
   localStorage.clear();
   sessionStorage.clear();
   location.href = "index.html";
-}
+};
 
 // ================= KLEUREN =================
 function getUserColor(user){
@@ -79,7 +79,6 @@ function getUserColor(user){
 // ================= MESSAGES =================
 const messagesCol = collection(db, "homecrewMessages");
 
-// Realtime ophalen van berichten
 onSnapshot(messagesCol, (snapshot) => {
     const chatBox = document.getElementById("chatBox");
     chatBox.innerHTML = "";
@@ -96,7 +95,6 @@ onSnapshot(messagesCol, (snapshot) => {
             div.innerHTML = `<strong>${msg.user}</strong>: ${msg.text} <small style="opacity:0.7;">${msg.timestamp?.seconds ? new Date(msg.timestamp.seconds*1000).toLocaleString("nl-BE") : "Onbekend tijdstip"}</small>`;
             chatBox.appendChild(div);
 
-            // Push notificatie voor nieuwe berichten van andere gebruikers
             if(msg.user !== user){
               OneSignal.push(function() {
                 OneSignal.sendSelfNotification(
@@ -111,8 +109,8 @@ onSnapshot(messagesCol, (snapshot) => {
     chatBox.scrollTop = chatBox.scrollHeight;
 });
 
-// Verstuur een bericht
-async function sendMessage(){
+// ================= VERSTUUR FUNCTIE GLOBAAL =================
+window.sendMessage = async function(){
     const input = document.getElementById("messageInput");
     const text = input.value.trim();
     if(!text) return;
