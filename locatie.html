@@ -5,27 +5,38 @@
 <title>Homecrew - Live Locatie</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="style.css">
+
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDo7KIQjAWmr6mNE413sky28HRM74yUaXQ"></script>
 </head>
 <body class="app-body">
 
 <header class="topbar">
-  <button class="home-btn" onclick="window.location.href='dashboard.html'"><i class="fas fa-home"></i> Dashboard</button>
+  <button class="home-btn" onclick="window.location.href='dashboard.html'">
+    <i class="fas fa-home"></i> Dashboard
+  </button>
+
   <h2>📍 Live Locatie</h2>
-  <button class="home-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Uitloggen</button>
+
+  <button class="home-btn" onclick="logout()">
+    <i class="fas fa-sign-out-alt"></i> Uitloggen
+  </button>
 </header>
 
 <main class="content">
   <h3 id="welcomeUser"></h3>
+
   <div class="card">
     <div id="map" style="width:100%; height:500px; border-radius:16px;"></div>
   </div>
 </main>
 
+
 <script type="module">
+
 // ================= FIREBASE =================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getFirestore, collection, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getFirestore, collection, doc, setDoc, onSnapshot, serverTimestamp } 
+from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCwlr069pxNXEEhIEGNug5Ly_kKSuvxSzs",
@@ -41,11 +52,21 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // ================= GEBRUIKER =================
-const activeUser = localStorage.getItem("homecrewUser");
-if (!activeUser) window.location.href = "index.html";
+const activeUser = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
+
+if (!activeUser) {
+  window.location.href = "index.html";
+}
+
 document.getElementById("welcomeUser").textContent = "Welkom, " + activeUser + " 👋";
 
-// ================= GOOGLE MAPS =================
+window.logout = function() {
+  localStorage.removeItem("homecrewUser");
+  sessionStorage.removeItem("homecrewUser");
+  window.location.href = "index.html";
+};
+
+// ================= GOOGLE MAP =================
 let map;
 let markers = {};
 let infoWindows = {};
@@ -53,76 +74,117 @@ let infoWindows = {};
 function initMap() {
     map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: 51.2194, lng: 4.4025 },
-        zoom: 10
+        zoom: 10,
+        mapTypeId: "roadmap"
     });
 }
+
+initMap();
+
 
 // ================= KLEUREN PER GEBRUIKER =================
 const userColors = {
-    "jonas": "blue",
-    "liese": "red",
-    "loreana": "pink"
+  "jonas": "blue",
+  "liese": "red",
+  "loreana": "pink"
 };
 
-// ================= LIVE LOCATIE =================
+
+// ================= LIVE LOCATIE UPDATEN =================
 async function updateMyLocation() {
-    if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(async (pos) => {
-            const { latitude, longitude } = pos.coords;
-            await setDoc(doc(db, "users", activeUser), {
-                latitude,
-                longitude,
-                timestamp: new Date()
-            }, { merge: true });
-        }, (err) => console.error("Locatie fout:", err), { enableHighAccuracy: true });
-    } else {
-        alert("Locatie niet beschikbaar op dit toestel");
-    }
+  if (!navigator.geolocation) {
+    alert("Locatie wordt niet ondersteund op dit toestel");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(async (position) => {
+    const { latitude, longitude } = position.coords;
+
+    await setDoc(doc(db, "users_locations", activeUser), {
+      latitude,
+      longitude,
+      timestamp: serverTimestamp()
+    }, { merge: true });
+
+  },
+  (error) => {
+    console.error("Locatiefout:", error.message);
+  },
+  {
+    enableHighAccuracy: true,
+    maximumAge: 0,
+    timeout: 5000
+  });
 }
 
+// meteen en elke 30s
 updateMyLocation();
 setInterval(updateMyLocation, 30000);
 
-// ================= TONEN VAN GEBRUIKERS =================
-const usersCol = collection(db, "users");
-onSnapshot(usersCol, (snapshot) => {
-    snapshot.forEach((docSnap) => {
-        const user = docSnap.id;
-        const data = docSnap.data();
-        if (!data.latitude || !data.longitude) return;
 
-        const pos = { lat: data.latitude, lng: data.longitude };
-        const color = userColors[user.toLowerCase()] || "green";
+// ================= LIVE WEERGAVE VAN ALLE GEBRUIKERS =================
+const locationsRef = collection(db, "users_locations");
 
-        if (markers[user]) {
-            markers[user].setPosition(pos);
-            infoWindows[user].setContent(`<strong>${user}</strong><br>Laatste update: ${new Date(data.timestamp.seconds*1000).toLocaleTimeString()}`);
-        } else {
-            const marker = new google.maps.Marker({
-                position: pos,
-                map: map,
-                title: user,
-                icon: {
-                    path: google.maps.SymbolPath.CIRCLE,
-                    scale: 10,
-                    fillColor: color,
-                    fillOpacity: 1,
-                    strokeWeight: 1,
-                    strokeColor: "#000"
-                }
-            });
-            const infoWindow = new google.maps.InfoWindow({
-                content: `<strong>${user}</strong><br>Laatste update: ${new Date(data.timestamp.seconds*1000).toLocaleTimeString()}`
-            });
-            marker.addListener("click", () => infoWindow.open(map, marker));
+onSnapshot(locationsRef, (snapshot) => {
 
-            markers[user] = marker;
-            infoWindows[user] = infoWindow;
+  snapshot.forEach((userDoc) => {
+    const user = userDoc.id;
+    const data = userDoc.data();
+
+    if (!data.latitude || !data.longitude) return;
+
+    const position = {
+      lat: data.latitude,
+      lng: data.longitude
+    };
+
+    const color = userColors[user.toLowerCase()] || "green";
+
+    const lastUpdate = data.timestamp?.seconds
+      ? new Date(data.timestamp.seconds * 1000).toLocaleTimeString()
+      : "net bijgewerkt";
+
+    if (markers[user]) {
+      markers[user].setPosition(position);
+      infoWindows[user].setContent(`
+        <strong>${user}</strong><br>
+        Laatste update: ${lastUpdate}
+      `);
+
+    } else {
+      const marker = new google.maps.Marker({
+        position,
+        map,
+        title: user,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 10,
+          fillColor: color,
+          fillOpacity: 1,
+          strokeWeight: 1,
+          strokeColor: "#000"
         }
-    });
+      });
+
+      const infoWindow = new google.maps.InfoWindow({
+        content: `
+          <strong>${user}</strong><br>
+          Laatste update: ${lastUpdate}
+        `
+      });
+
+      marker.addListener("click", () => {
+        infoWindow.open(map, marker);
+      });
+
+      markers[user] = marker;
+      infoWindows[user] = infoWindow;
+    }
+
+  });
+
 });
 
-initMap();
 </script>
 
 </body>
