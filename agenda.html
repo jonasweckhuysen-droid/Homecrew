@@ -129,11 +129,18 @@ async function loadEvents(){
 
     vevents.forEach(v => {
       const ev = new ICAL.Event(v);
+      const start = ev.startDate.toJSDate();
       const li = document.createElement("li");
       li.className = "event-item google-event";
+
+      // fallback: title uit summary of description
+      let title = ev.summary || "";
+      if (!title && ev.description) title = ev.description.split("\n")[0];
+      if (!title) title = "Geen titel";
+
       li.innerHTML = `
-        <strong>${escapeHtml(ev.summary || "Geen titel")}</strong>
-        <div class="event-meta">${ev.startDate.toJSDate().toLocaleString("nl-BE")}</div>
+        <strong>${escapeHtml(title)}</strong>
+        <div class="event-meta">${start.toLocaleString("nl-BE")}</div>
         <div style="color:black;">📅 Google Agenda</div>
         ${ev.location ? `<div>📍 ${escapeHtml(ev.location)}</div>` : ""}
       `;
