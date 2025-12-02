@@ -6,22 +6,30 @@
 <title>Homecrew – Agenda</title>
 <link rel="stylesheet" href="style.css">
 <style>
-  body { font-family: sans-serif; margin:0; padding:0; background:#f4f4f4; }
   .app-body { padding:10px; }
-  .topbar { display:flex; justify-content:space-between; align-items:center; background:#222; color:#fff; padding:10px; }
-  .home-btn { background:#555; color:#fff; border:none; padding:5px 10px; cursor:pointer; }
   .card { background:#fff; padding:10px; margin:10px 0; border-radius:6px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
-  .event-item { padding:8px; margin-bottom:5px; border-left:6px solid #3498db; background:#f9f9f9; border-radius:4px; }
+  .event-item { padding:8px; margin-bottom:8px; border-left:6px solid #3498db; background:#f9f9f9; border-radius:4px; list-style:none; }
   .google-event { border-left-color:black; }
+  .event-meta { font-size:0.85em; opacity:0.7; }
+  .event-user { font-size:0.9em; font-weight:bold; }
+  input, textarea { width:100%; padding:6px; margin-bottom:6px; }
 </style>
 </head>
 
 <body class="app-body">
 
-<header class="topbar">
-  <button onclick="window.location.href='dashboard.html'" class="home-btn">🏠 Home</button>
-  <h2>📅 Homecrew Agenda</h2>
-  <button onclick="logout()" class="home-btn">🚪 Uitloggen</button>
+<header class="header">
+  <div class="header-left">
+    <button onclick="window.location.href='dashboard.html'" class="nav-btn">🏠 Home</button>
+  </div>
+
+  <div class="header-center">
+    <h2>📅 Homecrew Agenda</h2>
+  </div>
+
+  <div class="header-right">
+    <button onclick="logout()" class="nav-btn">🚪 Uitloggen</button>
+  </div>
 </header>
 
 <main class="content">
@@ -33,7 +41,7 @@
   <input type="text" id="eventTitle" placeholder="Titel">
   <input type="datetime-local" id="eventDate">
   <textarea id="eventDescription" placeholder="Beschrijving (optioneel)"></textarea>
-  <button class="home-btn" onclick="addLocalEvent()">Toevoegen</button>
+  <button class="nav-btn" onclick="addLocalEvent()">Toevoegen</button>
 </div>
 
 <div class="card">
@@ -88,6 +96,7 @@ function addLocalEvent(){
 const API_KEY = "AIzaSyAGS2I6qDdXumD3FizgbllbczNcRKcr8Bg";
 const CALENDAR_ID = "b3756ae16d0f11ea12a33407c6077e5925740ab0ce0d19514aa77a7fc6a6e0c0@group.calendar.google.com";
 const MAX_EVENTS = 50;
+
 const API_URL = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events?maxResults=${MAX_EVENTS}&orderBy=startTime&singleEvents=true&timeMin=${new Date().toISOString()}&key=${API_KEY}`;
 
 // ================== LOAD EVENTS ==================
@@ -98,16 +107,19 @@ async function loadEvents(){
   // Lokale events
   const localEvents = JSON.parse(localStorage.getItem("homecrewLocalEvents")) || [];
   localEvents.sort((a,b)=> new Date(a.date) - new Date(b.date));
+
   localEvents.forEach(ev=>{
     const li = document.createElement("li");
     li.className = "event-item";
     li.style.borderLeft = "6px solid " + getUserColor(ev.user);
+
     li.innerHTML = `
       <strong>${ev.title}</strong>
       <div class="event-meta">${new Date(ev.date).toLocaleString("nl-BE")}</div>
       <div class="event-user" style="color:${getUserColor(ev.user)}">👤 ${ev.user}</div>
       <div>${ev.description || ""}</div>
     `;
+
     list.appendChild(li);
   });
 
@@ -115,20 +127,31 @@ async function loadEvents(){
   try{
     const res = await fetch(API_URL);
     const data = await res.json();
-    if(data.items){
+
+    if(data.items && data.items.length > 0){
       data.items.forEach(ev=>{
         const start = ev.start.dateTime || ev.start.date;
+        const title = ev.summary || "Geen titel";
+
         const li = document.createElement("li");
         li.className = "event-item google-event";
+
         li.innerHTML = `
-          <strong>${ev.summary}</strong>
+          <strong>${title}</strong>
           <div class="event-meta">${new Date(start).toLocaleString("nl-BE")}</div>
           <div style="color:black;">📅 Google Agenda</div>
-          ${ev.location ? `<div>${ev.location}</div>` : ""}
+          ${ev.location ? `<div>📍 ${ev.location}</div>` : ""}
         `;
+
         list.appendChild(li);
       });
     }
+    else{
+      const li = document.createElement("li");
+      li.innerHTML = "Geen Google events gevonden";
+      list.appendChild(li);
+    }
+
   } catch(err){
     console.error("Fout bij Google Calendar API:", err);
   }
@@ -137,8 +160,8 @@ async function loadEvents(){
 // ================== AUTO-REFRESH ==================
 setInterval(loadEvents, 5*60*1000); // elke 5 minuten
 loadEvents();
-
 </script>
 
+</main>
 </body>
 </html>
