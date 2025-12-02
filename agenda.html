@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Homecrew – Agenda</title>
 <link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/ical.js@1.4.0/build/ical.min.js"></script>
 </head>
 
 <body class="app-body">
@@ -21,12 +22,10 @@
 
 <div class="card">
   <h3>Nieuwe afspraak toevoegen</h3>
-
   <input type="text" id="eventTitle" placeholder="Titel">
   <input type="datetime-local" id="eventDate">
   <textarea id="eventDescription" placeholder="Beschrijving (optioneel)"></textarea>
-
-  <button class="main-btn" id="addEventBtn">Toevoegen</button>
+  <button class="main-btn" onclick="addEvent()">Toevoegen</button>
 </div>
 
 <div class="card">
@@ -37,8 +36,7 @@
 <script type="module">
 // ================= FIREBASE =================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-import ICAL from "https://cdn.jsdelivr.net/npm/ical.js@1.4.0/build/ical.module.js";
+import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp, doc, deleteDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 // Firebase config
 const firebaseConfig = {
@@ -46,7 +44,7 @@ const firebaseConfig = {
   authDomain: "homecrew-d8e21.firebaseapp.com",
   databaseURL: "https://homecrew-d8e21-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "homecrew-d8e21",
-  storageBucket: "homecrew-d8e21.firebasestorage.app",
+  storageBucket: "homecrew-d8e21.appspot.com",
   messagingSenderId: "47664248188",
   appId: "1:47664248188:web:0994c6b2ba07f6fee060f9",
   measurementId: "G-5R58JL5D5K"
@@ -57,8 +55,8 @@ const db = getFirestore(app);
 
 // ================= GEBRUIKER =================
 const user = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
-if(!user) window.location.href="index.html";
-document.getElementById("welcomeUser").textContent = "Welkom, " + user + " 👋";
+if (!user) window.location.href = "index.html";
+document.getElementById("welcomeUser").innerText = "Welkom, " + user + " 👋";
 
 // ================= LOGOUT =================
 function logout(){
@@ -69,99 +67,107 @@ function logout(){
 
 // ================= KLEUREN =================
 function getUserColor(user){
-  if(user.toLowerCase()==="jonas") return "#3498db";
-  if(user.toLowerCase()==="liese") return "#e74c3c";
-  if(user.toLowerCase()==="loreana") return "#ff69b4";
+  if(user.toLowerCase() === "jonas") return "#3498db";
+  if(user.toLowerCase() === "liese") return "#e74c3c";
+  if(user.toLowerCase() === "loreana") return "#ff69b4";
   return "#555";
 }
 
 // ================= FIRESTORE EVENTS =================
 const eventsCol = collection(db, "homecrewEvents");
 
-// Event toevoegen
-document.getElementById("addEventBtn").addEventListener("click", async () => {
+// Toevoegen van event
+async function addEvent(){
   const title = document.getElementById("eventTitle").value.trim();
   const date = document.getElementById("eventDate").value;
-  const desc = document.getElementById("eventDescription").value.trim();
+  const description = document.getElementById("eventDescription").value.trim();
 
-  if(!title || !date){ alert("Titel en datum zijn verplicht"); return; }
+  if(title === "" || date === ""){
+    alert("Titel en datum zijn verplicht");
+    return;
+  }
 
-  await addDoc(eventsCol, { user, title, date, description: desc, timestamp: serverTimestamp() });
+  await addDoc(eventsCol, {
+    user,
+    title,
+    date,
+    description,
+    timestamp: serverTimestamp()
+  });
 
-  document.getElementById("eventTitle").value="";
-  document.getElementById("eventDate").value="";
-  document.getElementById("eventDescription").value="";
-});
+  document.getElementById("eventTitle").value = "";
+  document.getElementById("eventDate").value = "";
+  document.getElementById("eventDescription").value = "";
+}
 
-// Event verwijderen
+// Verwijderen van event
 async function deleteEvent(id){
   await deleteDoc(doc(db, "homecrewEvents", id));
 }
 
-// ================= FUNCTIE VOOR EVENTS TONEN =================
-function renderEvents(list, container){
-  list.forEach(ev => {
-    const li = document.createElement("li");
-    li.className="event-item";
-    li.style.borderLeft="6px solid " + getUserColor(ev.user);
+// ================= FIRESTORE REALTIME =================
+onSnapshot(eventsCol, (snapshot) => {
+  const list = document.getElementById("eventList");
+  list.innerHTML = "";
 
-    li.innerHTML=`
+  const events = snapshot.docs
+      .map(docSnap => ({ id: docSnap.id, ...docSnap.data() }))
+      .sort((a,b) => new Date(a.date) - new Date(b.date));
+
+  events.forEach(ev => {
+    const li = document.createElement("li");
+    li.className = "event-item";
+    li.style.borderLeft = "6px solid " + getUserColor(ev.user);
+
+    li.innerHTML = `
       <strong>${ev.title}</strong>
       <div class="event-meta">${new Date(ev.date).toLocaleString("nl-BE")}</div>
       <div class="event-user" style="color:${getUserColor(ev.user)}">👤 ${ev.user}</div>
       <div>${ev.description || ""}</div>
-      ${ev.id ? `<button class="main-btn" onclick="deleteEvent('${ev.id}')">🗑️ Verwijderen</button>` : ""}
+      <button class="main-btn" onclick="deleteEvent('${ev.id}')">🗑️ Verwijderen</button>
     `;
-    container.appendChild(li);
+    list.appendChild(li);
   });
-}
-
-// ================= FIRESTORE REALTIME =================
-onSnapshot(eventsCol, snapshot => {
-  const list = document.getElementById("eventList");
-  list.innerHTML="";
-  const events = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }))
-                    .sort((a,b) => new Date(a.date) - new Date(b.date));
-  renderEvents(events, list);
-
-  // ICS-events na Firestore-events laden
-  loadGoogleCalendar();
 });
 
 // ================= GOOGLE CALENDAR ICS =================
+import ICAL from "https://cdn.jsdelivr.net/npm/ical.js@1.4.0/build/ical.min.js";
+
+// Voeg hier je publieke ICS URL in
 const icsUrl = "https://calendar.google.com/calendar/ical/b3756ae16d0f11ea12a33407c6077e5925740ab0ce0d19514aa77a7fc6a6e0c0%40group.calendar.google.com/public/basic.ics";
 
-async function loadGoogleCalendar(){
+// ICS import naar Firestore (voorkomt duplicaten)
+async function importGoogleCalendar(){
   try{
-    const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(icsUrl)}`);
-    if(!response.ok) throw new Error("ICS niet op te halen");
+    const response = await fetch(icsUrl);
     const data = await response.text();
-
     const jcalData = ICAL.parse(data);
     const comp = new ICAL.Component(jcalData);
     const vevents = comp.getAllSubcomponents("vevent");
 
-    const list = document.getElementById("eventList");
-
-    vevents.forEach(v => {
+    for(const v of vevents){
       const ev = new ICAL.Event(v);
-      const li = document.createElement("li");
-      li.className = "event-item";
-      li.style.borderLeft = "6px solid black"; // ICS-events zwart
 
-      li.innerHTML = `
-        <strong>${ev.summary}</strong>
-        <div class="event-meta">${ev.startDate.toJSDate().toLocaleString("nl-BE")}</div>
-        <div style="color:black;">📅 Google agenda</div>
-        <div>${ev.description || ""}</div>
-      `;
-      list.appendChild(li);
-    });
+      // Controleer of event al bestaat
+      const q = query(eventsCol, where("title", "==", ev.summary), where("date", "==", ev.startDate.toJSDate().toISOString()));
+      const existing = await getDocs(q);
+      if(existing.docs.length > 0) continue; // al toegevoegd
 
+      await addDoc(eventsCol, {
+        user: "Google Agenda",
+        title: ev.summary,
+        date: ev.startDate.toJSDate().toISOString(),
+        description: ev.description || "",
+        timestamp: serverTimestamp()
+      });
+    }
   } catch(err){
-    console.error("Google kalender fout:", err);
+    console.error("Google Calendar import fout:", err);
   }
 }
+
+// ================= INIT =================
+importGoogleCalendar();
 
 </script>
 
