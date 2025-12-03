@@ -11,9 +11,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-/* Enige styles die hier nog mogen staan: PAGINA SPECIFIEK */
-/* Alles van de header + knoppen zit nu in style.css */
-
+/* PAGINA SPECIFIEK */
 .app-body { 
   padding:10px; 
   font-family: Arial, sans-serif;
@@ -91,7 +89,7 @@ input, textarea {
 
 <body class="app-body">
 
-<!-- ✅ STANDAARD HEADER (nu volledig uit style.css) -->
+<!-- ✅ STANDAARD HEADER -->
 <header class="topbar">
   <button onclick="window.location.href='dashboard.html'" class="home-btn">
     <i class="fas fa-home"></i>
@@ -125,19 +123,12 @@ input, textarea {
 
 <script>
 /* ===== CONFIG ===== */
-
 const LOCAL_EVENTS_KEY = "homecrewLocalEvents";
-
-// 👉 JOUW GOOGLE API KEY
 const GOOGLE_API_KEY = "4a993261a71ece889094805bab5b864a";
-
-// ✅ JOUW CALENDAR ID
 const CALENDAR_ID = "b3756ae16d0f11ea12a33407c6077e5925740ab0ce0d19514aa77a7fc6a6e0c0@group.calendar.google.com";
-
 const MAX_GOOGLE_EVENTS = 50;
 
 /* ===== HELPERS ===== */
-
 function escapeHtml(str){
   if (!str) return "";
   return String(str)
@@ -158,12 +149,9 @@ function getUserColor(u){
 }
 
 /* ===== USER ===== */
-
 const user = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
 
-if (!user) {
-  window.location.href = "index.html";
-}
+if (!user) window.location.href = "index.html";
 
 document.getElementById("welcomeUser").innerText = "Welkom, " + user + " 👋";
 
@@ -174,7 +162,6 @@ function logout(){
 }
 
 /* ===== LOKALE EVENTS ===== */
-
 function addLocalEvent(){
   const title = document.getElementById("eventTitle").value.trim();
   const date = document.getElementById("eventDate").value;
@@ -187,12 +174,7 @@ function addLocalEvent(){
 
   const events = JSON.parse(localStorage.getItem(LOCAL_EVENTS_KEY) || "[]");
 
-  events.push({
-    user,
-    title,
-    date,
-    description: desc
-  });
+  events.push({ user, title, date, description: desc });
 
   localStorage.setItem(LOCAL_EVENTS_KEY, JSON.stringify(events));
 
@@ -204,24 +186,20 @@ function addLocalEvent(){
 }
 
 /* ===== GOOGLE EVENTS ===== */
-
 async function fetchGoogleEvents(){
-
   const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events` +
-    `?key=${GOOGLE_API_KEY}` +
-    `&maxResults=${MAX_GOOGLE_EVENTS}` +
-    `&orderBy=startTime` +
-    `&singleEvents=true` +
-    `&timeMin=${new Date().toISOString()}`;
+              `?key=${GOOGLE_API_KEY}` +
+              `&maxResults=${MAX_GOOGLE_EVENTS}` +
+              `&orderBy=startTime` +
+              `&singleEvents=true` +
+              `&timeMin=${encodeURIComponent(new Date().toISOString())}`;
 
   try {
     const res = await fetch(url);
-
     if (!res.ok) {
       const text = await res.text();
       throw new Error(text);
     }
-
     const data = await res.json();
 
     return (data.items || []).map(ev => ({
@@ -241,9 +219,7 @@ async function fetchGoogleEvents(){
 }
 
 /* ===== WEERGAVE ===== */
-
 async function loadEvents(){
-
   const list = document.getElementById("eventList");
   const noEventsMsg = document.getElementById("no-events");
   const err = document.getElementById("agenda-error");
@@ -256,7 +232,6 @@ async function loadEvents(){
 
   // Lokale events
   const localEvents = JSON.parse(localStorage.getItem(LOCAL_EVENTS_KEY) || "[]");
-
   localEvents.sort((a,b)=> new Date(a.date) - new Date(b.date));
 
   localEvents.forEach(ev => {
@@ -264,45 +239,36 @@ async function loadEvents(){
     const li = document.createElement("li");
     li.className = "event-item";
     li.style.borderLeft = "6px solid " + getUserColor(ev.user);
-
     li.innerHTML = `
       <strong>${escapeHtml(ev.title)}</strong>
       <div class="event-meta">${new Date(ev.date).toLocaleString("nl-BE")}</div>
       <div class="event-user" style="color:${getUserColor(ev.user)}">👤 ${escapeHtml(ev.user)}</div>
       ${ev.description ? `<div>${escapeHtml(ev.description)}</div>` : ""}
     `;
-
     list.appendChild(li);
   });
 
   // Google events
   const googleEvents = await fetchGoogleEvents();
-
-  googleEvents.sort((a,b)=>a.start - b.start);
+  googleEvents.sort((a,b)=> a.start.getTime() - b.start.getTime());
 
   googleEvents.forEach(ev =>{
     hasEvents = true;
-
     const li = document.createElement("li");
     li.className = "event-item google-event";
-
     li.innerHTML = `
       <strong>${escapeHtml(ev.title)}</strong>
       <div class="event-meta">${ev.start.toLocaleString("nl-BE")}</div>
       <div style="color:black;">📅 Google Agenda</div>
       ${ev.location ? `<div>📍 ${escapeHtml(ev.location)}</div>` : ""}
     `;
-
     list.appendChild(li);
   });
 
-  if (!hasEvents){
-    noEventsMsg.style.display = "block";
-  }
+  if (!hasEvents) noEventsMsg.style.display = "block";
 }
 
 /* ===== AUTO ===== */
-
 document.addEventListener("DOMContentLoaded", loadEvents);
 setInterval(loadEvents, 5 * 60 * 1000);
 </script>
