@@ -81,91 +81,123 @@ body { margin:0; background:#f2f6ff; font-family:Arial,sans-serif; }
 
 </div>
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    // ================== Gebruiker ==================
-    const user = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
-    if(!user){ window.location.href="index.html"; return; }
-    document.getElementById("welcome").innerText = `Welkom, ${user} 👋`;
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getFirestore, collection, onSnapshot, query, orderBy, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-    // ================== Navigatie ==================
-    document.getElementById("btnAgenda").onclick = () => window.location.href="agenda.html";
-    document.getElementById("btnBoodschappen").onclick = () => window.location.href="boodschappen.html";
-    document.getElementById("btnBerichten").onclick = () => {
-        window.location.href="berichten.html";
-        // Badge resetten bij openen
-        updateUnreadMessages(0);
-    };
-    document.getElementById("btnTaken").onclick = () => window.location.href="taken.html";
-    document.getElementById("btnLocatie").onclick = () => window.location.href="locatie.html";
+// ================== Firebase ==================
+const firebaseConfig = {
+    apiKey: "AIzaSyCwlr069pxNXEEhIEGNug5Ly_kKSuvxSzs",
+    authDomain: "homecrew-d8e21.firebaseapp.com",
+    projectId: "homecrew-d8e21",
+    storageBucket: "homecrew-d8e21.firebasestorage.app",
+    messagingSenderId: "47664248188",
+    appId: "1:47664248188:web:0994c6b2ba07f6fee060f9",
+    measurementId: "G-5R58JL5D5K"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-    document.getElementById("logoutBtn").onclick = () => {
-        localStorage.removeItem("homecrewUser");
-        sessionStorage.removeItem("homecrewUser");
-        window.location.href="index.html";
-    };
+// ================== Gebruiker ==================
+const activeUser = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
+if(!activeUser){ window.location.href="index.html"; }
 
-    // ================== Weer ==================
-    const weatherIcon = document.getElementById("weatherIcon");
-    const weatherTemp = document.getElementById("weatherTemp");
-    const weatherTime = document.getElementById("weatherTime");
+document.getElementById("welcome").innerText = `Welkom, ${activeUser} 👋`;
 
-    const API_KEY = "4a993261a71ece889094805bab5b864a"; // Jouw key
-    const LAT = 51.2012;
-    const LON = 4.8170;
+// ================== Navigatie ==================
+document.getElementById("btnAgenda").onclick = () => window.location.href="agenda.html";
+document.getElementById("btnBoodschappen").onclick = () => window.location.href="boodschappen.html";
+document.getElementById("btnTaken").onclick = () => window.location.href="taken.html";
+document.getElementById("btnLocatie").onclick = () => window.location.href="locatie.html";
 
-    async function updateWeather() {
-        try {
-            const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${LAT}&lon=${LON}&appid=${API_KEY}&units=metric&lang=nl`);
-            if(!res.ok) throw new Error("OpenWeatherMap API response niet OK");
-            const data = await res.json();
+// ================== Logout ==================
+document.getElementById("logoutBtn").onclick = () => {
+    localStorage.removeItem("homecrewUser");
+    sessionStorage.removeItem("homecrewUser");
+    window.location.href="index.html";
+};
 
-            const temp = Math.round(data.main.temp);
-            const weatherId = data.weather[0].id;
-            let iconClass = "fa-sun";
+// ================== Weer ==================
+const weatherIcon = document.getElementById("weatherIcon");
+const weatherTemp = document.getElementById("weatherTemp");
+const weatherTime = document.getElementById("weatherTime");
 
-            if(weatherId >= 200 && weatherId < 300) iconClass="fa-bolt";
-            else if(weatherId >= 300 && weatherId < 600) iconClass="fa-cloud-showers-heavy";
-            else if(weatherId >= 600 && weatherId < 700) iconClass="fa-snowflake";
-            else if(weatherId >= 700 && weatherId < 800) iconClass="fa-smog";
-            else if(weatherId === 800) iconClass="fa-sun";
-            else if(weatherId > 800) iconClass="fa-cloud";
+const API_KEY = "4a993261a71ece889094805bab5b864a"; 
+const LAT = 51.2012;
+const LON = 4.8170;
 
-            weatherIcon.className = `fas ${iconClass}`;
-            weatherTemp.innerText = temp + "°C";
+async function updateWeather() {
+    try {
+        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${LAT}&lon=${LON}&appid=${API_KEY}&units=metric&lang=nl`);
+        if(!res.ok) throw new Error("OpenWeatherMap API response niet OK");
+        const data = await res.json();
 
-            const now = new Date();
-            weatherTime.innerText = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-        } catch(e) {
-            console.error("Weer kon niet geladen worden:", e);
-            weatherTemp.innerText="--°C";
-            weatherTime.innerText="--:--";
-            weatherIcon.className="fas fa-sun";
-        }
+        const temp = Math.round(data.main.temp);
+        const weatherId = data.weather[0].id;
+        let iconClass = "fa-sun";
+
+        if(weatherId >= 200 && weatherId < 300) iconClass="fa-bolt";
+        else if(weatherId >= 300 && weatherId < 600) iconClass="fa-cloud-showers-heavy";
+        else if(weatherId >= 600 && weatherId < 700) iconClass="fa-snowflake";
+        else if(weatherId >= 700 && weatherId < 800) iconClass="fa-smog";
+        else if(weatherId === 800) iconClass="fa-sun";
+        else if(weatherId > 800) iconClass="fa-cloud";
+
+        weatherIcon.className = `fas ${iconClass}`;
+        weatherTemp.innerText = temp + "°C";
+
+        const now = new Date();
+        weatherTime.innerText = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    } catch(e) {
+        console.error("Weer kon niet geladen worden:", e);
+        weatherTemp.innerText="--°C";
+        weatherTime.innerText="--:--";
+        weatherIcon.className="fas fa-sun";
     }
+}
 
-    updateWeather();
-    setInterval(updateWeather, 60000);
+updateWeather();
+setInterval(updateWeather, 60000);
 
-    // ================== Ongelezen berichten badge ==================
-    const badgeEl = document.getElementById("badgeBerichten");
+// ================== Ongelezen berichten badge ==================
+const badgeEl = document.getElementById("badgeBerichten");
 
-    function updateUnreadMessages(count){
-        if(count > 0){
-            badgeEl.style.display = "inline-block";
-            badgeEl.textContent = count;
-        } else {
-            badgeEl.style.display = "none";
-        }
+// Functie voor badge update
+function updateUnreadMessages(count){
+    if(count > 0){
+        badgeEl.style.display = "inline-block";
+        badgeEl.textContent = count;
+    } else {
+        badgeEl.style.display = "none";
     }
+}
 
-    // Voorbeeld: stel dat er 3 ongelezen berichten zijn
-    let unreadMessages = 3;
-    updateUnreadMessages(unreadMessages);
+// Luister naar berichten in Firebase
+const messagesRef = collection(db, "messages");
+const q = query(messagesRef, orderBy("createdAt", "desc"));
 
-    // Optioneel: dynamisch bijwerken via backend / Firebase
-    // bv: setInterval(() => updateUnreadMessages(getUnreadCountFromDB()), 30000);
+onSnapshot(q, (snapshot) => {
+    let unreadCount = 0;
+    snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        if(!data.read && data.user !== activeUser){
+            unreadCount++;
+        }
+    });
+    updateUnreadMessages(unreadCount);
 });
+
+// Reset badge bij klikken op berichten
+document.getElementById("btnBerichten").onclick = async () => {
+    const snapshot = await getDocs(messagesRef);
+    snapshot.forEach(docSnap => {
+        if(!docSnap.data().read){
+            updateDoc(doc(db, "messages", docSnap.id), { read:true });
+        }
+    });
+    updateUnreadMessages(0);
+    window.location.href="berichten.html";
+};
 </script>
 
 </body>
