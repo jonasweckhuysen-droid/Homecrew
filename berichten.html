@@ -4,9 +4,11 @@
 <meta charset="UTF-8">
 <title>Homecrew - Berichten</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <link rel="stylesheet" href="style.css">
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+
 <script>
   window.OneSignal = window.OneSignal || [];
   OneSignal.push(function() {
@@ -18,13 +20,50 @@
     OneSignal.showSlidedownPrompt();
   });
 </script>
+
+<style>
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px;
+  background:linear-gradient(135deg,#667eea,#764ba2);
+  color:white;
+}
+
+.home-btn{
+  padding:8px 12px;
+  border:none;
+  border-radius:10px;
+  background:white;
+  color:black;
+  font-weight:bold;
+}
+
+.content{
+  padding:15px;
+}
+
+.card{
+  background:white;
+  padding:15px;
+  border-radius:20px;
+}
+</style>
 </head>
+
 <body class="app-body">
 
 <header class="topbar">
-  <button onclick="window.location.href='dashboard.html'" class="home-btn">🏠 Home</button>
+  <button onclick="window.location.href='dashboard.html'" class="home-btn">
+    <i class="fas fa-home"></i>
+  </button>
+
   <h2>💬 Berichten</h2>
-  <button onclick="logout()" class="home-btn">🚪 Uitloggen</button>
+
+  <button onclick="logout()" class="home-btn">
+    <i class="fas fa-sign-out-alt"></i>
+  </button>
 </header>
 
 <main class="content">
@@ -37,6 +76,7 @@
     <button class="main-btn" onclick="sendMessage()">Verstuur</button>
   </div>
 </main>
+
 <script type="module">
 // ================= FIREBASE =================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
@@ -92,7 +132,12 @@ onSnapshot(messagesCol, (snapshot) => {
             div.style.padding = "8px 12px";
             div.style.borderRadius = "12px";
             div.style.marginBottom = "8px";
-            div.innerHTML = `<strong>${msg.user}</strong>: ${msg.text} <small style="opacity:0.7;">${msg.timestamp?.seconds ? new Date(msg.timestamp.seconds*1000).toLocaleString("nl-BE") : "Onbekend tijdstip"}</small>`;
+            div.innerHTML = `
+              <strong>${msg.user}</strong>: ${msg.text}
+              <small style="opacity:0.7;">
+                ${msg.timestamp?.seconds ? new Date(msg.timestamp.seconds*1000).toLocaleString("nl-BE") : "Onbekend tijdstip"}
+              </small>
+            `;
             chatBox.appendChild(div);
 
             if(msg.user !== user){
@@ -109,7 +154,7 @@ onSnapshot(messagesCol, (snapshot) => {
     chatBox.scrollTop = chatBox.scrollHeight;
 });
 
-// ================= VERSTUUR FUNCTIE GLOBAAL =================
+// ================= VERSTUUR FUNCTIE =================
 window.sendMessage = async function(){
     const input = document.getElementById("messageInput");
     const text = input.value.trim();
