@@ -7,29 +7,10 @@
 
 <link rel="stylesheet" href="style.css">
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDo7KIQjAWmr6mNE413sky28HRM74yUaXQ"></script>
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-/* ===== HEADER STIJL ===== */
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:10px;
-  background:linear-gradient(135deg,#667eea,#764ba2);
-  color:white;
-}
-
-.home-btn{
-  padding:8px 12px;
-  border:none;
-  border-radius:10px;
-  background:white;
-  color:black;
-  font-weight:bold;
-  cursor:pointer;
-}
-
+/* ===== PAGINA SPECIFIEK ===== */
 .content{
   padding:15px;
 }
@@ -40,7 +21,6 @@
   border-radius:20px;
 }
 
-/* ===== STATUS BAR ===== */
 #statusBar {
   position: fixed;
   top: 70px;
@@ -54,7 +34,6 @@
   z-index: 9999;
 }
 
-/* ===== CONTROL BAR ===== */
 .control-bar {
   text-align: center;
   margin-top: 10px;
@@ -78,6 +57,7 @@
 
 <div id="statusBar">🔄 Verbinden...</div>
 
+<!-- ✅ STANDAARD HEADER -->
 <header class="topbar">
   <button onclick="window.location.href='dashboard.html'" class="home-btn">
     <i class="fas fa-home"></i>
@@ -127,10 +107,7 @@ const statusBar = document.getElementById("statusBar");
 
 // ================= GEBRUIKER =================
 const activeUser = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
-
-if (!activeUser) {
-  window.location.href = "index.html";
-}
+if (!activeUser) window.location.href = "index.html";
 
 document.getElementById("welcomeUser").textContent = "Welkom, " + activeUser + " 👋";
 
@@ -166,11 +143,7 @@ const userColors = {
 let watchId = null;
 
 window.startTracking = function () {
-  if (!navigator.geolocation) {
-    alert("Locatie wordt niet ondersteund");
-    return;
-  }
-
+  if (!navigator.geolocation) { alert("Locatie wordt niet ondersteund"); return; }
   statusBar.textContent = "🟢 Locatie delen actief";
 
   watchId = navigator.geolocation.watchPosition(async (position) => {
@@ -209,17 +182,11 @@ const locationsRef = collection(db, "users_locations");
 
 onSnapshot(locationsRef, (snapshot) => {
   snapshot.forEach((userDoc) => {
-
     const user = userDoc.id;
     const data = userDoc.data();
-
     if (!data.latitude || !data.longitude) return;
 
-    const position = {
-      lat: data.latitude,
-      lng: data.longitude
-    };
-
+    const position = { lat: data.latitude, lng: data.longitude };
     const color = userColors[user.toLowerCase()] || "green";
 
     const lastUpdate = data.timestamp?.seconds
@@ -227,16 +194,9 @@ onSnapshot(locationsRef, (snapshot) => {
       : "net bijgewerkt";
 
     if (markers[user]) {
-
       markers[user].setPosition(position);
-
-      infoWindows[user].setContent(`
-        <strong>${user}</strong><br>
-        Laatste update: ${lastUpdate}
-      `);
-
+      infoWindows[user].setContent(`<strong>${user}</strong><br>Laatste update: ${lastUpdate}`);
     } else {
-
       const marker = new google.maps.Marker({
         position,
         map,
@@ -252,26 +212,19 @@ onSnapshot(locationsRef, (snapshot) => {
       });
 
       const infoWindow = new google.maps.InfoWindow({
-        content: `
-          <strong>${user}</strong><br>
-          Laatste update: ${lastUpdate}
-        `
+        content: `<strong>${user}</strong><br>Laatste update: ${lastUpdate}`
       });
 
-      marker.addListener("click", () => {
-        infoWindow.open(map, marker);
-      });
+      marker.addListener("click", () => { infoWindow.open(map, marker); });
 
       markers[user] = marker;
       infoWindows[user] = infoWindow;
     }
-
   });
 
   statusBar.textContent = "✅ Live verbinding actief";
 });
 
 </script>
-
 </body>
 </html>
