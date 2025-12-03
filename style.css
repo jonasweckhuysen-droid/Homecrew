@@ -292,3 +292,119 @@ li button {
 .dash-btn i {
     color: black;
 }
+/* ===============================
+   TOPBAR (globaal voor alle pagina's)
+================================ */
+
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px;
+  background:linear-gradient(135deg,#667eea,#764ba2);
+  color:white;
+}
+
+.topbar h2{
+  margin:0;
+  font-size:18px;
+  color:white;
+}
+
+.home-btn{
+  padding:8px 12px;
+  border:none;
+  border-radius:10px;
+  background:white;
+  color:black;
+  font-weight:bold;
+  cursor:pointer;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.content{
+  padding:15px;
+}
+
+.card{
+  background:white;
+  padding:15px;
+  border-radius:20px;
+}
+
+.list-box{
+  display:none;
+  margin-top:10px;
+}
+
+.list-box.show{
+  display:block;
+}
+
+.input-group{
+  display:flex;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+.input-group input{
+  flex:1;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #ccc;
+}
+
+.main-btn{
+  padding:10px 15px;
+  background:#667eea;
+  border:none;
+  color:white;
+  border-radius:10px;
+}
+
+ul{
+  list-style:none;
+  padding:0;
+}
+
+li{
+  background:#f1f4ff;
+  margin-bottom:8px;
+  padding:10px;
+  border-radius:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+/* Dashboard knoppen */
+.dashboard-buttons{
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+}
+
+.dash-btn{
+  padding:15px;
+  border-radius:20px;
+  text-align:center;
+  font-size:18px;
+  cursor:pointer;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:10px;
+}
+
+/* KLEUR + ZWARTE TEKST */
+#vingardiumBtn{
+  background:linear-gradient(135deg,#11998e,#38ef7d);
+  color:black;
+}
+
+#drijveldenBtn{
+  background:linear-gradient(135deg,#f7971e,#ffd200);
+  color:black;
+}
