@@ -3,41 +3,31 @@ body, .app-body {
     margin: 0;
     padding: 0;
     font-family: 'Arial', sans-serif;
-    background: linear-gradient(135deg, #f3f7fa, #e1f0f8); /* lichtere achtergrond */
-    color: #222; /* donkerder tekst voor betere leesbaarheid */
+    background: linear-gradient(135deg, #f3f7fa, #e1f0f8);
+    color: #222;
 }
 
 /* -------------------- Headers -------------------- */
 h1, h2, h3 {
     text-align: center;
-    color: #111; /* donkerder en duidelijker */
+    color: #111;
     margin: 0 0 10px 0;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.15); /* subtiele text shadow */
-}
-
-/* -------------------- Login / Dashboard box -------------------- */
-.login-box, .dashboard-box {
-    max-width: 420px;
-    margin: 50px auto;
-    padding: 25px;
-    background: linear-gradient(145deg, #ffffff, #f0f4f8); /* lichtere box */
-    border-radius: 25px;
-    box-shadow: 0 12px 25px rgba(0,0,0,0.2);
-    text-align: center;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.15);
 }
 
 /* -------------------- Input velden -------------------- */
 input[type="text"], input[type="password"], input[type="date"], textarea {
     width: 100%;
-    padding: 14px;
+    padding: 16px;       /* grotere input voor beter zicht */
     margin: 10px 0;
     border-radius: 16px;
-    border: none;
+    border: 1px solid #ccc;
     font-size: 16px;
     box-sizing: border-box;
-    transition: all 0.3s;
     background: #fefefe;
     box-shadow: inset 0 3px 6px rgba(0,0,0,0.1);
+    direction: ltr;      /* tekst van links naar rechts */
+    transition: all 0.3s;
 }
 
 input:focus, textarea:focus {
@@ -64,144 +54,54 @@ button:hover {
     box-shadow: 0 10px 20px rgba(0,0,0,0.2);
 }
 
-/* Logout knop opvallender */
-button.logout-btn { 
-    background: linear-gradient(45deg, #ff5f6d, #ffc371);
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
+/* -------------------- Topbar -------------------- */
+.topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px;
+    background:linear-gradient(135deg,#667eea,#764ba2);
+    color:white;
 }
 
-/* -------------------- Dashboard knoppen -------------------- */
-.dashboard-buttons {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin-top: 20px;
+.topbar h2{
+    margin:0;
+    font-size:18px;
+    color:white;
 }
 
-.dash-btn {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 15px;
-    padding: 20px;
-    border-radius: 20px;
-    font-size: 20px;
-    font-weight: bold;
-    color: white;
-    cursor: pointer;
-    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-    transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+.home-btn{
+    padding:8px 12px;
+    border:none;
+    border-radius:10px;
+    background:white;
+    color:black;
+    font-weight:bold;
+    cursor:pointer;
+    display:flex;
+    justify-content:center;
+    align-items:center;
 }
 
-.dash-btn i { font-size: 28px; }
-
-.dash-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 18px rgba(0,0,0,0.25);
-    filter: brightness(1.1);
+/* -------------------- Content / Cards -------------------- */
+.content{
+    padding:15px;
 }
 
-/* Kleuren per knop met gradient */
-.dash-btn.agenda { background: linear-gradient(135deg, #3a6ea5, #70a1ff); }
-.dash-btn.boodschappenlijst { background: linear-gradient(135deg, #ff9800, #ffc947); }
-.dash-btn.berichten { background: linear-gradient(135deg, #9c27b0, #d46ee5); }
-.dash-btn.taken { background: linear-gradient(135deg, #f44336, #ff7961); }
-.dash-btn.locatie { background: linear-gradient(135deg, #4caf50, #81c784); }
-
-/* -------------------- Terug naar home / iconen -------------------- */
-.home-btn {
-    background: linear-gradient(135deg, #00c6ff, #0072ff);
-    border-radius: 25px;
-    padding: 12px 20px;
-    color: white;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 15px auto;
-    width: fit-content;
-    box-shadow: 0 6px 14px rgba(0,0,0,0.2);
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.home-btn:hover {
-    transform: translateY(-3px) scale(1.05);
-    filter: brightness(1.2);
-}
-
-/* -------------------- Lijsten (Agenda / Taken / Boodschappen) -------------------- */
-ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-li {
-    background: linear-gradient(145deg, #ffffff, #f5f8fa); /* lichtere lijst items */
-    margin-bottom: 15px;
-    padding: 16px;
-    border-radius: 16px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    display: flex;
-    flex-direction: column;
-    transition: all 0.3s;
-}
-
-li:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 14px rgba(0,0,0,0.15);
-}
-
-li.agenda::before { content: "📅"; position: absolute; left: 12px; top: 12px; font-size: 20px; }
-li.taken::before { content: "📝"; position: absolute; left: 12px; top: 12px; font-size: 20px; }
-
-/* -------------------- Kaarten / content -------------------- */
-.card {
-    background: #ffffff;
-    padding: 15px;
-    border-radius: 12px;
-    margin-bottom: 20px;
+.card{
+    background:white;
+    padding:15px;
+    border-radius:20px;
     box-shadow: 0 6px 12px rgba(0,0,0,0.1);
 }
 
-.card input, .card textarea {
-    width: 100%;
-    margin: 8px 0;
-    padding: 10px;
-    border-radius: 10px;
-    border: none;
-    background: #f5f8fa;
-}
-
-/* -------------------- Buttons in cards -------------------- */
-.main-btn {
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 10px;
-    font-size: 16px;
-    background: #4caf50;
-    color: white;
-}
-
-/* -------------------- Mobiel responsiveness -------------------- */
-@media (max-width: 480px) {
-    .login-box, .dashboard-box { margin: 30px 15px; padding: 20px; }
-    .dash-btn { font-size: 18px; padding: 18px; justify-content: center; }
-    li { padding: 12px; }
-}
-/* -------------------- Lijst box styling -------------------- */
-.list-box {
+/* -------------------- Lijstboxen -------------------- */
+.list-box{
     display: none;
-    margin-top: 15px;
-    padding: 15px;
-    border-radius: 16px;
-    background: #f7f9fc; /* lichte achtergrond voor contrast */
+    margin-top:15px;
+    padding:15px;
+    border-radius:16px;
+    background: #f7f9fc;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     transition: all 0.3s ease;
 }
@@ -210,56 +110,45 @@ li.taken::before { content: "📝"; position: absolute; left: 12px; top: 12px; f
     display: block;
 }
 
-#vingardium-box {
-    margin-bottom: 20px; /* ruimte onder Vingardium zodat Drijvelden niet direct aanleunt */
+.input-group{
+    display:flex;
+    gap:10px;
+    margin-bottom:12px;
 }
 
-.list-box h3 {
-    margin-bottom: 10px;
-    text-align: center;
-    font-size: 18px;
-    color: #222;
-}
-
-.input-group {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 12px;
-}
-
-.input-group input {
-    flex: 1;
-    padding: 10px;
-    border-radius: 12px;
-    border: 1px solid #ccc;
-    font-size: 16px;
-    box-sizing: border-box;
+.input-group input{
+    flex:1;
+    padding:16px;       /* groter inputveld */
+    font-size:16px;     /* beter zichtbare tekst */
+    border-radius:12px;
+    border:1px solid #ccc;
+    direction: ltr;     /* tekst normaal */
 }
 
 .input-group button {
-    padding: 10px 14px;
+    padding:12px 16px;
     border: none;
     border-radius: 10px;
     background: #3a6ea5;
     color: white;
     cursor: pointer;
-    font-size: 16px;
+    font-size:16px;
 }
 
 /* -------------------- Lijst items -------------------- */
 ul {
     list-style: none;
-    padding: 0;
-    margin: 0;
+    padding:0;
+    margin:0;
 }
 
 li {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 15px;
-    margin-bottom: 10px;
-    border-radius: 12px;
+    padding:14px 16px;
+    margin-bottom:10px;
+    border-radius:12px;
     background: #ffffff;
     box-shadow: 0 4px 8px rgba(0,0,0,0.08);
     transition: all 0.2s ease;
@@ -279,132 +168,39 @@ li button {
     cursor: pointer;
 }
 
-/* Specifiek voor de Boodschappen knoppen */
-#vingardium-box, #drijvelden-box {
-    color: black;
-}
-
-.dash-btn span {
-    color: black; /* zorgt dat de knoplabels zwart worden */
-}
-
-/* Eventueel ook de iconen iets donkerder */
-.dash-btn i {
-    color: black;
-}
-/* ===============================
-   TOPBAR (globaal voor alle pagina's)
-================================ */
-
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:12px;
-  background:linear-gradient(135deg,#667eea,#764ba2);
-  color:white;
-}
-
-.topbar h2{
-  margin:0;
-  font-size:18px;
-  color:white;
-}
-
-.home-btn{
-  padding:8px 12px;
-  border:none;
-  border-radius:10px;
-  background:white;
-  color:black;
-  font-weight:bold;
-  cursor:pointer;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
-
-.content{
-  padding:15px;
-}
-
-.card{
-  background:white;
-  padding:15px;
-  border-radius:20px;
-}
-
-.list-box{
-  display:none;
-  margin-top:10px;
-}
-
-.list-box.show{
-  display:block;
-}
-
-.input-group{
-  display:flex;
-  gap:10px;
-  margin-bottom:10px;
-}
-
-.input-group input{
-  flex:1;
-  padding:10px;
-  border-radius:10px;
-  border:1px solid #ccc;
-}
-
-.main-btn{
-  padding:10px 15px;
-  background:#667eea;
-  border:none;
-  color:white;
-  border-radius:10px;
-}
-
-ul{
-  list-style:none;
-  padding:0;
-}
-
-li{
-  background:#f1f4ff;
-  margin-bottom:8px;
-  padding:10px;
-  border-radius:10px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-/* Dashboard knoppen */
+/* -------------------- Dashboard knoppen -------------------- */
 .dashboard-buttons{
-  display:flex;
-  flex-direction:column;
-  gap:15px;
+    display:flex;
+    flex-direction:column;
+    gap:15px;
 }
 
 .dash-btn{
-  padding:15px;
-  border-radius:20px;
-  text-align:center;
-  font-size:18px;
-  cursor:pointer;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:10px;
+    padding:15px;
+    border-radius:20px;
+    text-align:center;
+    font-size:18px;
+    cursor:pointer;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:10px;
 }
 
-/* KLEUR + ZWARTE TEKST */
+/* Kleuren per knop */
 #vingardiumBtn{
-  background:linear-gradient(135deg,#11998e,#38ef7d);
-  color:black;
+    background:linear-gradient(135deg,#11998e,#38ef7d);
+    color:black;
+}
+#drijveldenBtn{
+    background:linear-gradient(135deg,#f7971e,#ffd200);
+    color:black;
 }
 
-#drijveldenBtn{
-  background:linear-gradient(135deg,#f7971e,#ffd200);
-  color:black;
+/* -------------------- Mobiel responsiveness -------------------- */
+@media (max-width:480px){
+    .dash-btn { font-size:16px; padding:16px; justify-content:center; }
+    li { padding:12px; }
+    .input-group input { padding:14px; font-size:15px; }
+    .input-group button { padding:10px; font-size:15px; }
 }
