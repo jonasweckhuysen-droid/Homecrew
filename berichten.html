@@ -6,9 +6,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet" href="style.css">
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 
+<!-- Font Awesome voor icoontjes -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<!-- OneSignal -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
   window.OneSignal = window.OneSignal || [];
   OneSignal.push(function() {
@@ -22,23 +25,7 @@
 </script>
 
 <style>
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:10px;
-  background:linear-gradient(135deg,#667eea,#764ba2);
-  color:white;
-}
-
-.home-btn{
-  padding:8px 12px;
-  border:none;
-  border-radius:10px;
-  background:white;
-  color:black;
-  font-weight:bold;
-}
+/* ===== PAGINA SPECIFIEK ===== */
 
 .content{
   padding:15px;
@@ -49,11 +36,36 @@
   padding:15px;
   border-radius:20px;
 }
+
+.chat-box{
+  max-height:300px;
+  overflow-y:auto;
+  padding:10px;
+}
+
+#messageInput{
+  width:100%;
+  padding:8px;
+  margin:6px 0;
+  border-radius:6px;
+  border:1px solid #ddd;
+  box-sizing:border-box;
+}
+
+.main-btn{
+  padding:10px 15px;
+  background:#667eea;
+  border:none;
+  color:white;
+  border-radius:10px;
+  cursor:pointer;
+}
 </style>
 </head>
 
 <body class="app-body">
 
+<!-- ✅ STANDAARD HEADER -->
 <header class="topbar">
   <button onclick="window.location.href='dashboard.html'" class="home-btn">
     <i class="fas fa-home"></i>
@@ -70,7 +82,7 @@
   <h3 id="welcomeUser"></h3>
 
   <div class="card">
-    <div id="chatBox" class="chat-box" style="max-height:300px; overflow-y:auto; padding:10px;"></div>
+    <div id="chatBox" class="chat-box"></div>
 
     <input type="text" id="messageInput" placeholder="Typ je bericht..." />
     <button class="main-btn" onclick="sendMessage()">Verstuur</button>
@@ -166,7 +178,6 @@ window.sendMessage = async function(){
             text,
             timestamp: serverTimestamp()
         });
-        console.log("Bericht succesvol verzonden:", text);
         input.value = "";
     } catch (error) {
         console.error("Fout bij verzenden:", error);
