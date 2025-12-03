@@ -22,7 +22,7 @@ body { margin:0; background:#f2f6ff; font-family:Arial,sans-serif; }
 
 /* Knoppen grid */
 .dashboard-buttons { display:grid; grid-template-columns:1fr 1fr; gap:15px; }
-.dash-btn { padding:20px 10px; border-radius:18px; color:white; text-align:center; font-weight:bold; cursor:pointer; box-shadow:0 10px 15px rgba(0,0,0,0.1); transition:0.2s ease; }
+.dash-btn { position:relative; padding:20px 10px; border-radius:18px; color:white; text-align:center; font-weight:bold; cursor:pointer; box-shadow:0 10px 15px rgba(0,0,0,0.1); transition:0.2s ease; }
 .dash-btn i { font-size:28px; display:block; margin-bottom:8px; }
 .dash-btn:active { transform:scale(0.95); }
 .agenda { background: linear-gradient(135deg,#ff9966,#ff5e62); }
@@ -30,6 +30,20 @@ body { margin:0; background:#f2f6ff; font-family:Arial,sans-serif; }
 .berichten { background: linear-gradient(135deg,#a8ff78,#78ffd6); }
 .taken { background: linear-gradient(135deg,#f7971e,#ffd200); }
 .locatie { background: linear-gradient(135deg,#c471f5,#fa71cd); }
+
+/* Badge voor ongelezen berichten */
+.badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background:red;
+  color:white;
+  border-radius:50%;
+  padding:2px 6px;
+  font-size:10px;
+  font-weight:bold;
+  display:none;
+}
 
 /* Logout */
 .logout-btn { margin-top:25px; width:100%; padding:15px; border:none; border-radius:30px; background:#ff4d4d; color:white; font-size:16px; font-weight:bold; }
@@ -55,7 +69,10 @@ body { margin:0; background:#f2f6ff; font-family:Arial,sans-serif; }
     <div class="dashboard-buttons">
         <div class="dash-btn agenda" id="btnAgenda"><i class="fas fa-calendar-alt"></i>Agenda</div>
         <div class="dash-btn boodschappenlijst" id="btnBoodschappen"><i class="fas fa-shopping-basket"></i>Boodschappen</div>
-        <div class="dash-btn berichten" id="btnBerichten"><i class="fas fa-comments"></i>Berichten</div>
+        <div class="dash-btn berichten" id="btnBerichten">
+            <i class="fas fa-comments"></i>Berichten
+            <span class="badge" id="badgeBerichten">0</span>
+        </div>
         <div class="dash-btn taken" id="btnTaken"><i class="fas fa-list-check"></i>Taken</div>
         <div class="dash-btn locatie" id="btnLocatie"><i class="fas fa-location-dot"></i>Locatie</div>
     </div>
@@ -74,7 +91,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // ================== Navigatie ==================
     document.getElementById("btnAgenda").onclick = () => window.location.href="agenda.html";
     document.getElementById("btnBoodschappen").onclick = () => window.location.href="boodschappen.html";
-    document.getElementById("btnBerichten").onclick = () => window.location.href="berichten.html";
+    document.getElementById("btnBerichten").onclick = () => {
+        window.location.href="berichten.html";
+        // Badge resetten bij openen
+        updateUnreadMessages(0);
+    };
     document.getElementById("btnTaken").onclick = () => window.location.href="taken.html";
     document.getElementById("btnLocatie").onclick = () => window.location.href="locatie.html";
 
@@ -103,20 +124,18 @@ document.addEventListener("DOMContentLoaded", () => {
             const weatherId = data.weather[0].id;
             let iconClass = "fa-sun";
 
-            // Icon mapping op basis van OpenWeatherMap weather id
-            if(weatherId >= 200 && weatherId < 300) iconClass="fa-bolt"; // Thunderstorm
-            else if(weatherId >= 300 && weatherId < 600) iconClass="fa-cloud-showers-heavy"; // Rain
-            else if(weatherId >= 600 && weatherId < 700) iconClass="fa-snowflake"; // Snow
-            else if(weatherId >= 700 && weatherId < 800) iconClass="fa-smog"; // Atmosphere
-            else if(weatherId === 800) iconClass="fa-sun"; // Clear
-            else if(weatherId > 800) iconClass="fa-cloud"; // Clouds
+            if(weatherId >= 200 && weatherId < 300) iconClass="fa-bolt";
+            else if(weatherId >= 300 && weatherId < 600) iconClass="fa-cloud-showers-heavy";
+            else if(weatherId >= 600 && weatherId < 700) iconClass="fa-snowflake";
+            else if(weatherId >= 700 && weatherId < 800) iconClass="fa-smog";
+            else if(weatherId === 800) iconClass="fa-sun";
+            else if(weatherId > 800) iconClass="fa-cloud";
 
             weatherIcon.className = `fas ${iconClass}`;
             weatherTemp.innerText = temp + "°C";
 
             const now = new Date();
             weatherTime.innerText = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-
         } catch(e) {
             console.error("Weer kon niet geladen worden:", e);
             weatherTemp.innerText="--°C";
@@ -127,6 +146,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
     updateWeather();
     setInterval(updateWeather, 60000);
+
+    // ================== Ongelezen berichten badge ==================
+    const badgeEl = document.getElementById("badgeBerichten");
+
+    function updateUnreadMessages(count){
+        if(count > 0){
+            badgeEl.style.display = "inline-block";
+            badgeEl.textContent = count;
+        } else {
+            badgeEl.style.display = "none";
+        }
+    }
+
+    // Voorbeeld: stel dat er 3 ongelezen berichten zijn
+    let unreadMessages = 3;
+    updateUnreadMessages(unreadMessages);
+
+    // Optioneel: dynamisch bijwerken via backend / Firebase
+    // bv: setInterval(() => updateUnreadMessages(getUnreadCountFromDB()), 30000);
 });
 </script>
 
