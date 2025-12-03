@@ -4,15 +4,27 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Homecrew — Taken (live)</title>
-<link rel="stylesheet" href="/Homecrew/style.css">
-</head>
-<body>
 
-<div class="topbar">
-  <button class="back-btn" onclick="window.location.href='/Homecrew/dashboard.html'">🏠 Home</button>
-  <span class="top-title">Taken</span>
-  <button class="back-btn" onclick="logout()">🚪</button>
-</div>
+<link rel="stylesheet" href="/Homecrew/style.css">
+
+<!-- Icons -->
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+</head>
+<body class="app-body">
+
+<!-- ✅ AANGEPASTE HEADER -->
+<header class="topbar">
+  <button class="home-btn" onclick="window.location.href='/Homecrew/dashboard.html'">
+    <i class="fas fa-home"></i> Dashboard
+  </button>
+
+  <h2>✅ Taken</h2>
+
+  <button class="home-btn" onclick="logout()">
+    <i class="fas fa-sign-out-alt"></i> Uitloggen
+  </button>
+</header>
 
 <div class="login-box" style="max-width:820px; margin:20px auto;">
   <h1 id="welcome">Welkom</h1>
@@ -21,9 +33,11 @@
     <h3>Nieuwe taak toevoegen</h3>
     <input id="taskTitle" type="text" placeholder="Titel" />
     <textarea id="taskDesc" placeholder="Beschrijving (optioneel)"></textarea>
-    <div style="display:flex;gap:10px;">
+    <div style="display:flex; gap:10px;">
       <button id="addTaskBtn" class="main-btn" style="flex:1">Toevoegen</button>
-      <button id="refreshBtn" class="main-btn" style="flex:0 0 130px;background:#607d8b">Vernieuw</button>
+      <button id="refreshBtn" class="main-btn" style="flex:0 0 130px; background:#607d8b">
+        Vernieuw
+      </button>
     </div>
   </div>
 
@@ -38,13 +52,20 @@
    Homecrew — Live taken (Firestore)
    ============================= */
 
-/* --------- Firebase imports --------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import {
-  getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, deleteDoc, doc
+  getFirestore,
+  collection,
+  addDoc,
+  onSnapshot,
+  query,
+  orderBy,
+  serverTimestamp,
+  deleteDoc,
+  doc
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-/* --------- Firebase config (gebruik jouw config) --------- */
+/* --------- Firebase config --------- */
 const firebaseConfig = {
   apiKey: "AIzaSyCwlr069pxNXEEhIEGNug5Ly_kKSuvxSzs",
   authDomain: "homecrew-d8e21.firebaseapp.com",
@@ -68,13 +89,17 @@ function getUserColor(name) {
   return "#666";
 }
 
-/* --------- Huidige gebruiker (local/session) --------- */
-const activeUser = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
+/* --------- Huidige gebruiker --------- */
+const activeUser =
+  localStorage.getItem("homecrewUser") ||
+  sessionStorage.getItem("homecrewUser");
+
 if (!activeUser) {
-  // niet ingelogd: terug naar start
   window.location.href = "/Homecrew/index.html";
 }
-document.getElementById("welcome").innerText = "Welkom, " + activeUser + " 👋";
+
+document.getElementById("welcome").innerText =
+  "Welkom, " + activeUser + " 👋";
 
 /* --------- DOM refs --------- */
 const tasksListEl = document.getElementById("tasksList");
@@ -83,10 +108,11 @@ const refreshBtn = document.getElementById("refreshBtn");
 const titleInput = document.getElementById("taskTitle");
 const descInput = document.getElementById("taskDesc");
 
-/* --------- Add taak (write) --------- */
+/* --------- Add taak --------- */
 async function addTask() {
   const title = titleInput.value.trim();
   const desc = descInput.value.trim();
+
   if (!title) {
     alert("Vul een titel in voor de taak");
     return;
@@ -99,19 +125,21 @@ async function addTask() {
       user: activeUser,
       createdAt: serverTimestamp()
     });
+
     titleInput.value = "";
     descInput.value = "";
-    // succes log
-    console.log("Taak toegevoegd");
+    console.log("✅ Taak toegevoegd");
+
   } catch (err) {
     console.error("Fout bij toevoegen taak:", err);
     alert("Kon taak niet toevoegen. Kijk console voor details.");
   }
 }
 
-/* --------- Delete taak (delete) --------- */
+/* --------- Delete taak --------- */
 async function deleteTask(docId) {
   if (!confirm("Verwijder deze taak?")) return;
+
   try {
     await deleteDoc(doc(db, "tasks", docId));
   } catch (err) {
@@ -120,19 +148,17 @@ async function deleteTask(docId) {
   }
 }
 
-/* --------- Realtime listener (read) --------- */
+/* --------- Realtime listener --------- */
 function startTasksListener() {
-  // Sorteer op creatie tijd (oudste eerst)
   const q = query(collection(db, "tasks"), orderBy("createdAt", "asc"));
 
-  // onSnapshot: realtime updates
   return onSnapshot(q, (snapshot) => {
     tasksListEl.innerHTML = "";
+
     snapshot.forEach((docSnap) => {
       const data = docSnap.data();
       const id = docSnap.id;
 
-      // Format item
       const li = document.createElement("li");
       li.className = "event-item";
       li.style.display = "flex";
@@ -141,7 +167,6 @@ function startTasksListener() {
       li.style.padding = "12px";
       li.style.marginBottom = "10px";
 
-      // Left: content
       const left = document.createElement("div");
       left.style.flex = "1";
 
@@ -159,21 +184,25 @@ function startTasksListener() {
       const metaEl = document.createElement("div");
       metaEl.style.marginTop = "6px";
       metaEl.style.fontSize = "12px";
+
       const userColor = getUserColor(data.user);
-      metaEl.innerHTML = `👤 <span style="color:${userColor}; font-weight:600">${data.user || "?"}</span> • ${data.createdAt && data.createdAt.toDate ? new Date(data.createdAt.toDate()).toLocaleString("nl-BE") : ""}`;
+
+      metaEl.innerHTML = `
+        👤 <span style="color:${userColor}; font-weight:600">${data.user || "?"}</span>
+        • ${data.createdAt && data.createdAt.toDate
+          ? new Date(data.createdAt.toDate()).toLocaleString("nl-BE")
+          : ""}
+      `;
 
       left.appendChild(titleEl);
       left.appendChild(descEl);
       left.appendChild(metaEl);
 
-      // Right: acties
       const right = document.createElement("div");
       right.style.marginLeft = "12px";
       right.style.display = "flex";
-      right.style.gap = "8px";
       right.style.alignItems = "center";
 
-      // Delete knop (iedereen mag nu verwijderen — we kunnen rechten later limiteren)
       const delBtn = document.createElement("button");
       delBtn.className = "delete-btn";
       delBtn.style.background = "#DA4453";
@@ -193,7 +222,6 @@ function startTasksListener() {
       tasksListEl.appendChild(li);
     });
 
-    // lege toestand
     if (!tasksListEl.hasChildNodes()) {
       const empty = document.createElement("div");
       empty.style.padding = "14px";
@@ -201,27 +229,28 @@ function startTasksListener() {
       empty.textContent = "Nog geen taken — voeg er een toe!";
       tasksListEl.appendChild(empty);
     }
+
   }, (err) => {
     console.error("Listener error:", err);
   });
 }
 
-/* --------- Bind events --------- */
+/* --------- Events --------- */
 addBtn.addEventListener("click", addTask);
+
 refreshBtn.addEventListener("click", () => {
-  // herstart listener (simpele refresh)
   if (unsubscribe) unsubscribe();
   unsubscribe = startTasksListener();
 });
 
-/* --------- Logout (cleart lokale sessie) --------- */
+/* --------- Logout --------- */
 function logout() {
   localStorage.removeItem("homecrewUser");
   sessionStorage.removeItem("homecrewUser");
   window.location.href = "/Homecrew/index.html";
 }
 
-/* --------- Start realtime listener --------- */
+/* --------- Start --------- */
 let unsubscribe = startTasksListener();
 
 </script>
