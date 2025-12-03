@@ -13,16 +13,16 @@
 </head>
 <body class="app-body">
 
-<!-- ✅ AANGEPASTE HEADER -->
+<!-- ✅ GESCHIKTE HEADER -->
 <header class="topbar">
   <button class="home-btn" onclick="window.location.href='/Homecrew/dashboard.html'">
-    <i class="fas fa-home"></i> Dashboard
+    <i class="fas fa-home"></i>
   </button>
 
   <h2>✅ Taken</h2>
 
   <button class="home-btn" onclick="logout()">
-    <i class="fas fa-sign-out-alt"></i> Uitloggen
+    <i class="fas fa-sign-out-alt"></i>
   </button>
 </header>
 
@@ -48,10 +48,7 @@
 </div>
 
 <script type="module">
-/* =============================
-   Homecrew — Live taken (Firestore)
-   ============================= */
-
+// ================= FIREBASE =================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import {
   getFirestore,
@@ -65,7 +62,6 @@ import {
   doc
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-/* --------- Firebase config --------- */
 const firebaseConfig = {
   apiKey: "AIzaSyCwlr069pxNXEEhIEGNug5Ly_kKSuvxSzs",
   authDomain: "homecrew-d8e21.firebaseapp.com",
@@ -76,20 +72,10 @@ const firebaseConfig = {
   measurementId: "G-5R58JL5D5K"
 };
 
-/* --------- Init Firebase --------- */
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* --------- Hulp: gebruikerskleuren --------- */
-function getUserColor(name) {
-  const n = (name || "").toLowerCase();
-  if (n === "jonas") return "#3498db";
-  if (n === "liese") return "#e74c3c";
-  if (n === "loreana") return "#ff69b4";
-  return "#666";
-}
-
-/* --------- Huidige gebruiker --------- */
+// ================= GEBRUIKER =================
 const activeUser =
   localStorage.getItem("homecrewUser") ||
   sessionStorage.getItem("homecrewUser");
@@ -101,22 +87,34 @@ if (!activeUser) {
 document.getElementById("welcome").innerText =
   "Welkom, " + activeUser + " 👋";
 
-/* --------- DOM refs --------- */
+window.logout = function () {
+  localStorage.removeItem("homecrewUser");
+  sessionStorage.removeItem("homecrewUser");
+  window.location.href = "/Homecrew/index.html";
+};
+
+// ================= HULPFUNCTIES =================
+function getUserColor(name) {
+  const n = (name || "").toLowerCase();
+  if (n === "jonas") return "#3498db";
+  if (n === "liese") return "#e74c3c";
+  if (n === "loreana") return "#ff69b4";
+  return "#666";
+}
+
+// ================= DOM REFS =================
 const tasksListEl = document.getElementById("tasksList");
 const addBtn = document.getElementById("addTaskBtn");
 const refreshBtn = document.getElementById("refreshBtn");
 const titleInput = document.getElementById("taskTitle");
 const descInput = document.getElementById("taskDesc");
 
-/* --------- Add taak --------- */
+// ================= ADD TASK =================
 async function addTask() {
   const title = titleInput.value.trim();
   const desc = descInput.value.trim();
 
-  if (!title) {
-    alert("Vul een titel in voor de taak");
-    return;
-  }
+  if (!title) { alert("Vul een titel in voor de taak"); return; }
 
   try {
     await addDoc(collection(db, "tasks"), {
@@ -125,30 +123,22 @@ async function addTask() {
       user: activeUser,
       createdAt: serverTimestamp()
     });
-
     titleInput.value = "";
     descInput.value = "";
-    console.log("✅ Taak toegevoegd");
-
   } catch (err) {
     console.error("Fout bij toevoegen taak:", err);
-    alert("Kon taak niet toevoegen. Kijk console voor details.");
+    alert("Kon taak niet toevoegen.");
   }
 }
 
-/* --------- Delete taak --------- */
+// ================= DELETE TASK =================
 async function deleteTask(docId) {
   if (!confirm("Verwijder deze taak?")) return;
-
-  try {
-    await deleteDoc(doc(db, "tasks", docId));
-  } catch (err) {
-    console.error("Fout bij verwijderen:", err);
-    alert("Kon taak niet verwijderen.");
-  }
+  try { await deleteDoc(doc(db, "tasks", docId)); } 
+  catch (err) { console.error(err); alert("Kon taak niet verwijderen."); }
 }
 
-/* --------- Realtime listener --------- */
+// ================= LISTENER =================
 function startTasksListener() {
   const q = query(collection(db, "tasks"), orderBy("createdAt", "asc"));
 
@@ -184,15 +174,7 @@ function startTasksListener() {
       const metaEl = document.createElement("div");
       metaEl.style.marginTop = "6px";
       metaEl.style.fontSize = "12px";
-
-      const userColor = getUserColor(data.user);
-
-      metaEl.innerHTML = `
-        👤 <span style="color:${userColor}; font-weight:600">${data.user || "?"}</span>
-        • ${data.createdAt && data.createdAt.toDate
-          ? new Date(data.createdAt.toDate()).toLocaleString("nl-BE")
-          : ""}
-      `;
+      metaEl.innerHTML = `👤 <span style="color:${getUserColor(data.user)}; font-weight:600">${data.user||"?"}</span> • ${data.createdAt?.toDate ? new Date(data.createdAt.toDate()).toLocaleString("nl-BE") : ""}`;
 
       left.appendChild(titleEl);
       left.appendChild(descEl);
@@ -215,7 +197,6 @@ function startTasksListener() {
       delBtn.onclick = () => deleteTask(id);
 
       right.appendChild(delBtn);
-
       li.appendChild(left);
       li.appendChild(right);
 
@@ -229,31 +210,16 @@ function startTasksListener() {
       empty.textContent = "Nog geen taken — voeg er een toe!";
       tasksListEl.appendChild(empty);
     }
-
-  }, (err) => {
-    console.error("Listener error:", err);
-  });
+  }, (err) => console.error("Listener error:", err));
 }
 
-/* --------- Events --------- */
+// ================= EVENTS =================
 addBtn.addEventListener("click", addTask);
+refreshBtn.addEventListener("click", () => { if (unsubscribe) unsubscribe(); unsubscribe = startTasksListener(); });
 
-refreshBtn.addEventListener("click", () => {
-  if (unsubscribe) unsubscribe();
-  unsubscribe = startTasksListener();
-});
-
-/* --------- Logout --------- */
-function logout() {
-  localStorage.removeItem("homecrewUser");
-  sessionStorage.removeItem("homecrewUser");
-  window.location.href = "/Homecrew/index.html";
-}
-
-/* --------- Start --------- */
+// ================= START =================
 let unsubscribe = startTasksListener();
 
 </script>
-
 </body>
 </html>
