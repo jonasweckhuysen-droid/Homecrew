@@ -4,14 +4,46 @@
 <meta charset="UTF-8">
 <title>Homecrew - Live Locatie</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="style.css">
 
+<link rel="stylesheet" href="style.css">
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDo7KIQjAWmr6mNE413sky28HRM74yUaXQ"></script>
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 
 <style>
+/* ===== HEADER STIJL ===== */
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px;
+  background:linear-gradient(135deg,#667eea,#764ba2);
+  color:white;
+}
+
+.home-btn{
+  padding:8px 12px;
+  border:none;
+  border-radius:10px;
+  background:white;
+  color:black;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.content{
+  padding:15px;
+}
+
+.card{
+  background:white;
+  padding:15px;
+  border-radius:20px;
+}
+
+/* ===== STATUS BAR ===== */
 #statusBar {
   position: fixed;
-  top: 10px;
+  top: 70px;
   left: 50%;
   transform: translateX(-50%);
   background: black;
@@ -22,6 +54,7 @@
   z-index: 9999;
 }
 
+/* ===== CONTROL BAR ===== */
 .control-bar {
   text-align: center;
   margin-top: 10px;
@@ -46,14 +79,14 @@
 <div id="statusBar">🔄 Verbinden...</div>
 
 <header class="topbar">
-  <button class="home-btn" onclick="window.location.href='dashboard.html'">
-    <i class="fas fa-home"></i> Dashboard
+  <button onclick="window.location.href='dashboard.html'" class="home-btn">
+    <i class="fas fa-home"></i>
   </button>
 
-  <h2>📍 Live Locatie</h2>
+  <h2>📍 Live locatie</h2>
 
-  <button class="home-btn" onclick="logout()">
-    <i class="fas fa-sign-out-alt"></i> Uitloggen
+  <button onclick="logout()" class="home-btn">
+    <i class="fas fa-sign-out-alt"></i>
   </button>
 </header>
 
@@ -71,7 +104,6 @@
 </main>
 
 <script type="module">
-
 // ================= FIREBASE =================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getFirestore, collection, doc, setDoc, onSnapshot, serverTimestamp } 
@@ -143,7 +175,6 @@ window.startTracking = function () {
 
   watchId = navigator.geolocation.watchPosition(async (position) => {
     const { latitude, longitude } = position.coords;
-
     map.setCenter({ lat: latitude, lng: longitude });
 
     await setDoc(doc(db, "users_locations", activeUser), {
