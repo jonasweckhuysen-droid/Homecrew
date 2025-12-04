@@ -7,10 +7,9 @@
 
 <link rel="stylesheet" href="style.css">
 
-<!-- Firebase -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+  import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCwlr069pxNXEEhIEGNug5Ly_kKSuvxSzs",
@@ -26,6 +25,15 @@
   const db = getDatabase(app);
 
   window.addEventListener("DOMContentLoaded", () => {
+
+    const storedUser = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
+
+    // ✅ AUTO LOGIN
+    if (storedUser) {
+      window.location.href = "dashboard.html";
+      return;
+    }
+
     const startBtn = document.getElementById("startBtn");
 
     startBtn.addEventListener("click", async () => {
@@ -34,37 +42,47 @@
       const stayLoggedIn = document.getElementById("stayLoggedIn").checked;
       const error = document.getElementById("error");
 
+      error.textContent = "";
+
       if (username === "" || password === "") {
         error.textContent = "Vul een naam en wachtwoord in";
         return;
       }
 
-      const userRef = ref(db, "users/" + username);
-      const snapshot = await get(userRef);
+      try {
+        const userRef = ref(db, "users/" + username);
+        const snapshot = await get(userRef);
 
-      if (snapshot.exists()) {
-        // Controleer wachtwoord
-        if (snapshot.val().password !== password) {
-          error.textContent = "Fout wachtwoord";
-          return;
+        if (snapshot.exists()) {
+          // Controleer wachtwoord
+          if (snapshot.val().password !== password) {
+            error.textContent = "Fout wachtwoord";
+            return;
+          }
+        } else {
+          // Nieuwe gebruiker aanmaken
+          await set(userRef, {
+            username: username,
+            password: password,
+            createdAt: new Date().toISOString()
+          });
         }
-      } else {
-        // Nieuwe gebruiker aanmaken
-        await set(userRef, {
-          username: username,
-          password: password,
-          createdAt: new Date().toISOString()
-        });
+
+        if (stayLoggedIn) {
+          localStorage.setItem("homecrewUser", username);
+        } else {
+          sessionStorage.setItem("homecrewUser", username);
+        }
+
+        window.location.href = "dashboard.html";
+
+      } catch (e) {
+        console.error(e);
+        error.textContent = "Er ging iets mis met de verbinding.";
       }
 
-      if (stayLoggedIn) {
-        localStorage.setItem("homecrewUser", username);
-      } else {
-        sessionStorage.setItem("homecrewUser", username);
-      }
-
-      window.location.href = "dashboard.html";
     });
+
   });
 </script>
 
