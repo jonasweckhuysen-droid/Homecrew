@@ -196,7 +196,7 @@ document.getElementById("saveActivity").onclick = async ()=>{
     if(hour>23) break;
     const id = `${week}-${editingActivity?.day || editingActivity?.day || 'Ma'}-${hour}`;
     await setDoc(doc(db,"planning",id),{
-      text: text+(i>0 ? " (vervolg)" : ""),
+      text: text+(i>0 ? "" : ""),
       user,
       color: myColor,
       day: editingActivity?.day || editingActivity?.day || 'Ma',
