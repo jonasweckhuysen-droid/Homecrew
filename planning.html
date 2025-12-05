@@ -1,8 +1,55 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Homecrew – Weekplanning</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="topbar">
+  <button class="home-btn" onclick="window.location.href='dashboard.html'">
+    <i class="fas fa-home"></i>
+  </button>
+  <h2>📅 Weekplanning</h2>
+  <div style="width:40px;"></div>
+</div>
+
+<div class="content">
+<div class="card">
+
+<!-- WEEK SWITCH -->
+<div class="week-nav">
+  <button id="prevWeek">←</button>
+  <span id="currentWeek"></span>
+  <button id="nextWeek">→</button>
+</div>
+
+<!-- FILTERS -->
+<div class="filter-buttons">
+  <button class="filter-btn all active" data-user="all">Iedereen</button>
+  <button class="filter-btn jonas" data-user="Jonas">Jonas</button>
+  <button class="filter-btn liese" data-user="Liese">Liese</button>
+  <button class="filter-btn loreana" data-user="Loreana">Loreana</button>
+</div>
+
+<div class="table-wrapper">
+<table id="planningTable"></table>
+</div>
+
+</div>
+</div>
+
+<script type="module">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { 
-  getFirestore, doc, setDoc, onSnapshot, collection, onSnapshot as onSnap 
+  getFirestore, doc, setDoc, onSnapshot, collection 
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
+// ================= FIREBASE =================
 const firebaseConfig = {
     apiKey: "AIzaSyCwlr069pxNXEEhIEGNug5Ly_kKSuvxSzs",
     authDomain: "homecrew-d8e21.firebaseapp.com",
@@ -12,73 +59,144 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ================== Gegevens ==================
+// ================= GEBRUIKER =================
 const user = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser") || "Onbekend";
 
 const userColors = {
-  "Jonas": "#2196f3",    // Blauw
-  "Liese": "#f44336",    // Rood
-  "Loreana": "#e91e63",  // Roze
+  "Jonas": "#2196f3",
+  "Liese": "#f44336",
+  "Loreana": "#e91e63",
 };
 
-const myColor = userColors[user] || "#9e9e9e"; // fallback grijs
+const myColor = userColors[user] || "#9e9e9e";
 
+// ================= WEEK =================
+let currentDate = new Date();
+let activeUser = "all";
+
+const currentWeek = document.getElementById("currentWeek");
 const days = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"];
 const table = document.getElementById("planningTable");
 
-// ================== Tabel maken ==================
-let html = "<tr><th>Uur</th>";
-days.forEach(d => html+=`<th>${d}</th>`);
-html += "</tr>";
-
-for(let hour=0; hour<24; hour++){
-  html+= `<tr><td class="hour">${hour}:00</td>`;
-  days.forEach(day=>{
-    html+=`<td data-day="${day}" data-hour="${hour}"></td>`
-  })
-  html+="</tr>";
+// WEEK BEREKENEN
+function getWeekRange(date){
+  const start = new Date(date);
+  start.setDate(start.getDate() - start.getDay() + 1);
+  const end = new Date(start);
+  end.setDate(start.getDate() + 6);
+  return { start, end };
 }
-table.innerHTML = html;
 
-// ================== KLIK: planning toevoegen ==================
-document.querySelectorAll("td[data-day]").forEach(cell=>{
-  cell.addEventListener("click", async ()=>{
-    const text = prompt(`Wat plannen (${user}) op dit moment?`);
-    if(!text) return;
+// WEEK TEKST
+function updateWeekText(){
+  const week = getWeekRange(currentDate);
+  currentWeek.innerText = 
+    week.start.toLocaleDateString("nl-BE") + " - " + 
+    week.end.toLocaleDateString("nl-BE");
+}
 
-    const day = cell.dataset.day;
-    const hour = cell.dataset.hour;
+// TABLE GENEREREN
+function buildTable(){
+  let html = "<tr><th>Uur</th>";
+  days.forEach(d => html+=`<th>${d}</th>`);
+  html += "</tr>";
 
-    await setDoc(doc(db, "planning", `${day}-${hour}`), {
-      text: text,
-      user: user,
-      color: myColor,
-      updated: new Date()
+  for(let hour=0; hour<24; hour++){
+    html+= `<tr><td class="hour">${hour}:00</td>`;
+    days.forEach(day=>{
+      html+=`<td data-day="${day}" data-hour="${hour}"></td>`;
+    });
+    html+="</tr>";
+  }
+
+  table.innerHTML = html;
+  addCellListeners();
+}
+
+// CELL CLICK
+function addCellListeners(){
+  document.querySelectorAll("td[data-day]").forEach(cell=>{
+    cell.onclick = async ()=>{
+      const text = prompt(`Wat plannen (${user}) om ${cell.dataset.hour}:00?`);
+      if(!text) return;
+
+      const week = getWeekRange(currentDate).start.toISOString().split("T")[0];
+      const id = `${week}-${cell.dataset.day}-${cell.dataset.hour}`;
+
+      await setDoc(doc(db, "planning", id), {
+        text: text,
+        user: user,
+        color: myColor,
+        day: cell.dataset.day,
+        hour: cell.dataset.hour,
+        week: week,
+        updated: new Date().toISOString()
+      });
+    };
+  });
+}
+
+// FILTER KNOPPEN
+document.querySelectorAll(".filter-btn").forEach(btn=>{
+  btn.onclick = ()=>{
+    document.querySelectorAll(".filter-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+
+    activeUser = btn.dataset.user;
+    loadWeekData();
+  };
+});
+
+// WEEK SWITCH
+document.getElementById("prevWeek").onclick = ()=>{
+  currentDate.setDate(currentDate.getDate() - 7);
+  updateWeekText();
+  buildTable();
+  loadWeekData();
+};
+
+document.getElementById("nextWeek").onclick = ()=>{
+  currentDate.setDate(currentDate.getDate() + 7);
+  updateWeekText();
+  buildTable();
+  loadWeekData();
+};
+
+// DATA LADEN
+function loadWeekData(){
+  const week = getWeekRange(currentDate).start.toISOString().split("T")[0];
+
+  onSnapshot(collection(db, "planning"), (snapshot)=>{
+    document.querySelectorAll("td[data-day]").forEach(c=>{
+      c.innerText = "";
+      c.style.background = "white";
+      c.style.color = "black";
     });
 
-    cell.innerText = `${text}\n(${user})`;
-    cell.style.background = myColor;
-    cell.style.color = "white";
-  });
-});
-
-// ================== LIVE DATA ==================
-onSnap(collection(db,"planning"), (snapshot)=>{
-  document.querySelectorAll("td[data-day]").forEach(c=>{
-    c.innerText = "";
-    c.style.background = "white";
-    c.style.color = "black";
-  });
-
-  snapshot.forEach(docSnap=>{
-    const [day,hour] = docSnap.id.split("-");
-    const cell = document.querySelector(`td[data-day="${day}"][data-hour="${hour}"]`);
-
-    if(cell){
+    snapshot.forEach(docSnap=>{
       const data = docSnap.data();
-      cell.innerText = `${data.text}\n(${data.user})`;
-      cell.style.background = data.color;
-      cell.style.color = "white";
-    }
+
+      if(data.week !== week) return;
+      if(activeUser !== "all" && data.user !== activeUser) return;
+
+      const cell = document.querySelector(
+        `td[data-day="${data.day}"][data-hour="${data.hour}"]`
+      );
+
+      if(cell){
+        cell.innerText = `${data.text}\n(${data.user})`;
+        cell.style.background = data.color;
+        cell.style.color = "white";
+      }
+    });
   });
-});
+}
+
+// ================= START =================
+updateWeekText();
+buildTable();
+loadWeekData();
+
+</script>
+</body>
+</html>
