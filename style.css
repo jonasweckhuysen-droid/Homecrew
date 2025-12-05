@@ -133,3 +133,46 @@ td:hover{
     td{font-size:9px;}
     th{font-size:11px;}
 }
+/* Vingardium knop */
+#vingardiumBtn {
+  background: linear-gradient(135deg, #43cea2, #185a9d);
+}
+
+/* Drijvelden knop */
+#drijveldenBtn {
+  background: linear-gradient(135deg, #f7971e, #ffd200);
+}
+
+/* Algemene dash-btn voor deze pagina (voor de zekerheid) */
+.dashboard-buttons {
+  display: grid;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.dash-btn {
+  padding: 16px 12px;
+  border-radius: 16px;
+  color: white;
+  text-align: center;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+  transition: 0.2s ease;
+}
+
+.dash-btn:active {
+  transform: scale(0.96);
+}
+.list-box {
+  display: none;
+  padding: 10px;
+  margin-top: 10px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 5px 12px rgba(0,0,0,0.08);
+}
+
+.list-box.show {
+  display: block;
+}
