@@ -176,3 +176,6 @@ td:hover{
 .list-box.show {
   display: block;
 }
+.home-btn i {
+  color: black !important;
+}
