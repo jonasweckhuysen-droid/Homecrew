@@ -72,7 +72,7 @@
 <div id="activityModal" class="modal">
   <div class="modal-content">
     <span class="close">&times;</span>
-    <h3>Nieuwe activiteit plannen</h3>
+    <h3>Activiteit plannen / bewerken</h3>
     <label>Beschrijving:</label>
     <input type="text" id="activityText" placeholder="Wat gaan we doen?" />
     
@@ -88,7 +88,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getFirestore, doc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { getFirestore, doc, setDoc, onSnapshot, collection, deleteDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 // ================= FIREBASE =================
 const firebaseConfig = {
@@ -101,11 +101,7 @@ const db = getFirestore(app);
 
 // ================= GEBRUIKER =================
 const user = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser") || "Onbekend";
-const userColors = {
-  "Jonas": "#2196f3",
-  "Liese": "#f44336",
-  "Loreana": "#e91e63",
-};
+const userColors = { "Jonas": "#2196f3", "Liese": "#f44336", "Loreana": "#e91e63" };
 const myColor = userColors[user] || "#9e9e9e";
 
 // ================= WEEK =================
@@ -113,101 +109,113 @@ let currentDate = new Date();
 let activeUser = "all";
 
 const currentWeek = document.getElementById("currentWeek");
-const days = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"];
+const days = ["Ma","Di","Wo","Do","Vr","Za","Zo"];
 const table = document.getElementById("planningTable");
 
-// WEEK BEREKENEN
+// ================= MODAL =================
+const modal = document.getElementById("activityModal");
+const closeModal = document.querySelector(".close");
+let editingActivity = null; // Houdt bij welke activiteit wordt bewerkt
+
+closeModal.onclick = ()=> modal.style.display = "none";
+window.onclick = (e)=> { if(e.target === modal) modal.style.display="none"; };
+
+// ================= FUNCTIES =================
 function getWeekRange(date){
-  const start = new Date(date);
-  start.setDate(start.getDate() - start.getDay() + 1);
-  const end = new Date(start);
-  end.setDate(start.getDate() + 6);
+  const start = new Date(date); start.setDate(start.getDate() - start.getDay() + 1);
+  const end = new Date(start); end.setDate(start.getDate() + 6);
   return { start, end };
 }
 
-// WEEK TEKST
 function updateWeekText(){
   const week = getWeekRange(currentDate);
-  currentWeek.innerText = 
-    week.start.toLocaleDateString("nl-BE") + " - " + 
-    week.end.toLocaleDateString("nl-BE");
+  currentWeek.innerText = week.start.toLocaleDateString("nl-BE")+" - "+week.end.toLocaleDateString("nl-BE");
 }
 
-// TABLE GENEREREN
 function buildTable(){
-  let html = "<tr><th>Uur</th>";
-  days.forEach(d => html+=`<th>${d}</th>`);
-  html += "</tr>";
-
+  let html = "<tr><th>Uur</th>"; days.forEach(d=>html+=`<th>${d}</th>`); html+="</tr>";
   for(let hour=0; hour<24; hour++){
-    html+= `<tr><td class="hour">${hour}:00</td>`;
-    days.forEach(day=>{
-      html+=`<td data-day="${day}" data-hour="${hour}"></td>`;
-    });
+    html+=`<tr><td class="hour">${hour}:00</td>`;
+    days.forEach(day=>html+=`<td data-day="${day}" data-hour="${hour}"></td>`);
     html+="</tr>";
   }
-
   table.innerHTML = html;
   addCellListeners();
 }
 
-// CELL CLICK
+// Open modal voor nieuwe of bestaande activiteit
+function openModal(day, startHour=8, text="", duration=1){
+  editingActivity = {day, startHour};
+  document.getElementById("activityText").value = text;
+  document.getElementById("activityStart").value = `${String(startHour).padStart(2,'0')}:00`;
+  document.getElementById("activityDuration").value = duration;
+  modal.style.display = "flex";
+}
+
+// ================= CELL LISTENERS =================
 function addCellListeners(){
   document.querySelectorAll("td[data-day]").forEach(cell=>{
-    cell.onclick = ()=> openModal(cell.dataset.day);
+    cell.onclick = ()=>{
+      const hour = parseInt(cell.dataset.hour);
+      const day = cell.dataset.day;
+      if(cell.classList.contains("activity")){
+        const text = cell.querySelector("span")?.innerText.split(" (")[0] || "";
+        let duration = 1;
+        // Tel het aantal aaneengesloten activiteiten
+        let nextHour = hour+1;
+        while(document.querySelector(`td[data-day="${day}"][data-hour="${nextHour}"]`)?.classList.contains("activity")){ duration++; nextHour++; }
+        openModal(day, hour, text, duration);
+      } else {
+        openModal(day, hour);
+      }
+    };
   });
 }
 
-// ================= MODAL LOGICA =================
-const modal = document.getElementById("activityModal");
-const closeModal = document.querySelector(".close");
-closeModal.onclick = ()=> modal.style.display = "none";
-window.onclick = (e)=> { if(e.target === modal) modal.style.display="none"; };
+// ================= SAVE ACTIVITY =================
+document.getElementById("saveActivity").onclick = async ()=>{
+  const text = document.getElementById("activityText").value.trim();
+  const start = document.getElementById("activityStart").value;
+  const duration = parseInt(document.getElementById("activityDuration").value);
+  if(!text || !start || !duration) return;
 
-function openModal(day){
-  document.getElementById("activityText").value = "";
-  document.getElementById("activityStart").value = "08:00";
-  document.getElementById("activityDuration").value = 1;
-  modal.style.display = "flex";
+  const week = getWeekRange(currentDate).start.toISOString().split("T")[0];
+  const [startHour, startMin] = start.split(":").map(Number);
 
-  const saveBtn = document.getElementById("saveActivity");
-  saveBtn.onclick = async ()=>{
-    const text = document.getElementById("activityText").value.trim();
-    const start = document.getElementById("activityStart").value;
-    const duration = parseInt(document.getElementById("activityDuration").value);
-
-    if(!text || !start || !duration) return;
-
-    const week = getWeekRange(currentDate).start.toISOString().split("T")[0];
-    const [startHour, startMin] = start.split(":").map(Number);
-
-    for(let i=0; i<duration; i++){
-      const hour = startHour + i;
-      if(hour > 23) break;
-
-      const id = `${week}-${day}-${hour}`;
-      await setDoc(doc(db, "planning", id), {
-        text: text + (i===0 ? "" : " (vervolg)"),
-        user,
-        color: myColor,
-        day,
-        hour,
-        week,
-        updated: new Date().toISOString()
-      });
+  // Verwijder oude activiteit (indien bewerken)
+  if(editingActivity){
+    for(let i=0;i<24;i++){
+      const id = `${week}-${editingActivity.day}-${editingActivity.startHour + i}`;
+      await deleteDoc(doc(db,"planning",id)).catch(()=>{});
     }
+  }
 
-    modal.style.display = "none";
-    loadWeekData();
-  };
+  // Sla nieuwe activiteit op
+  for(let i=0;i<duration;i++){
+    const hour = startHour + i;
+    if(hour>23) break;
+    const id = `${week}-${editingActivity?.day || editingActivity?.day || 'Ma'}-${hour}`;
+    await setDoc(doc(db,"planning",id),{
+      text: text+(i>0 ? " (vervolg)" : ""),
+      user,
+      color: myColor,
+      day: editingActivity?.day || editingActivity?.day || 'Ma',
+      hour,
+      week,
+      updated: new Date().toISOString()
+    });
+  }
+
+  modal.style.display="none";
+  editingActivity=null;
+  loadWeekData();
 }
 
-// ================= FILTER KNOPPEN =================
+// ================= FILTER =================
 document.querySelectorAll(".filter-btn").forEach(btn=>{
   btn.onclick = ()=>{
     document.querySelectorAll(".filter-btn").forEach(b=>b.classList.remove("active"));
     btn.classList.add("active");
-
     activeUser = btn.dataset.user;
     loadWeekData();
   };
@@ -215,48 +223,34 @@ document.querySelectorAll(".filter-btn").forEach(btn=>{
 
 // ================= WEEK SWITCH =================
 document.getElementById("prevWeek").onclick = ()=>{
-  currentDate.setDate(currentDate.getDate() - 7);
-  updateWeekText();
-  buildTable();
-  loadWeekData();
+  currentDate.setDate(currentDate.getDate()-7); updateWeekText(); buildTable(); loadWeekData();
 };
 document.getElementById("nextWeek").onclick = ()=>{
-  currentDate.setDate(currentDate.getDate() + 7);
-  updateWeekText();
-  buildTable();
-  loadWeekData();
+  currentDate.setDate(currentDate.getDate()+7); updateWeekText(); buildTable(); loadWeekData();
 };
 
-// ================= DATA LADEN =================
+// ================= LOAD DATA =================
 function loadWeekData(){
   const week = getWeekRange(currentDate).start.toISOString().split("T")[0];
-
-  onSnapshot(collection(db, "planning"), (snapshot)=>{
+  onSnapshot(collection(db,"planning"), snapshot=>{
     document.querySelectorAll("td[data-day]").forEach(c=>{
-      c.innerHTML = "";
-      c.style.background = "white";
-      c.style.color = "black";
-      c.classList.remove("activity");
+      c.innerHTML=""; c.style.background="white"; c.style.color="black"; c.classList.remove("activity");
     });
-
     snapshot.forEach(docSnap=>{
       const data = docSnap.data();
-      if(data.week !== week) return;
-      if(activeUser !== "all" && data.user !== activeUser) return;
-
+      if(data.week!==week) return;
+      if(activeUser!=="all" && data.user!==activeUser) return;
       const cell = document.querySelector(`td[data-day="${data.day}"][data-hour="${data.hour}"]`);
       if(cell){
         cell.classList.add("activity");
-        cell.innerHTML = `<span style="background:${data.color}">${data.text} (${data.user})</span>`;
+        cell.innerHTML=`<span style="background:${data.color}">${data.text} (${data.user})</span>`;
       }
     });
   });
 }
 
 // ================= START =================
-updateWeekText();
-buildTable();
-loadWeekData();
+updateWeekText(); buildTable(); loadWeekData();
 
 </script>
 
