@@ -75,12 +75,17 @@ body { margin:0; background:#f2f6ff; font-family:Arial,sans-serif; }
         </div>
         <div class="dash-btn taken" id="btnTaken"><i class="fas fa-list-check"></i>Taken</div>
         <div class="dash-btn locatie" id="btnLocatie"><i class="fas fa-location-dot"></i>Locatie</div>
+        <div class="dash-btn planning" id="btnPlanning"><i class="fas fa-clock"></i>Planning</div>
     </div>
 
     <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Uitloggen</button>
 
 </div>
-
+<script>
+document.getElementById("btnPlanning").onclick = () => {
+  window.location.href = "planning.html";
+}
+</script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getFirestore, collection, query, orderBy, onSnapshot, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
