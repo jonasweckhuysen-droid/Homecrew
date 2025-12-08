@@ -8,34 +8,26 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
 <style>
-
-/* ALGEMEEN */
-* {
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f3f6f9;
     -webkit-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-}
-
-body {
-    background: #ecf0f1;
 }
 
 .app-body {
-    padding-bottom: 60px;
+    padding: 12px;
 }
 
-/* TOPBAR */
 .topbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     background: #2c3e50;
-    padding: 10px;
     color: white;
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .home-btn {
@@ -43,31 +35,20 @@ body {
     border: none;
     color: white;
     font-size: 20px;
-    cursor: pointer;
 }
 
-.home-btn:hover {
-    opacity: 0.7;
-}
-
-/* CONTENT */
 .content {
-    padding: 15px;
+    margin-top: 10px;
 }
 
-h3 {
-    margin: 10px 0 20px 0;
-}
-
-/* CARD */
+/* ALGEMEEN */
 .card {
-    background: white;
-    padding: 15px;
-    border-radius: 12px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
 }
 
-/* KNOPPEN BOVEN */
+/* DASH BUTTONS PER HUIS */
 .dashboard-buttons {
     display: flex;
     flex-direction: column;
@@ -75,109 +56,124 @@ h3 {
 }
 
 .dash-btn {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #3498db;
+    padding: 14px;
+    border-radius: 12px;
     color: white;
-    padding: 12px;
-    border-radius: 10px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     cursor: pointer;
 }
 
-.dash-btn:hover {
-    background: #2980b9;
+/* HUIS-KLEUREN */
+.vingardium-btn {
+    background: linear-gradient(135deg, #27ae60, #1e8449);
 }
 
+.drijvelden-btn {
+    background: linear-gradient(135deg, #f39c12, #d35400);
+}
+
+/* LIJST BOX */
 .list-box {
     display: none;
-    margin-top: 15px;
+    background: white;
+    padding: 14px;
+    border-radius: 16px;
 }
 
 .list-box.show {
     display: block;
 }
 
+/* EXTRA ONDERSCHEID */
+.vingardium-box {
+    border-left: 8px solid #27ae60;
+    background: #ecfdf5;
+}
+
+.drijvelden-box {
+    border-left: 8px solid #f39c12;
+    background: #fff5e6;
+}
+
+/* TITEL */
+.house-title {
+    padding: 10px;
+    margin-bottom: 12px;
+    border-radius: 10px;
+    font-weight: bold;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.vingardium-title {
+    background: #27ae60;
+}
+
+.drijvelden-title {
+    background: #f39c12;
+}
+
 /* INPUT */
 .input-group {
     display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
 .input-group input {
     flex: 1;
     padding: 10px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    font-size: 15px;
+    border-radius: 10px 0 0 10px;
+    border: none;
+    outline: none;
 }
 
 .input-group button {
-    width: 45px;
+    width: 55px;
     border: none;
-    background: #2ecc71;
+    border-radius: 0 10px 10px 0;
+    background: linear-gradient(135deg, #2980b9, #3498db);
     color: white;
-    border-radius: 10px;
     font-size: 18px;
-    cursor: pointer;
 }
 
-.input-group button:hover {
-    background: #27ae60;
-}
-
-/* ✅ HET BELANGRIJKSTE: LIJSTSTYLE */
+/* LIJST ITEMS */
 ul {
     list-style: none;
     padding: 0;
+    margin: 0;
 }
 
 li {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    background: #f7f9fa;
     padding: 10px 12px;
     margin-bottom: 8px;
+    background: white;
     border-radius: 10px;
-
-    transition: 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-li:hover {
-    background: #e8f4fc;
-}
-
+/* NETTE VERHOUDING TEKST / ICOON */
 li span {
     flex: 1;
+    text-align: left;
     font-size: 15px;
-    padding-right: 10px;
 }
 
-/* DELETE BUTTON */
 li button {
-    min-width: 40px;
-    height: 40px;
-
-    border-radius: 50%;
-    border: none;
     background: #e74c3c;
+    border: none;
     color: white;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    cursor: pointer;
-    transition: 0.2s ease;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    font-size: 14px;
 }
-
-li button:hover {
-    background: #c0392b;
-}
-
 </style>
 
 <script type="module">
@@ -197,76 +193,69 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-/* USER CHECK */
 const user = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
 if(!user) window.location.href = "index.html";
 
 document.addEventListener("DOMContentLoaded", ()=>{
-    document.getElementById("welcomeUser").innerText = "Welkom, " + user + " 👋";
+  document.getElementById("welcomeUser").innerText = "Welkom, " + user + " 👋";
 })
 
-/* LIVE LOAD */
 function liveLoad(place){
-    const listRef = ref(db, "boodschappen/" + place);
+  const listRef = ref(db, "boodschappen/" + place);
 
-    onValue(listRef, (snapshot)=>{
-        const ul = document.getElementById(place + "List");
-        ul.innerHTML = "";
+  onValue(listRef, (snapshot)=>{
+    const ul = document.getElementById(place + "List");
+    ul.innerHTML = "";
 
-        if(snapshot.exists()){
-            const data = snapshot.val();
+    if(snapshot.exists()){
+      const data = snapshot.val();
 
-            Object.keys(data).forEach(key=>{
-                const li = document.createElement("li");
+      Object.keys(data).forEach(key=>{
+        const li = document.createElement("li");
 
-                const text = document.createElement("span");
-                text.textContent = data[key].item;
+        const text = document.createElement("span");
+        text.textContent = data[key].item;
 
-                const del = document.createElement("button");
-                del.innerHTML = `<i class="fas fa-trash"></i>`;
-                del.onclick = ()=> removeItem(place,key);
+        const del = document.createElement("button");
+        del.innerHTML = `<i class="fas fa-trash"></i>`;
+        del.onclick = ()=> removeItem(place,key);
 
-                li.appendChild(text);
-                li.appendChild(del);
-                ul.appendChild(li);
-            });
-        }
-    })
+        li.appendChild(text);
+        li.appendChild(del);
+        ul.appendChild(li);
+      });
+    }
+  })
 }
 
-/* ADD */
 window.addItem = function(place){
-    const input = document.getElementById(place + "Input");
-    const value = input.value.trim();
-    if(!value) return;
+  const input = document.getElementById(place + "Input");
+  const value = input.value.trim();
+  if(!value) return;
 
-    const listRef = ref(db, "boodschappen/" + place);
-    push(listRef, {
-        item: value,
-        user: user,
-        time: Date.now()
-    });
+  const listRef = ref(db, "boodschappen/" + place);
+  push(listRef, {
+    item: value,
+    user: user,
+    time: Date.now()
+  });
 
-    input.value = "";
+  input.value = "";
 }
 
-/* REMOVE */
 function removeItem(place,key){
-    const itemRef = ref(db, "boodschappen/" + place + "/" + key);
-    remove(itemRef);
+  const itemRef = ref(db, "boodschappen/" + place + "/" + key);
+  remove(itemRef);
 }
 
-/* LOGOUT */
 window.logout = function(){
   localStorage.clear();
   sessionStorage.clear();
   window.location.href = "index.html";
 }
 
-/* START */
 liveLoad("vingardium");
 liveLoad("drijvelden");
-
 </script>
 </head>
 
@@ -290,34 +279,50 @@ liveLoad("drijvelden");
 
 <div class="card">
 
-  <div class="dashboard-buttons">
+<div class="dashboard-buttons">
 
-    <div class="dash-btn" onclick="document.getElementById('vingardium-box').classList.toggle('show')">
-      <i class="fas fa-seedling"></i> Vingardium <i class="fas fa-chevron-down"></i>
+    <div class="dash-btn vingardium-btn" onclick="document.getElementById('vingardium-box').classList.toggle('show')">
+      <div><i class="fas fa-seedling"></i> VINGARDIUM</div>
+      <i class="fas fa-chevron-down"></i>
     </div>
 
-    <div class="dash-btn" onclick="document.getElementById('drijvelden-box').classList.toggle('show')">
-      <i class="fas fa-tractor"></i> Drijvelden <i class="fas fa-chevron-down"></i>
+    <div class="dash-btn drijvelden-btn" onclick="document.getElementById('drijvelden-box').classList.toggle('show')">
+      <div><i class="fas fa-tractor"></i> DRIJVELDEN</div>
+      <i class="fas fa-chevron-down"></i>
     </div>
+
+</div>
+
+<div class="list-box show vingardium-box" id="vingardium-box">
+
+  <div class="house-title vingardium-title">
+    <i class="fas fa-seedling"></i> Boodschappen voor Vingardium
   </div>
 
-  <div class="list-box show" id="vingardium-box">
-    <div class="input-group">
-      <input type="text" id="vingardiumInput" placeholder="Nieuw item...">
-      <button onclick="addItem('vingardium')"><i class="fas fa-plus"></i></button>
-    </div>
-    <ul id="vingardiumList"></ul>
+  <div class="input-group">
+    <input type="text" id="vingardiumInput" placeholder="Nieuw item voor Vingardium...">
+    <button onclick="addItem('vingardium')"><i class="fas fa-plus"></i></button>
   </div>
 
-  <div class="list-box show" id="drijvelden-box">
-    <div class="input-group">
-      <input type="text" id="drijveldenInput" placeholder="Nieuw item...">
-      <button onclick="addItem('drijvelden')"><i class="fas fa-plus"></i></button>
-    </div>
-    <ul id="drijveldenList"></ul>
+  <ul id="vingardiumList"></ul>
+</div>
+
+<div class="list-box show drijvelden-box" id="drijvelden-box">
+
+  <div class="house-title drijvelden-title">
+    <i class="fas fa-tractor"></i> Boodschappen voor Drijvelden
   </div>
+
+  <div class="input-group">
+    <input type="text" id="drijveldenInput" placeholder="Nieuw item voor Drijvelden...">
+    <button onclick="addItem('drijvelden')"><i class="fas fa-plus"></i></button>
+  </div>
+
+  <ul id="drijveldenList"></ul>
+</div>
 
 </div>
 </main>
+
 </body>
 </html>
