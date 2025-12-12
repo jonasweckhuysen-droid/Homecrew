@@ -6,20 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet" href="style.css">
-
-<!-- Font Awesome voor icoontjes -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-<!-- OneSignal -->
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "1a11e790-0934-49f2-8510-ce8fd574e217",
-    });
-  });
-</script>
 
 <style>
 /* ===== PAGINA SPECIFIEK ===== */
@@ -38,6 +25,27 @@
   max-height:300px;
   overflow-y:auto;
   padding:10px;
+  display:flex;
+  flex-direction:column;
+}
+
+.msg-bubble{
+  padding:10px 14px;
+  border-radius:12px;
+  margin-bottom:10px;
+  color:white;
+  max-width:75%;
+  word-wrap:break-word;
+}
+
+.msg-meta{
+  font-size:0.75em;
+  margin-top:3px;
+  opacity:0.8;
+}
+
+.msg-right{
+  align-self:flex-end;
 }
 
 #messageInput{
@@ -62,7 +70,7 @@
 
 <body class="app-body">
 
-<!-- ✅ STANDAARD HEADER -->
+<!-- HEADER -->
 <header class="topbar">
   <button onclick="window.location.href='dashboard.html'" class="home-btn">
     <i class="fas fa-home"></i>
@@ -87,9 +95,9 @@
 </main>
 
 <script type="module">
-// ================= FIREBASE =================
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+/* ================= FIREBASE ================= */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // Firebase config
 const firebaseConfig = {
@@ -105,65 +113,66 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ================= GEBRUIKER =================
+/* ================= GEBRUIKER ================= */
 const user = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
 if (!user) window.location.href = "index.html";
+
 document.getElementById("welcomeUser").innerText = "Welkom, " + user + " 👋";
 
-// ================= LOGOUT =================
+/* ================= LOGOUT ================= */
 window.logout = function(){
   localStorage.clear();
   sessionStorage.clear();
   location.href = "index.html";
 };
 
-// ================= KLEUREN =================
-function getUserColor(user){
-  if(user.toLowerCase() === "jonas") return "#3498db";
-  if(user.toLowerCase() === "liese") return "#e74c3c";
-  if(user.toLowerCase() === "loreana") return "#ff69b4";
+/* ================= KLEUREN PER GEBRUIKER ================= */
+function getUserColor(u){
+  u = u.toLowerCase();
+  if (u === "jonas") return "#3498db";
+  if (u === "liese") return "#e74c3c";
+  if (u === "loreana") return "#ff69b4";
   return "#555";
 }
 
-// ================= MESSAGES =================
+/* ================= FIRESTORE COLLECTION ================= */
 const messagesCol = collection(db, "homecrewMessages");
 
+/* ================= REALTIME UPDATES ================= */
 onSnapshot(messagesCol, (snapshot) => {
     const chatBox = document.getElementById("chatBox");
     chatBox.innerHTML = "";
-    snapshot.docs
-        .sort((a,b) => (a.data().timestamp?.seconds || 0) - (b.data().timestamp?.seconds || 0))
-        .forEach(docSnap => {
-            const msg = docSnap.data();
-            const div = document.createElement("div");
-            div.style.background = getUserColor(msg.user);
-            div.style.color = "white";
-            div.style.padding = "8px 12px";
-            div.style.borderRadius = "12px";
-            div.style.marginBottom = "8px";
-            div.innerHTML = `
-              <strong>${msg.user}</strong>: ${msg.text}
-              <small style="opacity:0.7;">
-                ${msg.timestamp?.seconds ? new Date(msg.timestamp.seconds*1000).toLocaleString("nl-BE") : "Onbekend tijdstip"}
-              </small>
-            `;
-            chatBox.appendChild(div);
 
-            if(msg.user !== user){
-              OneSignal.push(function() {
-                OneSignal.sendSelfNotification(
-                  `Nieuw bericht van ${msg.user}`,
-                  msg.text,
-                  '',
-                  { user: msg.user }
-                );
-              });
-            }
-        });
+    const sorted = snapshot.docs.sort((a,b) =>
+        (a.data().timestamp?.seconds || 0) - (b.data().timestamp?.seconds || 0)
+    );
+
+    sorted.forEach(docSnap => {
+        const msg = docSnap.data();
+
+        const bubble = document.createElement("div");
+        bubble.className = "msg-bubble";
+        bubble.style.background = getUserColor(msg.user);
+
+        if (msg.user === user){
+            bubble.classList.add("msg-right");
+        }
+
+        bubble.innerHTML = `
+            <strong>${msg.user}</strong><br>
+            ${msg.text}
+            <div class="msg-meta">
+              ${msg.timestamp?.seconds ? new Date(msg.timestamp.seconds*1000).toLocaleString("nl-BE") : ""}
+            </div>
+        `;
+
+        chatBox.appendChild(bubble);
+    });
+
     chatBox.scrollTop = chatBox.scrollHeight;
 });
 
-// ================= VERSTUUR FUNCTIE =================
+/* ================= VERSTUREN ================= */
 window.sendMessage = async function(){
     const input = document.getElementById("messageInput");
     const text = input.value.trim();
@@ -178,9 +187,9 @@ window.sendMessage = async function(){
         input.value = "";
     } catch (error) {
         console.error("Fout bij verzenden:", error);
-        alert("Kan bericht niet verzenden. Controleer console voor details.");
+        alert("Kan bericht niet verzenden.");
     }
-}
+};
 </script>
 
 </body>
