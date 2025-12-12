@@ -7,35 +7,21 @@
 
 <link rel="stylesheet" href="style.css">
 
-<!-- Font Awesome voor icoontjes -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-/* PAGINA SPECIFIEK */
 .app-body { 
   padding:10px; 
   font-family: Arial, sans-serif;
   background:#f2f4f7;
 }
 
-.list-box{
-  display:none;
-  margin-top:10px;
-}
-.list-box.show{
-  display:block;
-}
-
-.input-group{
-  display:flex;
-  gap:10px;
-  margin-bottom:10px;
-}
-.input-group input{
-  flex:1;
-  padding:10px;
-  border-radius:10px;
-  border:1px solid #ccc;
+.card {
+  background:white;
+  padding:15px;
+  border-radius:12px;
+  margin-bottom:15px;
+  box-shadow:0 3px 6px rgba(0,0,0,0.05);
 }
 
 ul{
@@ -44,12 +30,11 @@ ul{
 }
 
 .event-item { 
-  list-style:none; 
   padding:10px; 
   margin-bottom:8px; 
-  border-left:6px solid #3498db; 
   background:#fbfbfb; 
   border-radius:6px; 
+  border-left:6px solid #3498db;
 }
 
 .google-event { 
@@ -89,7 +74,6 @@ input, textarea {
 
 <body class="app-body">
 
-<!-- ✅ STANDAARD HEADER -->
 <header class="topbar">
   <button onclick="window.location.href='dashboard.html'" class="home-btn">
     <i class="fas fa-home"></i>
@@ -122,13 +106,13 @@ input, textarea {
 </main>
 
 <script>
-/* ===== CONFIG ===== */
+/* =============== CONFIG =============== */
 const LOCAL_EVENTS_KEY = "homecrewLocalEvents";
 const GOOGLE_API_KEY = "AIzaSyCTgjVKj_ABJHEvDTdgPDu_ZVTBYV8PAT0";
 const CALENDAR_ID = "b3756ae16d0f11ea12a33407c6077e5925740ab0ce0d19514aa77a7fc6a6e0c0@group.calendar.google.com";
 const MAX_GOOGLE_EVENTS = 50;
 
-/* ===== HELPERS ===== */
+/* =============== HELPERS =============== */
 function escapeHtml(str){
   if (!str) return "";
   return String(str)
@@ -148,7 +132,7 @@ function getUserColor(u){
   return "#777";
 }
 
-/* ===== USER ===== */
+/* =============== USER =============== */
 const user = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
 
 if (!user) window.location.href = "index.html";
@@ -161,7 +145,7 @@ function logout(){
   window.location.href = "index.html";
 }
 
-/* ===== LOKALE EVENTS ===== */
+/* =============== LOKALE EVENTS OPSLAAN =============== */
 function addLocalEvent(){
   const title = document.getElementById("eventTitle").value.trim();
   const date = document.getElementById("eventDate").value;
@@ -185,90 +169,103 @@ function addLocalEvent(){
   loadEvents();
 }
 
-/* ===== GOOGLE EVENTS ===== */
+/* =============== GOOGLE EVENTS OPHALEN =============== */
 async function fetchGoogleEvents(){
-  const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events` +
-              `?key=${GOOGLE_API_KEY}` +
-              `&maxResults=${MAX_GOOGLE_EVENTS}` +
-              `&orderBy=startTime` +
-              `&singleEvents=true` +
-              `&timeMin=${encodeURIComponent(new Date().toISOString())}`;
+  const url = 
+    `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events` +
+    `?key=${GOOGLE_API_KEY}` +
+    `&maxResults=${MAX_GOOGLE_EVENTS}` +
+    `&singleEvents=true` +
+    `&orderBy=startTime` +
+    `&timeMin=${new Date().toISOString()}`;
 
   try {
     const res = await fetch(url);
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(text);
+
+    if (!res.ok){
+      const msg = await res.text();
+      throw new Error(msg);
     }
+
     const data = await res.json();
 
     return (data.items || []).map(ev => ({
       title: ev.summary || "Geen titel",
-      start: ev.start.dateTime ? new Date(ev.start.dateTime) : new Date(ev.start.date),
-      end: ev.end.dateTime ? new Date(ev.end.dateTime) : new Date(ev.end.date),
+      start: ev.start.dateTime 
+            ? new Date(ev.start.dateTime) 
+            : new Date(ev.start.date),
       location: ev.location || ""
     }));
 
-  } catch(error){
-    console.error("Google error:", error);
-    const err = document.getElementById("agenda-error");
-    err.style.display = "block";
-    err.innerText = "Google Agenda fout: " + error.message;
+  } catch(err){
+    console.error("Google Agenda fout:", err);
+    document.getElementById("agenda-error").style.display = "block";
+    document.getElementById("agenda-error").innerText = "Google Agenda fout: " + err.message;
     return [];
   }
 }
 
-/* ===== WEERGAVE ===== */
+/* =============== WEERGAVE =============== */
 async function loadEvents(){
   const list = document.getElementById("eventList");
-  const noEventsMsg = document.getElementById("no-events");
-  const err = document.getElementById("agenda-error");
+  const noEvents = document.getElementById("no-events");
+  const errorEl = document.getElementById("agenda-error");
 
   list.innerHTML = "";
-  noEventsMsg.style.display = "none";
-  err.style.display = "none";
+  noEvents.style.display = "none";
+  errorEl.style.display = "none";
 
-  let hasEvents = false;
+  let found = false;
 
-  // Lokale events
+  /* ---- Lokale events ---- */
   const localEvents = JSON.parse(localStorage.getItem(LOCAL_EVENTS_KEY) || "[]");
-  localEvents.sort((a,b)=> new Date(a.date) - new Date(b.date));
 
-  localEvents.forEach(ev => {
-    hasEvents = true;
-    const li = document.createElement("li");
-    li.className = "event-item";
-    li.style.borderLeft = "6px solid " + getUserColor(ev.user);
-    li.innerHTML = `
-      <strong>${escapeHtml(ev.title)}</strong>
-      <div class="event-meta">${new Date(ev.date).toLocaleString("nl-BE")}</div>
-      <div class="event-user" style="color:${getUserColor(ev.user)}">👤 ${escapeHtml(ev.user)}</div>
-      ${ev.description ? `<div>${escapeHtml(ev.description)}</div>` : ""}
-    `;
-    list.appendChild(li);
-  });
+  localEvents
+    .sort((a,b)=> new Date(a.date) - new Date(b.date))
+    .forEach(ev => {
+      found = true;
+      const li = document.createElement("li");
+      li.className = "event-item";
+      li.style.borderLeftColor = getUserColor(ev.user);
 
-  // Google events
+      li.innerHTML = `
+        <strong>${escapeHtml(ev.title)}</strong>
+        <div class="event-meta">${new Date(ev.date).toLocaleString("nl-BE")}</div>
+        <div class="event-user" style="color:${getUserColor(ev.user)}">
+          👤 ${escapeHtml(ev.user)}
+        </div>
+        ${ev.description ? `<div>${escapeHtml(ev.description)}</div>` : ""}
+      `;
+
+      list.appendChild(li);
+    });
+
+  /* ---- Google events ---- */
   const googleEvents = await fetchGoogleEvents();
-  googleEvents.sort((a,b)=> a.start.getTime() - b.start.getTime());
 
-  googleEvents.forEach(ev =>{
-    hasEvents = true;
-    const li = document.createElement("li");
-    li.className = "event-item google-event";
-    li.innerHTML = `
-      <strong>${escapeHtml(ev.title)}</strong>
-      <div class="event-meta">${ev.start.toLocaleString("nl-BE")}</div>
-      <div style="color:black;">📅 Google Agenda</div>
-      ${ev.location ? `<div>📍 ${escapeHtml(ev.location)}</div>` : ""}
-    `;
-    list.appendChild(li);
-  });
+  googleEvents
+    .sort((a,b)=> a.start - b.start)
+    .forEach(ev => {
+      found = true;
+      const li = document.createElement("li");
+      li.className = "event-item google-event";
 
-  if (!hasEvents) noEventsMsg.style.display = "block";
+      li.innerHTML = `
+        <strong>${escapeHtml(ev.title)}</strong>
+        <div class="event-meta">${ev.start.toLocaleString("nl-BE")}</div>
+        <div style="color:black;">📅 Google Agenda</div>
+        ${ev.location ? `<div>📍 ${escapeHtml(ev.location)}</div>` : ""}
+      `;
+
+      list.appendChild(li);
+    });
+
+  if (!found){
+    noEvents.style.display = "block";
+  }
 }
 
-/* ===== AUTO ===== */
+/* Automatisch laden */
 document.addEventListener("DOMContentLoaded", loadEvents);
 setInterval(loadEvents, 5 * 60 * 1000);
 </script>
