@@ -106,26 +106,33 @@ document.getElementById("btnPlanning").onclick = () => {
   window.location.href = "planning.html";
 }
 </script>
+
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import { getFirestore, collection, query, orderBy, onSnapshot, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { 
+    getFirestore, collection, query, orderBy, onSnapshot,
+    getDocs, updateDoc, doc 
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // ================== Firebase ==================
 const firebaseConfig = {
     apiKey: "AIzaSyCwlr069pxNXEEhIEGNug5Ly_kKSuvxSzs",
     authDomain: "homecrew-d8e21.firebaseapp.com",
     projectId: "homecrew-d8e21",
-    storageBucket: "homecrew-d8e21.firebasestorage.app",
+    storageBucket: "homecrew-d8e21.appspot.com",
     messagingSenderId: "47664248188",
     appId: "1:47664248188:web:0994c6b2ba07f6fee060f9",
     measurementId: "G-5R58JL5D5K"
 };
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // ================== Gebruiker ==================
 const user = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
-if(!user){ window.location.href="index.html"; }
+if(!user){ 
+    window.location.href="index.html"; 
+}
 document.getElementById("welcome").innerText = `Welkom, ${user} 👋`;
 
 // ================== Navigatie ==================
@@ -133,6 +140,7 @@ document.getElementById("btnAgenda").onclick = () => window.location.href="agend
 document.getElementById("btnBoodschappen").onclick = () => window.location.href="boodschappen.html";
 document.getElementById("btnTaken").onclick = () => window.location.href="taken.html";
 document.getElementById("btnLocatie").onclick = () => window.location.href="locatie.html";
+
 document.getElementById("logoutBtn").onclick = () => {
     localStorage.removeItem("homecrewUser");
     sessionStorage.removeItem("homecrewUser");
@@ -143,6 +151,7 @@ document.getElementById("logoutBtn").onclick = () => {
 const weatherIcon = document.getElementById("weatherIcon");
 const weatherTemp = document.getElementById("weatherTemp");
 const weatherTime = document.getElementById("weatherTime");
+
 const API_KEY = "4a993261a71ece889094805bab5b864a"; 
 const LAT = 51.2012;
 const LON = 4.8170;
@@ -150,21 +159,27 @@ const LON = 4.8170;
 async function updateWeather() {
     try {
         const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${LAT}&lon=${LON}&appid=${API_KEY}&units=metric&lang=nl`);
-        if(!res.ok) throw new Error("OpenWeatherMap API response niet OK");
+
+        if(!res.ok) throw new Error("OpenWeatherMap API fout");
+
         const data = await res.json();
         const temp = Math.round(data.main.temp);
+
         const weatherId = data.weather[0].id;
         let iconClass = "fa-sun";
+
         if(weatherId >= 200 && weatherId < 300) iconClass="fa-bolt";
         else if(weatherId >= 300 && weatherId < 600) iconClass="fa-cloud-showers-heavy";
         else if(weatherId >= 600 && weatherId < 700) iconClass="fa-snowflake";
         else if(weatherId >= 700 && weatherId < 800) iconClass="fa-smog";
         else if(weatherId === 800) iconClass="fa-sun";
         else if(weatherId > 800) iconClass="fa-cloud";
+
         weatherIcon.className = `fas ${iconClass}`;
         weatherTemp.innerText = temp + "°C";
         const now = new Date();
         weatherTime.innerText = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+
     } catch(e) {
         console.error("Weer kon niet geladen worden:", e);
         weatherTemp.innerText="--°C";
@@ -172,47 +187,45 @@ async function updateWeather() {
         weatherIcon.className="fas fa-sun";
     }
 }
+
 updateWeather();
 setInterval(updateWeather, 60000);
 
-// ================== Ongelezen berichten badge ==================
+// ================== Ongelezen berichten ==================
 const badgeEl = document.getElementById("badgeBerichten");
-const messagesRef = collection(db, "messages");
 
-function updateUnreadMessages(count){
-    if(count > 0){
-        badgeEl.style.display = "inline-block";
-        badgeEl.textContent = count;
-    } else {
-        badgeEl.style.display = "none";
-    }
-}
+const messagesQuery = query(
+    collection(db, "messages"),
+    orderBy("timestamp", "desc")
+);
 
-// Live listener voor ongelezen berichten
-onSnapshot(messagesRef, (snapshot) => {
-    let unreadCount = 0;
-    snapshot.forEach(docSnap => {
-        if(!docSnap.data().read) unreadCount++;
+onSnapshot(messagesQuery, (snapshot) => {
+    let unread = 0;
+    snapshot.forEach(d => {
+        if (!d.data().read) unread++;
     });
-    updateUnreadMessages(unreadCount);
+    badgeEl.style.display = unread > 0 ? "inline-block" : "none";
+    badgeEl.textContent = unread;
 });
 
-// Open berichtenpagina en markeer ongelezen berichten als gelezen
-document.getElementById("btnBerichten").onclick = () => {
-    window.location.href = "berichten.html";
+// Berichtenknop
+document.getElementById("btnBerichten").onclick = async () => {
 
-    (async () => {
-        const snapshot = await getDocs(messagesRef);
-        snapshot.forEach(docSnap => {
-            if(!docSnap.data().read) {
-                updateDoc(doc(db, "messages", docSnap.id), { read: true });
-            }
-        });
-    })();
+    // Markeer eerst gelezen
+    const snapshot = await getDocs(messagesQuery);
+    snapshot.forEach(d => {
+        if (!d.data().read) {
+            updateDoc(doc(db, "messages", d.id), { read: true });
+        }
+    });
 
-    updateUnreadMessages(0);
+    badgeEl.style.display = "none";
+
+    // Dan pas navigeren
+    setTimeout(() => {
+        window.location.href = "berichten.html";
+    }, 50);
 };
 </script>
-
 </body>
 </html>
