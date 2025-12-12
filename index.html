@@ -16,7 +16,7 @@
     authDomain: "homecrew-d8e21.firebaseapp.com",
     databaseURL: "https://homecrew-d8e21-default-rtdb.europe-west1.firebasedatabase.app",
     projectId: "homecrew-d8e21",
-    storageBucket: "homecrew-d8e21.firebasestorage.app",
+    storageBucket: "homecrew-d8e21.appspot.com",
     messagingSenderId: "47664248188",
     appId: "1:47664248188:web:0994c6b2ba07f6fee060f9"
   };
@@ -26,11 +26,13 @@
 
   window.addEventListener("DOMContentLoaded", () => {
 
-    const storedUser = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
+    const storedUser =
+      localStorage.getItem("homecrewUser") ||
+      sessionStorage.getItem("homecrewUser");
 
-    // ✅ AUTO LOGIN
-    if (storedUser) {
-      window.location.href = "dashboard.html";
+    // AUTO-LOGIN FIX
+    if (storedUser && storedUser.trim() !== "") {
+      setTimeout(() => (window.location.href = "dashboard.html"), 0);
       return;
     }
 
@@ -49,32 +51,32 @@
         return;
       }
 
+      const cleanUser = username.toLowerCase();
+
       try {
-        const userRef = ref(db, "users/" + username);
+        const userRef = ref(db, "users/" + cleanUser);
         const snapshot = await get(userRef);
 
         if (snapshot.exists()) {
-          // Controleer wachtwoord
           if (snapshot.val().password !== password) {
             error.textContent = "Fout wachtwoord";
             return;
           }
         } else {
-          // Nieuwe gebruiker aanmaken
           await set(userRef, {
-            username: username,
+            username: cleanUser,
             password: password,
             createdAt: new Date().toISOString()
           });
         }
 
         if (stayLoggedIn) {
-          localStorage.setItem("homecrewUser", username);
+          localStorage.setItem("homecrewUser", cleanUser);
         } else {
-          sessionStorage.setItem("homecrewUser", username);
+          sessionStorage.setItem("homecrewUser", cleanUser);
         }
 
-        window.location.href = "dashboard.html";
+        setTimeout(() => (window.location.href = "dashboard.html"), 0);
 
       } catch (e) {
         console.error(e);
