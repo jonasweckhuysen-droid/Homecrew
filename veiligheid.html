@@ -43,6 +43,12 @@ button {
   gap: 10px;
   font-size: 18px;
   padding: 15px;
+  transition: 0.2s ease;
+}
+
+.sos-btn:hover {
+  transform: scale(1.03);
+  box-shadow: 0 5px 15px rgba(255,75,92,0.4);
 }
 
 .card {
@@ -89,7 +95,7 @@ input {
 <div class="card">
   <h3>Contactpersonen beheren</h3>
   <input type="text" id="contactName" placeholder="Naam">
-  <input type="text" id="contactPhone" placeholder="Telefoon / Email">
+  <input type="text" id="contactPhone" placeholder="Telefoon (inclusief landcode, vb. 32470123456)">
   <button onclick="addContact()">Toevoegen</button>
 
   <ul id="contactList" style="margin-top:10px; list-style:none; padding:0;"></ul>
@@ -137,28 +143,41 @@ function removeContact(idx){
   loadContacts();
 }
 
-/* ===== SOS VERZENDEN ===== */
+/* ===== LOCATIE OPHALEN ===== */
+function getCurrentLocation(callback) {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            position => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                callback(lat, lon);
+            },
+            error => {
+                alert("Locatie kon niet worden opgehaald: " + error.message);
+            }
+        );
+    } else {
+        alert("Geolocatie wordt niet ondersteund door deze browser.");
+    }
+}
+
+/* ===== SOS VERZENDEN VIA WHATSAPP ===== */
 document.getElementById("sosBtn").addEventListener("click", () => {
   const contacts = JSON.parse(localStorage.getItem(CONTACTS_KEY) || "[]");
   if (!contacts.length) return alert("Voeg eerst contactpersonen toe!");
 
-  // Simuleer verzenden
   const user = localStorage.getItem("homecrewUser") || "Gebruiker";
-  let msg = `⚠️ ${user} heeft een SOS verzonden!`;
-  
-  // Optioneel: locatie
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(pos => {
-      const loc = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
-      alert(msg + "\nLocatie: " + loc + "\nNaar contactpersonen: " + contacts.map(c=>c.name).join(", "));
-    }, err => {
-      alert(msg + "\nLocatie niet beschikbaar.\nNaar contactpersonen: " + contacts.map(c=>c.name).join(", "));
-    });
-  } else {
-    alert(msg + "\nLocatie niet ondersteund.\nNaar contactpersonen: " + contacts.map(c=>c.name).join(", "));
-  }
 
-  console.log("SOS verzonden naar:", contacts);
+  getCurrentLocation((lat, lon) => {
+    const locLink = `https://www.google.com/maps?q=${lat},${lon}`;
+    const msg = `⚠️ ${user} heeft een SOS verzonden! Mijn locatie: ${locLink}`;
+
+    // Verstuur naar alle contactpersonen
+    contacts.forEach(c => {
+      const waUrl = `https://wa.me/${c.phone}?text=${encodeURIComponent(msg)}`;
+      window.open(waUrl, "_blank");
+    });
+  });
 });
 
 /* ===== INIT ===== */
