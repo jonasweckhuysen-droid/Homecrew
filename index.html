@@ -5,101 +5,239 @@
 <title>Homecrew – Login</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link rel="stylesheet" href="style.css">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+/* ===== BASIS ===== */
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== LOGIN BOX ===== */
+.login-box {
+  background: white;
+  width: 100%;
+  max-width: 380px;
+  padding: 30px 25px;
+  border-radius: 22px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  text-align: center;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.login-box h1 {
+  margin: 0 0 8px;
+  color: #4b4b4b;
+}
+
+.login-box p {
+  color: #777;
+  font-size: 14px;
+  margin-bottom: 25px;
+}
+
+/* ===== INPUTS ===== */
+.input-group {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.input-group i {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #aaa;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px 12px 12px 42px;
+  border-radius: 14px;
+  border: 1px solid #ddd;
+  font-size: 15px;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+/* ===== CHECKBOX ===== */
+.remember-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #555;
+  margin: 15px 0;
+  justify-content: center;
+}
+
+/* ===== BUTTON ===== */
+.main-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 30px;
+  background: linear-gradient(135deg,#667eea,#764ba2);
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(102,126,234,0.4);
+  transition: 0.2s ease;
+}
+
+.main-btn:active {
+  transform: scale(0.97);
+}
+
+/* ===== ERROR ===== */
+.error-msg {
+  color: #e74c3c;
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+/* ===== LOGO / ICON ===== */
+.logo {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg,#667eea,#764ba2);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 15px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+.logo i {
+  font-size: 32px;
+  color: white;
+}
+</style>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCwlr069pxNXEEhIEGNug5Ly_kKSuvxSzs",
-    authDomain: "homecrew-d8e21.firebaseapp.com",
-    databaseURL: "https://homecrew-d8e21-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "homecrew-d8e21",
-    storageBucket: "homecrew-d8e21.appspot.com",
-    messagingSenderId: "47664248188",
-    appId: "1:47664248188:web:0994c6b2ba07f6fee060f9"
-  };
+/* ===== FIREBASE ===== */
+const firebaseConfig = {
+  apiKey: "AIzaSyCwlr069pxNXEEhIEGNug5Ly_kKSuvxSzs",
+  authDomain: "homecrew-d8e21.firebaseapp.com",
+  databaseURL: "https://homecrew-d8e21-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "homecrew-d8e21",
+  storageBucket: "homecrew-d8e21.appspot.com",
+  messagingSenderId: "47664248188",
+  appId: "1:47664248188:web:0994c6b2ba07f6fee060f9"
+};
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-  window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", () => {
 
-    const storedUser =
-      localStorage.getItem("homecrewUser") ||
-      sessionStorage.getItem("homecrewUser");
+  /* ===== AUTO LOGIN ===== */
+  const storedUser =
+    localStorage.getItem("homecrewUser") ||
+    sessionStorage.getItem("homecrewUser");
 
-    // ✅ AUTO LOGIN
-    if (storedUser && storedUser.trim() !== "") {
-      window.location.href = "Homecrew/Homecrew/Home.html";
+  if (storedUser && storedUser.trim() !== "") {
+    window.location.href = "dashboard.html";
+    return;
+  }
+
+  document.getElementById("startBtn").addEventListener("click", async () => {
+
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const stayLoggedIn = document.getElementById("stayLoggedIn").checked;
+    const error = document.getElementById("error");
+
+    error.textContent = "";
+
+    if (!username || !password) {
+      error.textContent = "Vul een naam en wachtwoord in";
       return;
     }
 
-    document.getElementById("startBtn").addEventListener("click", async () => {
+    const cleanUser = username.toLowerCase();
 
-      const username = document.getElementById("username").value.trim();
-      const password = document.getElementById("password").value.trim();
-      const stayLoggedIn = document.getElementById("stayLoggedIn").checked;
-      const error = document.getElementById("error");
+    try {
+      const userRef = ref(db, "users/" + cleanUser);
+      const snapshot = await get(userRef);
 
-      error.textContent = "";
-
-      if (!username || !password) {
-        error.textContent = "Vul een naam en wachtwoord in";
-        return;
+      if (snapshot.exists()) {
+        if (snapshot.val().password !== password) {
+          error.textContent = "Fout wachtwoord";
+          return;
+        }
+      } else {
+        await set(userRef, {
+          username: cleanUser,
+          password: password,
+          createdAt: new Date().toISOString()
+        });
       }
 
-      const cleanUser = username.toLowerCase();
-
-      try {
-        const userRef = ref(db, "users/" + cleanUser);
-        const snapshot = await get(userRef);
-
-        if (snapshot.exists()) {
-          if (snapshot.val().password !== password) {
-            error.textContent = "Fout wachtwoord";
-            return;
-          }
-        } else {
-          await set(userRef, {
-            username: cleanUser,
-            password: password,
-            createdAt: new Date().toISOString()
-          });
-        }
-
-        if (stayLoggedIn) {
-          localStorage.setItem("homecrewUser", cleanUser);
-        } else {
-          sessionStorage.setItem("homecrewUser", cleanUser);
-        }
-
-        window.location.href = "Homecrew/Homecrew/Home.html";
-
-      } catch (e) {
-        console.error(e);
-        error.textContent = "Er ging iets mis met de verbinding.";
+      if (stayLoggedIn) {
+        localStorage.setItem("homecrewUser", cleanUser);
+      } else {
+        sessionStorage.setItem("homecrewUser", cleanUser);
       }
-    });
+
+      window.location.href = "dashboard.html";
+
+    } catch (e) {
+      console.error(e);
+      error.textContent = "Er ging iets mis met de verbinding.";
+    }
   });
+});
 </script>
 </head>
 
 <body>
 
 <div class="login-box">
-  <h1>Welkom bij Homecrew</h1>
-  <p>Vul je naam in en kies een wachtwoord / pincode</p>
+  <div class="logo">
+    <i class="fas fa-house"></i>
+  </div>
 
-  <input type="text" id="username" placeholder="Naam">
-  <input type="password" id="password" placeholder="Wachtwoord / pincode">
+  <h1>Homecrew</h1>
+  <p>Alles voor je gezin, op één plek</p>
+
+  <div class="input-group">
+    <i class="fas fa-user"></i>
+    <input type="text" id="username" placeholder="Naam">
+  </div>
+
+  <div class="input-group">
+    <i class="fas fa-lock"></i>
+    <input type="password" id="password" placeholder="Wachtwoord / pincode">
+  </div>
 
   <label class="remember-label">
-    <input type="checkbox" id="stayLoggedIn"> Blijf ingelogd
+    <input type="checkbox" id="stayLoggedIn">
+    Blijf ingelogd
   </label>
 
-  <button id="startBtn" class="main-btn">Start</button>
+  <button id="startBtn" class="main-btn">Inloggen</button>
   <p id="error" class="error-msg"></p>
 </div>
 
