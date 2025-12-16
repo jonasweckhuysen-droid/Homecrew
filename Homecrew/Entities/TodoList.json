@@ -1,0 +1,20 @@
+{
+  "name": "TodoList",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "icon": {
+      "type": "string",
+      "default": "\ud83d\udcdd"
+    },
+    "is_shared": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "name"
+  ]
+}
