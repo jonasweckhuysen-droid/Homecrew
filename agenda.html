@@ -73,6 +73,8 @@
   padding:6px;
   margin-bottom:6px;
   font-size:12px;
+  display:flex;
+  flex-direction:column;
 }
 
 .event.google { border-left-color:#222; }
@@ -85,6 +87,9 @@
 .event-user {
   font-size:11px;
   font-weight:bold;
+  display:flex;
+  align-items:center;
+  gap:4px;
 }
 
 /* INPUTS */
@@ -173,6 +178,25 @@ function changeWeek(offset){
   loadWeek();
 }
 
+/* ===== GEZINSLID KLEUREN EN ICONEN ===== */
+function getUserColor(u){
+  if(!u) return "#999";
+  u = u.toLowerCase();
+  if(u==="jonas") return "#3498db"; // blauw
+  if(u==="liese") return "#e74c3c"; // rood
+  if(u==="loreana") return "#ff69b4"; // roze
+  return "#777";
+}
+
+function getUserIcon(u){
+  if(!u) return "👤";
+  u = u.toLowerCase();
+  if(u==="jonas") return "👨";
+  if(u==="liese") return "👩";
+  if(u==="loreana") return "👧";
+  return "👤";
+}
+
 /* ===== EVENTS ===== */
 function addLocalEvent(){
   const events = JSON.parse(localStorage.getItem(LOCAL_EVENTS_KEY) || "[]");
@@ -183,6 +207,9 @@ function addLocalEvent(){
     description: eventDescription.value
   });
   localStorage.setItem(LOCAL_EVENTS_KEY, JSON.stringify(events));
+  eventTitle.value = "";
+  eventDate.value = "";
+  eventDescription.value = "";
   loadWeek();
 }
 
@@ -225,27 +252,28 @@ async function loadWeek(){
       ${day.toLocaleDateString("nl-BE",{weekday:"short", day:"numeric"})}
     </div>`;
 
-    localEvents.filter(e =>
-      new Date(e.date).toDateString() === day.toDateString()
-    ).forEach(e=>{
-      col.innerHTML += `
-        <div class="event">
-          <strong>${e.title}</strong>
-          <div class="event-time">${new Date(e.date).toLocaleTimeString("nl-BE",{hour:'2-digit',minute:'2-digit'})}</div>
-          <div class="event-user">${e.user}</div>
-        </div>`;
-    });
+    // Lokale events
+    localEvents.filter(e => new Date(e.date).toDateString() === day.toDateString())
+      .forEach(e=>{
+        col.innerHTML += `
+          <div class="event" style="border-left-color:${getUserColor(e.user)}">
+            <strong>${e.title}</strong>
+            <div class="event-time">${new Date(e.date).toLocaleTimeString("nl-BE",{hour:'2-digit',minute:'2-digit'})}</div>
+            <div class="event-user">${getUserIcon(e.user)} ${e.user}</div>
+            ${e.description ? `<div>${e.description}</div>` : ""}
+          </div>`;
+      });
 
-    googleEvents.filter(e =>
-      e.start.toDateString() === day.toDateString()
-    ).forEach(e=>{
-      col.innerHTML += `
-        <div class="event google">
-          <strong>${e.title}</strong>
-          <div class="event-time">${e.start.toLocaleTimeString("nl-BE",{hour:'2-digit',minute:'2-digit'})}</div>
-          <div class="event-user">Google</div>
-        </div>`;
-    });
+    // Google events
+    googleEvents.filter(e => e.start.toDateString() === day.toDateString())
+      .forEach(e=>{
+        col.innerHTML += `
+          <div class="event google">
+            <strong>${e.title}</strong>
+            <div class="event-time">${e.start.toLocaleTimeString("nl-BE",{hour:'2-digit',minute:'2-digit'})}</div>
+            <div class="event-user">📅 Google</div>
+          </div>`;
+      });
 
     grid.appendChild(col);
   }
