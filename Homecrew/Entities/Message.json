@@ -1,0 +1,19 @@
+{
+  "name": "Message",
+  "type": "object",
+  "properties": {
+    "content": {
+      "type": "string"
+    },
+    "sender_name": {
+      "type": "string"
+    },
+    "sender_avatar": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "content",
+    "sender_name"
+  ]
+}
