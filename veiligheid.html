@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Homecrew – Veiligheid</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f2f4f7;
+  padding: 10px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+h2 { margin: 0; }
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 15px;
+  font-size: 16px;
+}
+
+.sos-btn {
+  width: 100%;
+  background: linear-gradient(135deg,#ff4b5c,#ff758f);
+  color: white;
+  font-weight: bold;
+  margin: 15px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 18px;
+  padding: 15px;
+}
+
+.card {
+  background:white;
+  padding:15px;
+  border-radius:12px;
+  margin-bottom:15px;
+  box-shadow:0 3px 6px rgba(0,0,0,0.05);
+}
+
+input {
+  width: 100%;
+  padding: 8px;
+  margin: 6px 0;
+  border-radius:6px;
+  border:1px solid #ddd;
+  box-sizing:border-box;
+}
+
+.contact-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.contact-item span { font-weight: 500; }
+.remove-contact { color: red; cursor: pointer; }
+</style>
+</head>
+
+<body>
+
+<header>
+  <h2>🛡️ Veiligheid</h2>
+  <button onclick="window.location.href='dashboard.html'"><i class="fas fa-home"></i> Home</button>
+</header>
+
+<div class="card">
+  <button class="sos-btn" id="sosBtn"><i class="fas fa-bell"></i> SOS Verzend</button>
+</div>
+
+<div class="card">
+  <h3>Contactpersonen beheren</h3>
+  <input type="text" id="contactName" placeholder="Naam">
+  <input type="text" id="contactPhone" placeholder="Telefoon / Email">
+  <button onclick="addContact()">Toevoegen</button>
+
+  <ul id="contactList" style="margin-top:10px; list-style:none; padding:0;"></ul>
+</div>
+
+<script>
+/* ===== STORAGE ===== */
+const CONTACTS_KEY = "homecrewContacts";
+
+/* ===== CONTACTPERSONEN LADEN ===== */
+function loadContacts() {
+  const listEl = document.getElementById("contactList");
+  listEl.innerHTML = "";
+  const contacts = JSON.parse(localStorage.getItem(CONTACTS_KEY) || "[]");
+
+  contacts.forEach((c, idx) => {
+    const li = document.createElement("li");
+    li.className = "contact-item";
+    li.innerHTML = `<span>${c.name} (${c.phone})</span> <span class="remove-contact" onclick="removeContact(${idx})">&times;</span>`;
+    listEl.appendChild(li);
+  });
+}
+
+/* ===== CONTACT TOEVOEGEN ===== */
+function addContact() {
+  const name = document.getElementById("contactName").value.trim();
+  const phone = document.getElementById("contactPhone").value.trim();
+  if (!name || !phone) return alert("Naam en contact zijn verplicht!");
+
+  const contacts = JSON.parse(localStorage.getItem(CONTACTS_KEY) || "[]");
+  contacts.push({ name, phone });
+  localStorage.setItem(CONTACTS_KEY, JSON.stringify(contacts));
+
+  document.getElementById("contactName").value = "";
+  document.getElementById("contactPhone").value = "";
+
+  loadContacts();
+}
+
+/* ===== CONTACT VERWIJDEREN ===== */
+function removeContact(idx){
+  const contacts = JSON.parse(localStorage.getItem(CONTACTS_KEY) || "[]");
+  contacts.splice(idx,1);
+  localStorage.setItem(CONTACTS_KEY, JSON.stringify(contacts));
+  loadContacts();
+}
+
+/* ===== SOS VERZENDEN ===== */
+document.getElementById("sosBtn").addEventListener("click", () => {
+  const contacts = JSON.parse(localStorage.getItem(CONTACTS_KEY) || "[]");
+  if (!contacts.length) return alert("Voeg eerst contactpersonen toe!");
+
+  // Simuleer verzenden
+  const user = localStorage.getItem("homecrewUser") || "Gebruiker";
+  let msg = `⚠️ ${user} heeft een SOS verzonden!`;
+  
+  // Optioneel: locatie
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(pos => {
+      const loc = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+      alert(msg + "\nLocatie: " + loc + "\nNaar contactpersonen: " + contacts.map(c=>c.name).join(", "));
+    }, err => {
+      alert(msg + "\nLocatie niet beschikbaar.\nNaar contactpersonen: " + contacts.map(c=>c.name).join(", "));
+    });
+  } else {
+    alert(msg + "\nLocatie niet ondersteund.\nNaar contactpersonen: " + contacts.map(c=>c.name).join(", "));
+  }
+
+  console.log("SOS verzonden naar:", contacts);
+});
+
+/* ===== INIT ===== */
+loadContacts();
+</script>
+
+</body>
+</html>
