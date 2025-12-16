@@ -3,7 +3,7 @@
 // =====================================================
 
 const CACHE_KEY = "homecrewLocalEvents"; // lokaal opgeslagen events
-const ICS_URL = "https://calendar.google.com/calendar/ical/b3756ae16d0f11ea12a33407c6077e5925740ab0ce0c19514aa77a7fc6a6e0c0%40group.calendar.google.com/public/basic.ics";
+const ICS_URL = "https://calendar.google.com/calendar/ical/family16389375851516316441%40group.calendar.google.com/public/basic.ics";
 const PROXY_URL = "https://api.allorigins.win/raw?url=" + encodeURIComponent(ICS_URL);
 const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minuten
 
