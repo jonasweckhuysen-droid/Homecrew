@@ -1,0 +1,233 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { base44 } from '@/api/base44Client';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { format } from 'date-fns';
+import { nl } from 'date-fns/locale';
+import { Send, MessageCircle, Trash2 } from 'lucide-react';
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import PageHeader from '@/components/ui/PageHeader';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const avatarColors = [
+  'from-pink-400 to-rose-500',
+  'from-violet-400 to-purple-500',
+  'from-blue-400 to-indigo-500',
+  'from-emerald-400 to-teal-500',
+  'from-amber-400 to-orange-500',
+  'from-cyan-400 to-blue-500',
+];
+
+export default function Messages() {
+  const [newMessage, setNewMessage] = useState('');
+  const [user, setUser] = useState(null);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [lastMessageCount, setLastMessageCount] = useState(0);
+  const messagesEndRef = useRef(null);
+
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    base44.auth.me().then(setUser).catch(() => {});
+    
+    // Check if notifications are supported
+    if ('Notification' in window) {
+      setNotificationsEnabled(Notification.permission === 'granted');
+    }
+  }, []);
+
+  const { data: messages = [], isLoading } = useQuery({
+    queryKey: ['messages'],
+    queryFn: () => base44.entities.Message.list('-created_date', 100),
+    refetchInterval: 3000, // Poll every 3 seconds
+  });
+
+  // Notification effect
+  useEffect(() => {
+    if (!notificationsEnabled || messages.length === 0 || !user) return;
+    
+    if (lastMessageCount > 0 && messages.length > lastMessageCount) {
+      const newMessages = messages.slice(0, messages.length - lastMessageCount);
+      newMessages.forEach(msg => {
+        if (msg.sender_name !== user.full_name) {
+          new Notification('💬 Nieuw bericht van ' + msg.sender_name, {
+            body: msg.content.substring(0, 100),
+            icon: '💬',
+            tag: msg.id
+          });
+        }
+      });
+    }
+    setLastMessageCount(messages.length);
+  }, [messages, notificationsEnabled, user, lastMessageCount]);
+
+  const createMutation = useMutation({
+    mutationFn: (data) => base44.entities.Message.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['messages'] });
+      setNewMessage('');
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id) => base44.entities.Message.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['messages'] }),
+  });
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const handleSend = (e) => {
+    e.preventDefault();
+    if (!newMessage.trim()) return;
+    createMutation.mutate({
+      content: newMessage,
+      sender_name: user?.full_name || 'Anonymous',
+    });
+  };
+
+  const getAvatarColor = (name) => {
+    const index = name ? name.charCodeAt(0) % avatarColors.length : 0;
+    return avatarColors[index];
+  };
+
+  const sortedMessages = [...messages].reverse();
+
+  const requestNotificationPermission = async () => {
+    if ('Notification' in window && Notification.permission !== 'granted') {
+      const permission = await Notification.requestPermission();
+      setNotificationsEnabled(permission === 'granted');
+      if (permission === 'granted') {
+        new Notification('🎉 Notificaties ingeschakeld!', {
+          body: 'Je ontvangt nu meldingen voor nieuwe berichten',
+          icon: '💬'
+        });
+      }
+    }
+  };
+
+  return (
+    <div className="max-w-3xl mx-auto h-[calc(100vh-8rem)] flex flex-col">
+      <PageHeader 
+        title="💬 Familie Berichten"
+        subtitle="Blijf verbonden met je dierbaren"
+      />
+
+      <div className="mb-4 p-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl">
+        <div className="flex items-start gap-3">
+          <MessageCircle className="w-5 h-5 text-green-600 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-green-900">🔔 Browser Notificaties</p>
+            {notificationsEnabled ? (
+              <p className="text-sm text-green-700 mt-1">
+                ✅ Notificaties ingeschakeld! Je krijgt een melding bij nieuwe berichten.
+              </p>
+            ) : (
+              <div>
+                <p className="text-sm text-green-700 mt-1">
+                  Ontvang direct meldingen wanneer iemand een bericht stuurt!
+                </p>
+                <Button 
+                  size="sm" 
+                  onClick={requestNotificationPermission}
+                  className="mt-2 bg-green-600 hover:bg-green-700"
+                >
+                  🔔 Schakel Notificaties In
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <Card className="border-0 shadow-sm flex-1 flex flex-col overflow-hidden">
+        <CardContent className="flex-1 p-4 overflow-y-auto">
+          {isLoading ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="animate-pulse text-slate-400">Berichten laden...</div>
+            </div>
+          ) : messages.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-slate-500">
+              <MessageCircle className="w-16 h-16 mb-4 opacity-20" />
+              <p className="font-medium">Nog geen berichten</p>
+              <p className="text-sm">Start een gesprek met je familie</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <AnimatePresence>
+                {sortedMessages.map((msg) => {
+                  const isMe = user?.full_name === msg.sender_name;
+                  return (
+                    <motion.div
+                      key={msg.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={`flex gap-3 group ${isMe ? 'flex-row-reverse' : ''}`}
+                    >
+                      <Avatar className="h-10 w-10 flex-shrink-0">
+                        <AvatarFallback className={`bg-gradient-to-br ${getAvatarColor(msg.sender_name)} text-white`}>
+                          {msg.sender_name?.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className={`flex-1 max-w-[75%] ${isMe ? 'text-right' : ''}`}>
+                        <div className={`flex items-center gap-2 mb-1 ${isMe ? 'justify-end' : ''}`}>
+                          <span className="text-sm font-medium text-slate-700">
+                            {isMe ? 'Jij' : msg.sender_name}
+                          </span>
+                          <span className="text-xs text-slate-400">
+                            {msg.created_date && format(new Date(msg.created_date), 'd MMM, HH:mm', { locale: nl })}
+                          </span>
+                        </div>
+                        <div className={`inline-block p-4 rounded-2xl ${
+                          isMe 
+                            ? 'bg-gradient-to-br from-indigo-500 to-violet-600 text-white rounded-br-md' 
+                            : 'bg-slate-100 text-slate-700 rounded-bl-md'
+                        }`}>
+                          <p className="whitespace-pre-wrap">{msg.content}</p>
+                        </div>
+                        {isMe && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="opacity-0 group-hover:opacity-100 h-6 w-6 mt-1 text-slate-400 hover:text-red-500"
+                            onClick={() => deleteMutation.mutate(msg.id)}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        )}
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+              <div ref={messagesEndRef} />
+            </div>
+          )}
+        </CardContent>
+
+        {/* Message Input */}
+        <div className="p-4 border-t border-slate-100 bg-white">
+          <form onSubmit={handleSend} className="flex gap-3">
+            <Input
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder="Typ een bericht..."
+              className="flex-1 bg-slate-50 border-0"
+            />
+            <Button 
+              type="submit"
+              size="icon"
+              className="bg-gradient-to-r from-indigo-500 to-violet-600 h-10 w-10"
+              disabled={createMutation.isPending || !newMessage.trim()}
+            >
+              <Send className="w-4 h-4" />
+            </Button>
+          </form>
+        </div>
+      </Card>
+    </div>
+  );
+}
