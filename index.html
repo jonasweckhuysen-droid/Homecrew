@@ -30,15 +30,14 @@
       localStorage.getItem("homecrewUser") ||
       sessionStorage.getItem("homecrewUser");
 
-    // AUTO-LOGIN FIX
+    // ✅ AUTO LOGIN
     if (storedUser && storedUser.trim() !== "") {
-      setTimeout(() => (window.location.href = "dashboard.html"), 0);
+      window.location.href = "Homecrew/Homecrew/Home.html";
       return;
     }
 
-    const startBtn = document.getElementById("startBtn");
+    document.getElementById("startBtn").addEventListener("click", async () => {
 
-    startBtn.addEventListener("click", async () => {
       const username = document.getElementById("username").value.trim();
       const password = document.getElementById("password").value.trim();
       const stayLoggedIn = document.getElementById("stayLoggedIn").checked;
@@ -46,7 +45,7 @@
 
       error.textContent = "";
 
-      if (username === "" || password === "") {
+      if (!username || !password) {
         error.textContent = "Vul een naam en wachtwoord in";
         return;
       }
@@ -76,19 +75,17 @@
           sessionStorage.setItem("homecrewUser", cleanUser);
         }
 
-        setTimeout(() => (window.location.href = "dashboard.html"), 0);
+        window.location.href = "Homecrew/Homecrew/Home.html";
 
       } catch (e) {
         console.error(e);
         error.textContent = "Er ging iets mis met de verbinding.";
       }
-
     });
-
   });
 </script>
-
 </head>
+
 <body>
 
 <div class="login-box">
@@ -99,7 +96,7 @@
   <input type="password" id="password" placeholder="Wachtwoord / pincode">
 
   <label class="remember-label">
-      <input type="checkbox" id="stayLoggedIn"> Blijf ingelogd
+    <input type="checkbox" id="stayLoggedIn"> Blijf ingelogd
   </label>
 
   <button id="startBtn" class="main-btn">Start</button>
