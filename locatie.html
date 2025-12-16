@@ -6,20 +6,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet" href="style.css">
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDo7KIQjAWmr6mNE413sky28HRM74yUaXQ"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-/* ===== PAGINA SPECIFIEK ===== */
-.content{
-  padding:15px;
-}
+body { font-family: Arial, sans-serif; background:#f2f4f7; padding:10px; }
+.topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; }
+.topbar h2 { margin:0; }
+.home-btn { background:none; border:none; cursor:pointer; font-size:20px; }
 
-.card{
-  background:white;
-  padding:15px;
-  border-radius:20px;
-}
+.content{ padding:15px; }
+.card{ background:white; padding:15px; border-radius:20px; margin-bottom:15px; }
 
 #statusBar {
   position: fixed;
@@ -34,20 +30,11 @@
   z-index: 9999;
 }
 
-.control-bar {
-  text-align: center;
-  margin-top: 10px;
-}
-
+.control-bar { text-align: center; margin-top: 10px; }
 .control-bar button {
-  padding: 8px 18px;
-  border-radius: 20px;
-  border: none;
-  cursor: pointer;
-  margin: 4px;
-  font-weight: bold;
+  padding: 8px 18px; border-radius: 20px; border: none; cursor:pointer;
+  margin: 4px; font-weight:bold;
 }
-
 .start-btn { background: #00c850; color: white; }
 .stop-btn { background: #ff3b30; color: white; }
 </style>
@@ -57,17 +44,10 @@
 
 <div id="statusBar">🔄 Verbinden...</div>
 
-<!-- ✅ STANDAARD HEADER -->
 <header class="topbar">
-  <button onclick="window.location.href='dashboard.html'" class="home-btn">
-    <i class="fas fa-home"></i>
-  </button>
-
+  <button onclick="window.location.href='dashboard.html'" class="home-btn"><i class="fas fa-home"></i></button>
   <h2>📍 Live locatie</h2>
-
-  <button onclick="logout()" class="home-btn">
-    <i class="fas fa-sign-out-alt"></i>
-  </button>
+  <button onclick="logout()" class="home-btn"><i class="fas fa-sign-out-alt"></i></button>
 </header>
 
 <main class="content">
@@ -83,8 +63,11 @@
   </div>
 </main>
 
+<!-- GOOGLE MAPS -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDo7KIQjAWmr6mNE413sky28HRM74yUaXQ&callback=initMap" async defer></script>
+
 <script type="module">
-// ================= FIREBASE =================
+// ===== FIREBASE =====
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getFirestore, collection, doc, setDoc, onSnapshot, serverTimestamp } 
 from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
@@ -93,7 +76,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyCwlr069pxNXEEhIEGNug5Ly_kKSuvxSzs",
   authDomain: "homecrew-d8e21.firebaseapp.com",
   projectId: "homecrew-d8e21",
-  storageBucket: "homecrew-d8e21.firebasestorage.app",
+  storageBucket: "homecrew-d8e21.appspot.com",
   messagingSenderId: "47664248188",
   appId: "1:47664248188:web:0994c6b2ba07f6fee060f9",
   measurementId: "G-5R58JL5D5K"
@@ -102,48 +85,45 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ================= STATUS =================
+// ===== STATUS =====
 const statusBar = document.getElementById("statusBar");
 
-// ================= GEBRUIKER =================
+// ===== GEBRUIKER =====
 const activeUser = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
-if (!activeUser) window.location.href = "index.html";
-
+if(!activeUser) window.location.href="index.html";
 document.getElementById("welcomeUser").textContent = "Welkom, " + activeUser + " 👋";
 
-window.logout = function () {
+window.logout = function() {
   localStorage.removeItem("homecrewUser");
   sessionStorage.removeItem("homecrewUser");
   window.location.href = "index.html";
 };
 
-// ================= GOOGLE MAP =================
+// ===== GOOGLE MAP =====
 let map;
 let markers = {};
 let infoWindows = {};
 
-function initMap() {
+window.initMap = function() {
   map = new google.maps.Map(document.getElementById("map"), {
     center: { lat: 51.2194, lng: 4.4025 },
     zoom: 10,
     mapTypeId: "roadmap"
   });
-}
+};
 
-initMap();
-
-// ================= KLEUREN PER GEBRUIKER =================
+// ===== KLEUREN PER GEBRUIKER =====
 const userColors = {
   "jonas": "blue",
   "liese": "red",
   "loreana": "pink"
 };
 
-// ================= LIVE TRACKING =================
+// ===== LIVE TRACKING =====
 let watchId = null;
 
-window.startTracking = function () {
-  if (!navigator.geolocation) { alert("Locatie wordt niet ondersteund"); return; }
+window.startTracking = function() {
+  if(!navigator.geolocation) { alert("Locatie niet ondersteund"); return; }
   statusBar.textContent = "🟢 Locatie delen actief";
 
   watchId = navigator.geolocation.watchPosition(async (position) => {
@@ -160,40 +140,43 @@ window.startTracking = function () {
     console.error(error);
     statusBar.textContent = "🔴 Locatie fout: " + error.message;
   },{
-    enableHighAccuracy: true,
-    maximumAge: 0,
-    timeout: 10000
+    enableHighAccuracy:true,
+    maximumAge:0,
+    timeout:10000
   });
 };
 
-window.stopTracking = function () {
-  if (watchId !== null) {
+window.stopTracking = function() {
+  if(watchId!==null){
     navigator.geolocation.clearWatch(watchId);
-    watchId = null;
+    watchId=null;
   }
-  statusBar.textContent = "⛔ Locatie delen gestopt";
+  statusBar.textContent="⛔ Locatie delen gestopt";
 };
 
 // Start automatisch
-startTracking();
+window.addEventListener("load", () => {
+  if(window.initMap) window.initMap();
+  startTracking();
+});
 
-// ================= LIVE WEERGAVE ANDEREN =================
-const locationsRef = collection(db, "users_locations");
+// ===== LIVE WEERGAVE ANDEREN =====
+const locationsRef = collection(db,"users_locations");
 
 onSnapshot(locationsRef, (snapshot) => {
-  snapshot.forEach((userDoc) => {
+  snapshot.forEach(userDoc=>{
     const user = userDoc.id;
     const data = userDoc.data();
-    if (!data.latitude || !data.longitude) return;
+    if(!data.latitude || !data.longitude) return;
 
     const position = { lat: data.latitude, lng: data.longitude };
     const color = userColors[user.toLowerCase()] || "green";
 
     const lastUpdate = data.timestamp?.seconds
-      ? new Date(data.timestamp.seconds * 1000).toLocaleTimeString()
-      : "net bijgewerkt";
+        ? new Date(data.timestamp.seconds * 1000).toLocaleTimeString()
+        : "net bijgewerkt";
 
-    if (markers[user]) {
+    if(markers[user]){
       markers[user].setPosition(position);
       infoWindows[user].setContent(`<strong>${user}</strong><br>Laatste update: ${lastUpdate}`);
     } else {
@@ -205,9 +188,9 @@ onSnapshot(locationsRef, (snapshot) => {
           path: google.maps.SymbolPath.CIRCLE,
           scale: 10,
           fillColor: color,
-          fillOpacity: 1,
-          strokeWeight: 1,
-          strokeColor: "#000"
+          fillOpacity:1,
+          strokeWeight:1,
+          strokeColor:"#000"
         }
       });
 
@@ -215,7 +198,7 @@ onSnapshot(locationsRef, (snapshot) => {
         content: `<strong>${user}</strong><br>Laatste update: ${lastUpdate}`
       });
 
-      marker.addListener("click", () => { infoWindow.open(map, marker); });
+      marker.addListener("click",()=>{ infoWindow.open(map,marker); });
 
       markers[user] = marker;
       infoWindows[user] = infoWindow;
@@ -224,7 +207,6 @@ onSnapshot(locationsRef, (snapshot) => {
 
   statusBar.textContent = "✅ Live verbinding actief";
 });
-
 </script>
 </body>
 </html>
