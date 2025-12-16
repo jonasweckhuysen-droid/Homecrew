@@ -96,6 +96,7 @@ body { margin:0; background:#f2f6ff; font-family:Arial,sans-serif; }
         <div class="dash-btn taken" id="btnTaken"><i class="fas fa-list-check"></i>Taken</div>
         <div class="dash-btn locatie" id="btnLocatie"><i class="fas fa-location-dot"></i>Locatie</div>
         <div class="dash-btn planning" id="btnPlanning"><i class="fas fa-clock"></i>Planning</div>
+      <div class="dash-btn veiligheid" id="btnVeiligheid"><i class="fas fa-shield-alt"></i>Veiligheid</div>
     </div>
 
     <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Uitloggen</button>
@@ -140,6 +141,7 @@ document.getElementById("btnAgenda").onclick = () => window.location.href="agend
 document.getElementById("btnBoodschappen").onclick = () => window.location.href="boodschappen.html";
 document.getElementById("btnTaken").onclick = () => window.location.href="taken.html";
 document.getElementById("btnLocatie").onclick = () => window.location.href="locatie.html";
+document.getElementById("btnVeiligheid").onclick = () => window.location.href="veiligheid.html";
 
 document.getElementById("logoutBtn").onclick = () => {
     localStorage.removeItem("homecrewUser");
