@@ -5,11 +5,14 @@
 <title>Homecrew – Login</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#667eea">
+
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-/* ===== BASIS ===== */
 * { box-sizing: border-box; }
 body {
   margin: 0;
@@ -21,7 +24,7 @@ body {
   justify-content: center;
 }
 
-/* ===== LOGIN BOX ===== */
+/* LOGIN BOX */
 .login-box {
   background: white;
   width: 100%;
@@ -38,18 +41,25 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-.login-box h1 {
-  margin: 0 0 8px;
-  color: #4b4b4b;
+.logo {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg,#667eea,#764ba2);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 15px;
 }
 
-.login-box p {
-  color: #777;
-  font-size: 14px;
-  margin-bottom: 25px;
+.logo i {
+  font-size: 32px;
+  color: white;
 }
 
-/* ===== INPUTS ===== */
+h1 { margin: 0 0 8px; color:#444; }
+p { color:#777; font-size:14px; margin-bottom:25px; }
+
 .input-group {
   position: relative;
   margin-bottom: 15px;
@@ -71,148 +81,77 @@ body {
   font-size: 15px;
 }
 
-.input-group input:focus {
-  outline: none;
-  border-color: #667eea;
-}
-
-/* ===== CHECKBOX ===== */
 .remember-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: #555;
-  margin: 15px 0;
-  justify-content: center;
+  display:flex;
+  justify-content:center;
+  gap:8px;
+  font-size:14px;
+  color:#555;
+  margin:15px 0;
 }
 
-/* ===== BUTTON ===== */
 .main-btn {
-  width: 100%;
-  padding: 14px;
-  border: none;
-  border-radius: 30px;
-  background: linear-gradient(135deg,#667eea,#764ba2);
-  color: white;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 0 8px 18px rgba(102,126,234,0.4);
-  transition: 0.2s ease;
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:30px;
+  background:linear-gradient(135deg,#667eea,#764ba2);
+  color:white;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
 }
 
-.main-btn:active {
-  transform: scale(0.97);
-}
-
-/* ===== ERROR ===== */
 .error-msg {
-  color: #e74c3c;
-  margin-top: 12px;
-  font-size: 14px;
+  color:#e74c3c;
+  margin-top:12px;
+  font-size:14px;
 }
 
-/* ===== LOGO / ICON ===== */
-.logo {
-  width: 70px;
-  height: 70px;
-  background: linear-gradient(135deg,#667eea,#764ba2);
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 15px;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-}
-
-.logo i {
-  font-size: 32px;
+/* INSTALL BANNER */
+.install-banner {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  background: #667eea;
   color: white;
+  padding: 15px;
+  border-radius: 18px;
+  display: none;
+  z-index: 9999;
+  text-align: center;
+}
+
+.install-banner button {
+  margin-top: 10px;
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 12px;
+  background: white;
+  color: #667eea;
+  font-weight: bold;
 }
 </style>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-/* ===== FIREBASE ===== */
-const firebaseConfig = {
-  apiKey: "AIzaSyCwlr069pxNXEEhIEGNug5Ly_kKSuvxSzs",
-  authDomain: "homecrew-d8e21.firebaseapp.com",
-  databaseURL: "https://homecrew-d8e21-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "homecrew-d8e21",
-  storageBucket: "homecrew-d8e21.appspot.com",
-  messagingSenderId: "47664248188",
-  appId: "1:47664248188:web:0994c6b2ba07f6fee060f9"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-window.addEventListener("DOMContentLoaded", () => {
-
-  /* ===== AUTO LOGIN ===== */
-  const storedUser =
-    localStorage.getItem("homecrewUser") ||
-    sessionStorage.getItem("homecrewUser");
-
-  if (storedUser && storedUser.trim() !== "") {
-    window.location.href = "dashboard.html";
-    return;
-  }
-
-  document.getElementById("startBtn").addEventListener("click", async () => {
-
-    const username = document.getElementById("username").value.trim();
-    const password = document.getElementById("password").value.trim();
-    const stayLoggedIn = document.getElementById("stayLoggedIn").checked;
-    const error = document.getElementById("error");
-
-    error.textContent = "";
-
-    if (!username || !password) {
-      error.textContent = "Vul een naam en wachtwoord in";
-      return;
-    }
-
-    const cleanUser = username.toLowerCase();
-
-    try {
-      const userRef = ref(db, "users/" + cleanUser);
-      const snapshot = await get(userRef);
-
-      if (snapshot.exists()) {
-        if (snapshot.val().password !== password) {
-          error.textContent = "Fout wachtwoord";
-          return;
-        }
-      } else {
-        await set(userRef, {
-          username: cleanUser,
-          password: password,
-          createdAt: new Date().toISOString()
-        });
-      }
-
-      if (stayLoggedIn) {
-        localStorage.setItem("homecrewUser", cleanUser);
-      } else {
-        sessionStorage.setItem("homecrewUser", cleanUser);
-      }
-
-      window.location.href = "dashboard.html";
-
-    } catch (e) {
-      console.error(e);
-      error.textContent = "Er ging iets mis met de verbinding.";
-    }
-  });
-});
+<!-- SERVICE WORKER -->
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
 </script>
+
 </head>
 
 <body>
+
+<!-- INSTALL PROMPT -->
+<div class="install-banner" id="installBanner">
+  <strong>📱 Homecrew installeren?</strong>
+  <p>Gebruik Homecrew als echte app op je smartphone</p>
+  <button id="installBtn">Installeren</button>
+</div>
 
 <div class="login-box">
   <div class="logo">
@@ -233,12 +172,100 @@ window.addEventListener("DOMContentLoaded", () => {
   </div>
 
   <label class="remember-label">
-    <input type="checkbox" id="stayLoggedIn">
-    Blijf ingelogd
+    <input type="checkbox" id="stayLoggedIn"> Blijf ingelogd
   </label>
 
   <button id="startBtn" class="main-btn">Inloggen</button>
   <p id="error" class="error-msg"></p>
 </div>
+
+<!-- PWA INSTALL LOGIC -->
+<script>
+let deferredPrompt;
+
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById("installBanner").style.display = "block";
+});
+
+document.getElementById("installBtn").addEventListener("click", async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  document.getElementById("installBanner").style.display = "none";
+  deferredPrompt = null;
+});
+
+/* iOS instructie */
+if (/iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone) {
+  const banner = document.getElementById("installBanner");
+  banner.style.display = "block";
+  banner.innerHTML = `
+    <strong>📱 Installeer Homecrew</strong>
+    <p>Tik op <b>Delen</b> en kies <b>‘Zet op beginscherm’</b></p>
+  `;
+}
+</script>
+
+<!-- FIREBASE LOGIN -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCwlr069pxNXEEhIEGNug5Ly_kKSuvxSzs",
+  authDomain: "homecrew-d8e21.firebaseapp.com",
+  databaseURL: "https://homecrew-d8e21-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "homecrew-d8e21",
+  storageBucket: "homecrew-d8e21.appspot.com",
+  messagingSenderId: "47664248188",
+  appId: "1:47664248188:web:0994c6b2ba07f6fee060f9"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const storedUser =
+  localStorage.getItem("homecrewUser") ||
+  sessionStorage.getItem("homecrewUser");
+
+if (storedUser) {
+  location.href = "dashboard.html";
+}
+
+document.getElementById("startBtn").addEventListener("click", async () => {
+  const username = document.getElementById("username").value.trim().toLowerCase();
+  const password = document.getElementById("password").value.trim();
+  const stayLoggedIn = document.getElementById("stayLoggedIn").checked;
+  const error = document.getElementById("error");
+
+  error.textContent = "";
+
+  if (!username || !password) {
+    error.textContent = "Vul een naam en wachtwoord in";
+    return;
+  }
+
+  const userRef = ref(db, "users/" + username);
+  const snap = await get(userRef);
+
+  if (snap.exists() && snap.val().password !== password) {
+    error.textContent = "Fout wachtwoord";
+    return;
+  }
+
+  if (!snap.exists()) {
+    await set(userRef, { username, password });
+  }
+
+  stayLoggedIn
+    ? localStorage.setItem("homecrewUser", username)
+    : sessionStorage.setItem("homecrewUser", username);
+
+  location.href = "dashboard.html";
+});
+</script>
+
 </body>
 </html>
