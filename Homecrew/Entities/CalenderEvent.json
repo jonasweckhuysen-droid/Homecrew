@@ -1,0 +1,45 @@
+{
+  "name": "CalendarEvent",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Event title"
+    },
+    "description": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "start_time": {
+      "type": "string",
+      "description": "Start time in HH:mm format"
+    },
+    "end_time": {
+      "type": "string",
+      "description": "End time in HH:mm format"
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "Family member ID"
+    },
+    "member_color": {
+      "type": "string",
+      "description": "Color for display"
+    },
+    "reminder": {
+      "type": "boolean",
+      "default": false
+    },
+    "is_all_day": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "title",
+    "date"
+  ]
+}
