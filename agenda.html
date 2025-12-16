@@ -6,68 +6,102 @@
 <title>Homecrew – Agenda</title>
 
 <link rel="stylesheet" href="style.css">
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-.app-body { 
-  padding:10px; 
+.app-body {
+  padding:10px;
   font-family: Arial, sans-serif;
   background:#f2f4f7;
 }
 
+/* CARD */
 .card {
   background:white;
   padding:15px;
-  border-radius:12px;
+  border-radius:14px;
   margin-bottom:15px;
   box-shadow:0 3px 6px rgba(0,0,0,0.05);
 }
 
-ul{
-  list-style:none;
-  padding:0;
+/* WEEK HEADER */
+.week-header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:10px;
 }
 
-.event-item { 
-  padding:10px; 
-  margin-bottom:8px; 
-  background:#fbfbfb; 
-  border-radius:6px; 
-  border-left:6px solid #3498db;
+.week-header button {
+  background:#3a6ea5;
+  color:white;
+  border:none;
+  border-radius:10px;
+  padding:8px 12px;
 }
 
-.google-event { 
-  border-left-color:#222; 
+.week-title {
+  font-weight:bold;
 }
 
-.event-meta { 
-  font-size:0.85em; 
-  color:#666; 
-  margin-top:4px; 
+/* WEEK GRID */
+.week-grid {
+  display:grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap:8px;
 }
 
-.event-user { 
-  font-weight:600; 
-  margin-top:6px; 
+.day-col {
+  background:#fafafa;
+  border-radius:12px;
+  padding:8px;
+  min-height:120px;
 }
 
-input, textarea { 
-  width:100%; 
-  padding:8px; 
-  margin:6px 0; 
-  box-sizing:border-box; 
-  border-radius:6px; 
-  border:1px solid #ddd; 
+.day-header {
+  font-weight:bold;
+  font-size:13px;
+  text-align:center;
+  margin-bottom:6px;
+  color:#3a6ea5;
 }
 
-.nav-btn { 
-  padding:8px 12px; 
-  border-radius:8px; 
-  background:#3a6ea5; 
-  color:white; 
-  border:none; 
-  cursor:pointer; 
+.event {
+  background:white;
+  border-left:5px solid #3498db;
+  border-radius:8px;
+  padding:6px;
+  margin-bottom:6px;
+  font-size:12px;
+}
+
+.event.google { border-left-color:#222; }
+
+.event-time {
+  font-size:11px;
+  color:#666;
+}
+
+.event-user {
+  font-size:11px;
+  font-weight:bold;
+}
+
+/* INPUTS */
+input, textarea {
+  width:100%;
+  padding:8px;
+  margin:6px 0;
+  border-radius:8px;
+  border:1px solid #ddd;
+}
+
+.nav-btn {
+  padding:8px 12px;
+  border-radius:8px;
+  background:#3a6ea5;
+  color:white;
+  border:none;
 }
 </style>
 </head>
@@ -75,12 +109,10 @@ input, textarea {
 <body class="app-body">
 
 <header class="topbar">
-  <button onclick="window.location.href='dashboard.html'" class="home-btn">
+  <button onclick="location.href='dashboard.html'" class="home-btn">
     <i class="fas fa-home"></i>
   </button>
-
   <h2>📅 Homecrew Agenda</h2>
-
   <button onclick="logout()" class="home-btn">
     <i class="fas fa-sign-out-alt"></i>
   </button>
@@ -90,184 +122,136 @@ input, textarea {
   <h3 id="welcomeUser"></h3>
 
   <div class="card">
-    <h4>Nieuwe afspraak toevoegen</h4>
-    <input type="text" id="eventTitle" placeholder="Titel">
+    <h4>Nieuwe afspraak</h4>
+    <input id="eventTitle" placeholder="Titel">
     <input type="datetime-local" id="eventDate">
-    <textarea id="eventDescription" placeholder="Beschrijving (optioneel)"></textarea>
+    <textarea id="eventDescription" placeholder="Beschrijving"></textarea>
     <button class="nav-btn" onclick="addLocalEvent()">Toevoegen</button>
   </div>
 
   <div class="card">
-    <h4>📌 Afspraak overzicht</h4>
-    <ul id="eventList" class="event-list"></ul>
-    <p id="agenda-error" style="color:red; display:none; margin-top:10px;"></p>
-    <p id="no-events" style="display:none; color:#666; margin-top:10px;">Geen afspraken gevonden.</p>
+    <div class="week-header">
+      <button onclick="changeWeek(-1)"><i class="fas fa-chevron-left"></i></button>
+      <div class="week-title" id="weekTitle"></div>
+      <button onclick="changeWeek(1)"><i class="fas fa-chevron-right"></i></button>
+    </div>
+
+    <div class="week-grid" id="weekGrid"></div>
   </div>
 </main>
 
 <script>
-/* =============== CONFIG =============== */
+/* ===== CONFIG ===== */
 const LOCAL_EVENTS_KEY = "homecrewLocalEvents";
 const GOOGLE_API_KEY = "AIzaSyCTgjVKj_ABJHEvDTdgPDu_ZVTBYV8PAT0";
 const CALENDAR_ID = "b3756ae16d0f11ea12a33407c6077e5925740ab0ce0d19514aa77a7fc6a6e0c0@group.calendar.google.com";
-const MAX_GOOGLE_EVENTS = 50;
 
-/* =============== HELPERS =============== */
-function escapeHtml(str){
-  if (!str) return "";
-  return String(str)
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#39;");
-}
-
-function getUserColor(u){
-  if (!u) return "#999";
-  const s = u.toLowerCase();
-  if (s === "jonas") return "#3498db";
-  if (s === "liese") return "#e74c3c";
-  if (s === "loreana") return "#ff69b4";
-  return "#777";
-}
-
-/* =============== USER =============== */
+/* ===== USER ===== */
 const user = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
-
-if (!user) window.location.href = "index.html";
-
+if (!user) location.href = "index.html";
 document.getElementById("welcomeUser").innerText = "Welkom, " + user + " 👋";
 
 function logout(){
   localStorage.clear();
   sessionStorage.clear();
-  window.location.href = "index.html";
+  location.href = "index.html";
 }
 
-/* =============== LOKALE EVENTS OPSLAAN =============== */
+/* ===== WEEK LOGICA ===== */
+let currentWeekStart = getWeekStart(new Date());
+
+function getWeekStart(date){
+  const d = new Date(date);
+  const day = d.getDay() || 7;
+  d.setDate(d.getDate() - day + 1);
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function changeWeek(offset){
+  currentWeekStart.setDate(currentWeekStart.getDate() + offset * 7);
+  loadWeek();
+}
+
+/* ===== EVENTS ===== */
 function addLocalEvent(){
-  const title = document.getElementById("eventTitle").value.trim();
-  const date = document.getElementById("eventDate").value;
-  const desc = document.getElementById("eventDescription").value.trim();
-
-  if (!title || !date) {
-    alert("Titel en datum zijn verplicht");
-    return;
-  }
-
   const events = JSON.parse(localStorage.getItem(LOCAL_EVENTS_KEY) || "[]");
-
-  events.push({ user, title, date, description: desc });
-
+  events.push({
+    user,
+    title: eventTitle.value,
+    date: eventDate.value,
+    description: eventDescription.value
+  });
   localStorage.setItem(LOCAL_EVENTS_KEY, JSON.stringify(events));
-
-  document.getElementById("eventTitle").value = "";
-  document.getElementById("eventDate").value = "";
-  document.getElementById("eventDescription").value = "";
-
-  loadEvents();
+  loadWeek();
 }
 
-/* =============== GOOGLE EVENTS OPHALEN =============== */
 async function fetchGoogleEvents(){
-  const url = 
+  const res = await fetch(
     `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events` +
-    `?key=${GOOGLE_API_KEY}` +
-    `&maxResults=${MAX_GOOGLE_EVENTS}` +
-    `&singleEvents=true` +
-    `&orderBy=startTime` +
-    `&timeMin=${new Date().toISOString()}`;
-
-  try {
-    const res = await fetch(url);
-
-    if (!res.ok){
-      const msg = await res.text();
-      throw new Error(msg);
-    }
-
-    const data = await res.json();
-
-    return (data.items || []).map(ev => ({
-      title: ev.summary || "Geen titel",
-      start: ev.start.dateTime 
-            ? new Date(ev.start.dateTime) 
-            : new Date(ev.start.date),
-      location: ev.location || ""
-    }));
-
-  } catch(err){
-    console.error("Google Agenda fout:", err);
-    document.getElementById("agenda-error").style.display = "block";
-    document.getElementById("agenda-error").innerText = "Google Agenda fout: " + err.message;
-    return [];
-  }
+    `?key=${GOOGLE_API_KEY}&singleEvents=true&orderBy=startTime`
+  );
+  const data = await res.json();
+  return (data.items || []).map(e => ({
+    title: e.summary,
+    start: new Date(e.start.dateTime || e.start.date)
+  }));
 }
 
-/* =============== WEERGAVE =============== */
-async function loadEvents(){
-  const list = document.getElementById("eventList");
-  const noEvents = document.getElementById("no-events");
-  const errorEl = document.getElementById("agenda-error");
+/* ===== WEERGAVE ===== */
+async function loadWeek(){
+  const grid = document.getElementById("weekGrid");
+  grid.innerHTML = "";
 
-  list.innerHTML = "";
-  noEvents.style.display = "none";
-  errorEl.style.display = "none";
+  const weekEnd = new Date(currentWeekStart);
+  weekEnd.setDate(weekEnd.getDate() + 6);
 
-  let found = false;
+  document.getElementById("weekTitle").innerText =
+    currentWeekStart.toLocaleDateString("nl-BE") +
+    " – " +
+    weekEnd.toLocaleDateString("nl-BE");
 
-  /* ---- Lokale events ---- */
   const localEvents = JSON.parse(localStorage.getItem(LOCAL_EVENTS_KEY) || "[]");
-
-  localEvents
-    .sort((a,b)=> new Date(a.date) - new Date(b.date))
-    .forEach(ev => {
-      found = true;
-      const li = document.createElement("li");
-      li.className = "event-item";
-      li.style.borderLeftColor = getUserColor(ev.user);
-
-      li.innerHTML = `
-        <strong>${escapeHtml(ev.title)}</strong>
-        <div class="event-meta">${new Date(ev.date).toLocaleString("nl-BE")}</div>
-        <div class="event-user" style="color:${getUserColor(ev.user)}">
-          👤 ${escapeHtml(ev.user)}
-        </div>
-        ${ev.description ? `<div>${escapeHtml(ev.description)}</div>` : ""}
-      `;
-
-      list.appendChild(li);
-    });
-
-  /* ---- Google events ---- */
   const googleEvents = await fetchGoogleEvents();
 
-  googleEvents
-    .sort((a,b)=> a.start - b.start)
-    .forEach(ev => {
-      found = true;
-      const li = document.createElement("li");
-      li.className = "event-item google-event";
+  for(let i=0;i<7;i++){
+    const day = new Date(currentWeekStart);
+    day.setDate(day.getDate()+i);
 
-      li.innerHTML = `
-        <strong>${escapeHtml(ev.title)}</strong>
-        <div class="event-meta">${ev.start.toLocaleString("nl-BE")}</div>
-        <div style="color:black;">📅 Google Agenda</div>
-        ${ev.location ? `<div>📍 ${escapeHtml(ev.location)}</div>` : ""}
-      `;
+    const col = document.createElement("div");
+    col.className = "day-col";
 
-      list.appendChild(li);
+    col.innerHTML = `<div class="day-header">
+      ${day.toLocaleDateString("nl-BE",{weekday:"short", day:"numeric"})}
+    </div>`;
+
+    localEvents.filter(e =>
+      new Date(e.date).toDateString() === day.toDateString()
+    ).forEach(e=>{
+      col.innerHTML += `
+        <div class="event">
+          <strong>${e.title}</strong>
+          <div class="event-time">${new Date(e.date).toLocaleTimeString("nl-BE",{hour:'2-digit',minute:'2-digit'})}</div>
+          <div class="event-user">${e.user}</div>
+        </div>`;
     });
 
-  if (!found){
-    noEvents.style.display = "block";
+    googleEvents.filter(e =>
+      e.start.toDateString() === day.toDateString()
+    ).forEach(e=>{
+      col.innerHTML += `
+        <div class="event google">
+          <strong>${e.title}</strong>
+          <div class="event-time">${e.start.toLocaleTimeString("nl-BE",{hour:'2-digit',minute:'2-digit'})}</div>
+          <div class="event-user">Google</div>
+        </div>`;
+    });
+
+    grid.appendChild(col);
   }
 }
 
-/* Automatisch laden */
-document.addEventListener("DOMContentLoaded", loadEvents);
-setInterval(loadEvents, 5 * 60 * 1000);
+document.addEventListener("DOMContentLoaded", loadWeek);
 </script>
 
 </body>
