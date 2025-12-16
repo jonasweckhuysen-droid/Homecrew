@@ -1,0 +1,32 @@
+{
+  "name": "Location",
+  "type": "object",
+  "properties": {
+    "member_id": {
+      "type": "string",
+      "description": "Family member ID"
+    },
+    "member_name": {
+      "type": "string"
+    },
+    "latitude": {
+      "type": "number"
+    },
+    "longitude": {
+      "type": "number"
+    },
+    "address": {
+      "type": "string",
+      "description": "Readable address"
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "member_id",
+    "latitude",
+    "longitude"
+  ]
+}
