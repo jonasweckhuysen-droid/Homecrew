@@ -161,7 +161,7 @@ function getCurrentLocation(callback) {
     }
 }
 
-/* ===== SOS VERZENDEN VIA WHATSAPP OF SMS ===== */
+/* ===== SOS VERZENDEN VIA SMS ===== */
 document.getElementById("sosBtn").addEventListener("click", () => {
   const contacts = JSON.parse(localStorage.getItem(CONTACTS_KEY) || "[]");
   if (!contacts.length) return alert("Voeg eerst contactpersonen toe!");
@@ -173,15 +173,8 @@ document.getElementById("sosBtn").addEventListener("click", () => {
     const msg = `⚠️ ${user} heeft een SOS verzonden! Mijn locatie: ${locLink}`;
 
     contacts.forEach(c => {
-      // WhatsApp link
-      const waUrl = `https://wa.me/${c.phone}?text=${encodeURIComponent(msg)}`;
       const smsUrl = `sms:${c.phone}?&body=${encodeURIComponent(msg)}`;
-
-      // Probeer WhatsApp, anders SMS
-      const win = window.open(waUrl, "_blank");
-      if (!win || win.closed || typeof win.closed == 'undefined') {
-        window.open(smsUrl, "_blank");
-      }
+      window.open(smsUrl, "_blank");
     });
   });
 });
