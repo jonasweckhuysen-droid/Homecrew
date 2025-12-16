@@ -1,0 +1,38 @@
+{
+  "name": "FamilyMember",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Family member's name"
+    },
+    "avatar_url": {
+      "type": "string",
+      "description": "Profile picture URL"
+    },
+    "color": {
+      "type": "string",
+      "description": "Color code for calendar events"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "parent",
+        "child",
+        "grandparent",
+        "other"
+      ],
+      "default": "parent"
+    },
+    "email": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "color"
+  ]
+}
