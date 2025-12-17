@@ -15,7 +15,6 @@
   background:#f2f4f7;
 }
 
-/* CARD */
 .card {
   background:white;
   padding:15px;
@@ -24,7 +23,6 @@
   box-shadow:0 3px 6px rgba(0,0,0,0.05);
 }
 
-/* WEEK HEADER */
 .week-header {
   display:flex;
   align-items:center;
@@ -44,7 +42,6 @@
   font-weight:bold;
 }
 
-/* WEEK GRID */
 .week-grid {
   display:grid;
   grid-template-columns: repeat(7, 1fr);
@@ -77,7 +74,10 @@
   flex-direction:column;
 }
 
-.event.google { border-left-color:#222; }
+.event.google {
+  border-left-color:#222;
+  background:#f9f9f9;
+}
 
 .event-time {
   font-size:11px;
@@ -92,7 +92,6 @@
   gap:4px;
 }
 
-/* INPUTS */
 input, textarea {
   width:100%;
   padding:8px;
@@ -178,13 +177,13 @@ function changeWeek(offset){
   loadWeek();
 }
 
-/* ===== GEZINSLID KLEUREN EN ICONEN ===== */
+/* ===== GEZINSLEDEN ===== */
 function getUserColor(u){
   if(!u) return "#999";
   u = u.toLowerCase();
-  if(u==="jonas") return "#3498db"; // blauw
-  if(u==="liese") return "#e74c3c"; // rood
-  if(u==="loreana") return "#ff69b4"; // roze
+  if(u==="jonas") return "#3498db";
+  if(u==="liese") return "#e74c3c";
+  if(u==="loreana") return "#ff69b4";
   return "#777";
 }
 
@@ -213,16 +212,37 @@ function addLocalEvent(){
   loadWeek();
 }
 
+/* ===== GOOGLE EVENTS (MET MEERDAAGS) ===== */
 async function fetchGoogleEvents(){
   const res = await fetch(
     `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events` +
     `?key=${GOOGLE_API_KEY}&singleEvents=true&orderBy=startTime`
   );
+
   const data = await res.json();
-  return (data.items || []).map(e => ({
-    title: e.summary,
-    start: new Date(e.start.dateTime || e.start.date)
-  }));
+
+  return (data.items || []).map(e => {
+    const isAllDay = !!e.start.date;
+
+    const start = isAllDay
+      ? new Date(e.start.date)
+      : new Date(e.start.dateTime);
+
+    let end;
+    if (isAllDay) {
+      end = new Date(e.end.date);
+      end.setDate(end.getDate() - 1); // Google end is exclusief
+    } else {
+      end = new Date(e.end.dateTime);
+    }
+
+    return {
+      title: e.summary,
+      start,
+      end,
+      isAllDay
+    };
+  });
 }
 
 /* ===== WEERGAVE ===== */
@@ -253,24 +273,34 @@ async function loadWeek(){
     </div>`;
 
     // Lokale events
-    localEvents.filter(e => new Date(e.date).toDateString() === day.toDateString())
+    localEvents
+      .filter(e => new Date(e.date).toDateString() === day.toDateString())
       .forEach(e=>{
         col.innerHTML += `
           <div class="event" style="border-left-color:${getUserColor(e.user)}">
             <strong>${e.title}</strong>
-            <div class="event-time">${new Date(e.date).toLocaleTimeString("nl-BE",{hour:'2-digit',minute:'2-digit'})}</div>
+            <div class="event-time">
+              ${new Date(e.date).toLocaleTimeString("nl-BE",{hour:'2-digit',minute:'2-digit'})}
+            </div>
             <div class="event-user">${getUserIcon(e.user)} ${e.user}</div>
             ${e.description ? `<div>${e.description}</div>` : ""}
           </div>`;
       });
 
-    // Google events
-    googleEvents.filter(e => e.start.toDateString() === day.toDateString())
+    // Google events (ook meerdaags)
+    googleEvents
+      .filter(e => day >= e.start && day <= e.end)
       .forEach(e=>{
         col.innerHTML += `
           <div class="event google">
             <strong>${e.title}</strong>
-            <div class="event-time">${e.start.toLocaleTimeString("nl-BE",{hour:'2-digit',minute:'2-digit'})}</div>
+            <div class="event-time">
+              ${
+                e.isAllDay
+                  ? `📆 ${e.start.toLocaleDateString("nl-BE")} – ${e.end.toLocaleDateString("nl-BE")}`
+                  : `🕒 ${e.start.toLocaleTimeString("nl-BE",{hour:'2-digit',minute:'2-digit'})}`
+              }
+            </div>
             <div class="event-user">📅 Google</div>
           </div>`;
       });
