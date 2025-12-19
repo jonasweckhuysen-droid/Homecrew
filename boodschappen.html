@@ -158,7 +158,6 @@ li {
     align-items: center;
 }
 
-/* NETTE VERHOUDING TEKST / ICOON */
 li span {
     flex: 1;
     text-align: left;
@@ -205,10 +204,14 @@ function liveLoad(place){
 
   onValue(listRef, (snapshot)=>{
     const ul = document.getElementById(place + "List");
+    const countEl = document.getElementById(place + "Count");
     ul.innerHTML = "";
+
+    let count = 0;
 
     if(snapshot.exists()){
       const data = snapshot.val();
+      count = Object.keys(data).length;
 
       Object.keys(data).forEach(key=>{
         const li = document.createElement("li");
@@ -225,6 +228,8 @@ function liveLoad(place){
         ul.appendChild(li);
       });
     }
+
+    countEl.textContent = `(${count})`;
   })
 }
 
@@ -282,18 +287,19 @@ liveLoad("drijvelden");
 <div class="dashboard-buttons">
 
     <div class="dash-btn vingardium-btn" onclick="document.getElementById('vingardium-box').classList.toggle('show')">
-      <div><i class="fas fa-seedling"></i> VINGARDIUM</div>
+      <div><i class="fas fa-seedling"></i> VINGARDIUM <span id="vingardiumCount">(0)</span></div>
       <i class="fas fa-chevron-down"></i>
     </div>
 
     <div class="dash-btn drijvelden-btn" onclick="document.getElementById('drijvelden-box').classList.toggle('show')">
-      <div><i class="fas fa-tractor"></i> DRIJVELDEN</div>
+      <div><i class="fas fa-tractor"></i> DRIJVELDEN <span id="drijveldenCount">(0)</span></div>
       <i class="fas fa-chevron-down"></i>
     </div>
 
 </div>
 
-<div class="list-box show vingardium-box" id="vingardium-box">
+<!-- standaard INGEKLAPT -->
+<div class="list-box vingardium-box" id="vingardium-box">
 
   <div class="house-title vingardium-title">
     <i class="fas fa-seedling"></i> Boodschappen voor Vingardium
@@ -307,7 +313,7 @@ liveLoad("drijvelden");
   <ul id="vingardiumList"></ul>
 </div>
 
-<div class="list-box show drijvelden-box" id="drijvelden-box">
+<div class="list-box drijvelden-box" id="drijvelden-box">
 
   <div class="house-title drijvelden-title">
     <i class="fas fa-tractor"></i> Boodschappen voor Drijvelden
