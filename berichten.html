@@ -30,6 +30,7 @@
 }
 
 .msg-bubble{
+  position: relative;
   padding:10px 14px;
   border-radius:12px;
   margin-bottom:10px;
@@ -46,6 +47,23 @@
 
 .msg-right{
   align-self:flex-end;
+}
+
+/* DELETE KNOP */
+.delete-btn{
+  position:absolute;
+  top:6px;
+  right:8px;
+  background:none;
+  border:none;
+  color:white;
+  cursor:pointer;
+  font-size:14px;
+  opacity:0.8;
+}
+
+.delete-btn:hover{
+  opacity:1;
 }
 
 #messageInput{
@@ -97,7 +115,15 @@
 <script type="module">
 /* ================= FIREBASE ================= */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { 
+  getFirestore, 
+  collection, 
+  addDoc, 
+  onSnapshot, 
+  serverTimestamp,
+  deleteDoc,
+  doc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // Firebase config
 const firebaseConfig = {
@@ -166,11 +192,26 @@ onSnapshot(messagesCol, (snapshot) => {
             </div>
         `;
 
+        /* 🗑️ Alleen eigen berichten kunnen verwijderd worden */
+        if (msg.user === user) {
+          const delBtn = document.createElement("button");
+          delBtn.className = "delete-btn";
+          delBtn.innerHTML = `<i class="fas fa-trash"></i>`;
+          delBtn.onclick = () => deleteMessage(docSnap.id);
+          bubble.appendChild(delBtn);
+        }
+
         chatBox.appendChild(bubble);
     });
 
     chatBox.scrollTop = chatBox.scrollHeight;
 });
+
+/* ================= VERWIJDER BERICHT ================= */
+async function deleteMessage(id){
+  if (!confirm("Dit bericht verwijderen?")) return;
+  await deleteDoc(doc(db, "homecrewMessages", id));
+}
 
 /* ================= VERSTUREN ================= */
 window.sendMessage = async function(){
