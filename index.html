@@ -4,12 +4,8 @@
 <meta charset="UTF-8">
 <title>Homecrew – Login</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<!-- PWA -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#667eea">
-
-<!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
@@ -23,8 +19,6 @@ body {
   align-items: center;
   justify-content: center;
 }
-
-/* LOGIN BOX */
 .login-box {
   background: white;
   width: 100%;
@@ -35,118 +29,26 @@ body {
   text-align: center;
   animation: fadeIn 0.5s ease;
 }
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.logo {
-  width: 70px;
-  height: 70px;
-  background: linear-gradient(135deg,#667eea,#764ba2);
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 15px;
-}
-
-.logo i {
-  font-size: 32px;
-  color: white;
-}
-
-h1 { margin: 0 0 8px; color:#444; }
-p { color:#777; font-size:14px; margin-bottom:25px; }
-
-.input-group {
-  position: relative;
-  margin-bottom: 15px;
-}
-
-.input-group i {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #aaa;
-}
-
-.input-group input {
-  width: 100%;
-  padding: 12px 12px 12px 42px;
-  border-radius: 14px;
-  border: 1px solid #ddd;
-  font-size: 15px;
-}
-
-.remember-label {
-  display:flex;
-  justify-content:center;
-  gap:8px;
-  font-size:14px;
-  color:#555;
-  margin:15px 0;
-}
-
-.main-btn {
-  width:100%;
-  padding:14px;
-  border:none;
-  border-radius:30px;
-  background:linear-gradient(135deg,#667eea,#764ba2);
-  color:white;
-  font-size:16px;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-.error-msg {
-  color:#e74c3c;
-  margin-top:12px;
-  font-size:14px;
-}
-
-/* INSTALL BANNER */
-.install-banner {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  right: 20px;
-  background: #667eea;
-  color: white;
-  padding: 15px;
-  border-radius: 18px;
-  display: none;
-  z-index: 9999;
-  text-align: center;
-}
-
-.install-banner button {
-  margin-top: 10px;
-  width: 100%;
-  padding: 10px;
-  border: none;
-  border-radius: 12px;
-  background: white;
-  color: #667eea;
-  font-weight: bold;
-}
+@keyframes fadeIn { from { opacity:0; transform:translateY(10px);} to { opacity:1; transform:translateY(0);} }
+.logo { width:70px; height:70px; background: linear-gradient(135deg,#667eea,#764ba2); border-radius:20px; display:flex; align-items:center; justify-content:center; margin:0 auto 15px;}
+.logo i { font-size:32px; color:white;}
+h1{margin:0 0 8px;color:#444;} p{color:#777; font-size:14px;margin-bottom:25px;}
+.input-group { position: relative; margin-bottom: 15px; }
+.input-group i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #aaa; }
+.input-group input { width:100%; padding:12px 12px 12px 42px; border-radius:14px; border:1px solid #ddd; font-size:15px; }
+.remember-label { display:flex; justify-content:center; gap:8px; font-size:14px; color:#555; margin:15px 0; }
+.main-btn { width:100%; padding:14px; border:none; border-radius:30px; background:linear-gradient(135deg,#667eea,#764ba2); color:white; font-size:16px; font-weight:bold; cursor:pointer; }
+.error-msg { color:#e74c3c; margin-top:12px; font-size:14px; }
+.install-banner { position: fixed; bottom: 20px; left:20px; right:20px; background:#667eea; color:white; padding:15px; border-radius:18px; display:none; z-index:9999; text-align:center;}
+.install-banner button { margin-top:10px; width:100%; padding:10px; border:none; border-radius:12px; background:white; color:#667eea; font-weight:bold; }
 </style>
 
-<!-- SERVICE WORKER -->
 <script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js");
-}
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("service-worker.js"); }
 </script>
-
 </head>
 
 <body>
-
-<!-- INSTALL PROMPT -->
 <div class="install-banner" id="installBanner">
   <strong>📱 Homecrew installeren?</strong>
   <p>Gebruik Homecrew als echte app op je smartphone</p>
@@ -154,118 +56,85 @@ if ("serviceWorker" in navigator) {
 </div>
 
 <div class="login-box">
-  <div class="logo">
-    <i class="fas fa-house"></i>
-  </div>
-
+  <div class="logo"><i class="fas fa-house"></i></div>
   <h1>Homecrew</h1>
   <p>Alles voor je gezin, op één plek</p>
 
-  <div class="input-group">
-    <i class="fas fa-user"></i>
-    <input type="text" id="username" placeholder="Naam">
-  </div>
-
-  <div class="input-group">
-    <i class="fas fa-lock"></i>
-    <input type="password" id="password" placeholder="Wachtwoord / pincode">
-  </div>
-
-  <label class="remember-label">
-    <input type="checkbox" id="stayLoggedIn"> Blijf ingelogd
-  </label>
-
+  <div class="input-group"><i class="fas fa-user"></i><input type="text" id="username" placeholder="Naam"></div>
+  <div class="input-group"><i class="fas fa-lock"></i><input type="password" id="password" placeholder="Wachtwoord / pincode"></div>
+  <label class="remember-label"><input type="checkbox" id="stayLoggedIn"> Blijf ingelogd</label>
   <button id="startBtn" class="main-btn">Inloggen</button>
   <p id="error" class="error-msg"></p>
 </div>
 
-<!-- PWA INSTALL LOGIC -->
 <script>
 let deferredPrompt;
-
-window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  document.getElementById("installBanner").style.display = "block";
-});
-
-document.getElementById("installBtn").addEventListener("click", async () => {
-  if (!deferredPrompt) return;
+window.addEventListener("beforeinstallprompt", (e)=>{ e.preventDefault(); deferredPrompt=e; document.getElementById("installBanner").style.display="block"; });
+document.getElementById("installBtn").addEventListener("click", async ()=>{
+  if(!deferredPrompt) return;
   deferredPrompt.prompt();
   await deferredPrompt.userChoice;
-  document.getElementById("installBanner").style.display = "none";
-  deferredPrompt = null;
+  document.getElementById("installBanner").style.display="none";
+  deferredPrompt=null;
 });
-
-/* iOS instructie */
-if (/iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone) {
-  const banner = document.getElementById("installBanner");
-  banner.style.display = "block";
-  banner.innerHTML = `
-    <strong>📱 Installeer Homecrew</strong>
-    <p>Tik op <b>Delen</b> en kies <b>‘Zet op beginscherm’</b></p>
-  `;
+if(/iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone){
+  const banner=document.getElementById("installBanner");
+  banner.style.display="block";
+  banner.innerHTML=`<strong>📱 Installeer Homecrew</strong><p>Tik op <b>Delen</b> en kies <b>‘Zet op beginscherm’</b></p>`;
 }
 </script>
 
-<!-- FIREBASE LOGIN -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCwlr069pxNXEEhIEGNug5Ly_kKSuvxSzs",
-  authDomain: "homecrew-d8e21.firebaseapp.com",
-  databaseURL: "https://homecrew-d8e21-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "homecrew-d8e21",
-  storageBucket: "homecrew-d8e21.appspot.com",
-  messagingSenderId: "47664248188",
-  appId: "1:47664248188:web:0994c6b2ba07f6fee060f9"
+  apiKey:"AIzaSyCwlr069pxNXEEhIEGNug5Ly_kKSuvxSzs",
+  authDomain:"homecrew-d8e21.firebaseapp.com",
+  databaseURL:"https://homecrew-d8e21-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:"homecrew-d8e21",
+  storageBucket:"homecrew-d8e21.appspot.com",
+  messagingSenderId:"47664248188",
+  appId:"1:47664248188:web:0994c6b2ba07f6fee060f9"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-const storedUser =
-  localStorage.getItem("homecrewUser") ||
-  sessionStorage.getItem("homecrewUser");
+const storedUser = localStorage.getItem("homecrewUser") || sessionStorage.getItem("homecrewUser");
+if(storedUser) location.href="dashboard.html";
 
-if (storedUser) {
-  location.href = "dashboard.html";
-}
-
-document.getElementById("startBtn").addEventListener("click", async () => {
+document.getElementById("startBtn").addEventListener("click", async ()=>{
   const username = document.getElementById("username").value.trim().toLowerCase();
   const password = document.getElementById("password").value.trim();
   const stayLoggedIn = document.getElementById("stayLoggedIn").checked;
   const error = document.getElementById("error");
+  error.textContent="";
 
-  error.textContent = "";
+  if(!username || !password){ error.textContent="Vul een naam en wachtwoord in"; return; }
 
-  if (!username || !password) {
-    error.textContent = "Vul een naam en wachtwoord in";
-    return;
-  }
-
-  const userRef = ref(db, "users/" + username);
+  const userRef = ref(db,"users/"+username);
   const snap = await get(userRef);
 
-  if (snap.exists() && snap.val().password !== password) {
-    error.textContent = "Fout wachtwoord";
-    return;
+  if(snap.exists()){
+    if(snap.val().password !== password){
+      error.textContent="Fout wachtwoord";
+      return;
+    }
+  } else {
+    // gebruiker aanmaken
+    await set(userRef,{ username, password });
   }
 
-  if (!snap.exists()) {
-    await set(userRef, { username, password });
+  // opslaan in storage
+  if(stayLoggedIn){
+    localStorage.setItem("homecrewUser", username);
+  } else {
+    sessionStorage.setItem("homecrewUser", username);
   }
 
-  stayLoggedIn
-    ? localStorage.setItem("homecrewUser", username)
-    : sessionStorage.setItem("homecrewUser", username);
-
-  location.href = "dashboard.html";
+  location.href="dashboard.html";
 });
 </script>
-
 </body>
 </html>
