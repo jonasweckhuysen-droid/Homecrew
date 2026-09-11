@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Homecrew</string>
+    <string name="login_with_google">Inloggen met Google</string>
+    <string name="app_logo">App Logo</string>
+    <string name="default_web_client_id">47664248188-5hplhplficuhbgooed3aepv662ts3s7a.apps.googleusercontent.com</string>
+</resources>
